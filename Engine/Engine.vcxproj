@@ -149,14 +149,19 @@ xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core\ShaderManager.cpp" />
+    <ClCompile Include="Core\GameModels.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math\vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ShaderManager.h" />
+    <ClInclude Include="Core\VertexFormat.h" />
+    <ClInclude Include="Core\GameModels.h" />
+    <ClInclude Include="Math\vec3.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\basicGreen.frag" />
-    <None Include="Shaders\basicTriangle.vert" />
+    <None Include="Shaders\basicColor.frag" />
+    <None Include="Shaders\basicPositionColor.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
