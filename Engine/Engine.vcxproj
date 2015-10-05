@@ -148,7 +148,15 @@ xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\ShaderManager.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\ShaderManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\basicGreen.frag" />
+    <None Include="Shaders\basicTriangle.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,11 +2,20 @@
 #include "Dependancies\freeglut\freeglut.h"
 #include <iostream>
 
+#include "Core\ShaderManager.h"
+
+GLuint program;
 
 void RenderScene()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(1.0, 0.0, 0.0, 1.0);//clear red
+
+	//use the created program
+	glUseProgram(program);
+
+	//draw 3 vertices as triangles
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	glutSwapBuffers();
 }
@@ -24,18 +33,29 @@ void InitialiseGLEW()
 	}
 }
 
-void InitialiseWindow(int argc, char **argv)
+void InitialiseGLUTWindow(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(100, 500);
 	glutInitWindowSize(800, 600);
 	glutCreateWindow("Engine");
+}
 
+void InitialiseShaders()
+{
+	Core::ShaderManager shaderManager;
+	program = shaderManager.CreateProgram("Shaders\\basicTriangle.vert", "Shaders\\basicGreen.frag");
+}
 
+void Initialise(int argc, char **argv)
+{
+	InitialiseGLUTWindow(argc, argv);
 	InitialiseGLEW();
 
 	glEnable(GL_DEPTH_TEST);
+	InitialiseShaders();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// register callbacks
 	glutDisplayFunc(RenderScene);
@@ -43,10 +63,10 @@ void InitialiseWindow(int argc, char **argv)
 	glutMainLoop();
 }
 
-
 int main(int argc, char **argv)
 {
-	InitialiseWindow(argc, argv);
+	Initialise(argc, argv);
+	glDeleteProgram(program);
 	return 0;
 }
 
