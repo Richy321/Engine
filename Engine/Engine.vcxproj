@@ -78,11 +78,11 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>Dependancies\freeglut\$(PlatformTarget);Dependancies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(ProjectDir)Dependancies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
       <Message>Copy freeglut &amp; glew</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -95,11 +95,11 @@ xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>Dependancies\freeglut\$(PlatformTarget);Dependancies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(ProjectDir)Dependancies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy freeglut &amp; glew</Message>
@@ -117,12 +117,12 @@ xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>Dependancies\freeglut\$(PlatformTarget);Dependancies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(ProjectDir)Dependancies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
       <Message>Copy freeglut &amp; glew</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -138,26 +138,43 @@ xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>Dependancies\freeglut\$(PlatformTarget);Dependancies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(ProjectDir)Dependancies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)Dependancies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
       <Message>Copy freeglut &amp; glew</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Core\ShaderManager.cpp" />
-    <ClCompile Include="Core\GameModels.cpp" />
+    <ClCompile Include="Managers\ShaderManager.cpp" />
+    <ClCompile Include="Core\Initialise\InitialiseGLEW.cpp" />
+    <ClCompile Include="Core\Initialise\InitialiseGLUT.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math\vec3.cpp" />
+    <ClCompile Include="Managers\SceneManager.cpp" />
+    <ClCompile Include="Managers\MeshManager.cpp" />
+    <ClCompile Include="Rendering\Primitives\Quad.cpp" />
+    <ClCompile Include="Rendering\Mesh.cpp" />
+    <ClCompile Include="Rendering\Primitives\Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Core\ShaderManager.h" />
-    <ClInclude Include="Core\VertexFormat.h" />
-    <ClInclude Include="Core\GameModels.h" />
+    <ClInclude Include="Core\ContextInfo.h" />
+    <ClInclude Include="Managers\MeshManager.h" />
+    <ClInclude Include="Rendering\Primitives\Quad.h" />
+    <ClInclude Include="Rendering\Mesh.h" />
+    <ClInclude Include="Rendering\IRenderObject.h" />
+    <ClInclude Include="Managers\ShaderManager.h" />
+    <ClInclude Include="Rendering\VertexFormat.h" />
+    <ClInclude Include="Core\FramebufferInfo.h" />
+    <ClInclude Include="Core\IListener.h" />
+    <ClInclude Include="Core\Initialise\InitialiseGLEW.h" />
+    <ClInclude Include="Core\Initialise\InitialiseGLUT.h" />
     <ClInclude Include="Math\vec3.h" />
+    <ClInclude Include="Managers\SceneManager.h" />
+    <ClInclude Include="Core\WindowInfo.h" />
+    <ClInclude Include="Rendering\Primitives\Triangle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />
