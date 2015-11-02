@@ -1,6 +1,4 @@
 #pragma once
-#include <cmath>
-
 namespace Math
 {
 	class vec3
@@ -16,7 +14,7 @@ namespace Math
 
 		float Length() const;
 
-		vec3 Math::vec3::operator-() const;
+		vec3 vec3::operator-() const;
 
 		vec3 operator+=(const float s) const;
 		vec3 operator-=(const float s) const;
@@ -36,6 +34,7 @@ namespace Math
 		float dot(const vec3 rhs) const;
 
 		static vec3 Zero;
+
 	public:
 		float x;
 		float y;

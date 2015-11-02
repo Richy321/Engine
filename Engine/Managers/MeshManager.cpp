@@ -34,7 +34,7 @@ void MeshManager::DeleteModel(const std::string& gameModelName)
 
 const IRenderObject& MeshManager::GetModel(const std::string& gameModelName) const
 {
-	return (*gameModelList.at(gameModelName));
+	return *gameModelList.at(gameModelName);
 }
 
 void MeshManager::Update()

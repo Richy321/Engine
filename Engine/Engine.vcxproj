@@ -152,16 +152,20 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClCompile Include="Core\Initialise\InitialiseGLEW.cpp" />
     <ClCompile Include="Core\Initialise\InitialiseGLUT.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math\mat4.cpp" />
     <ClCompile Include="Math\vec3.cpp" />
     <ClCompile Include="Managers\SceneManager.cpp" />
     <ClCompile Include="Managers\MeshManager.cpp" />
     <ClCompile Include="Rendering\Primitives\Quad.cpp" />
     <ClCompile Include="Rendering\Mesh.cpp" />
     <ClCompile Include="Rendering\Primitives\Triangle.cpp" />
+    <ClCompile Include="Math\vec2.cpp" />
+    <ClCompile Include="Math\vec4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ContextInfo.h" />
     <ClInclude Include="Managers\MeshManager.h" />
+    <ClInclude Include="Math\mat4.h" />
     <ClInclude Include="Rendering\Primitives\Quad.h" />
     <ClInclude Include="Rendering\Mesh.h" />
     <ClInclude Include="Rendering\IRenderObject.h" />
@@ -175,6 +179,8 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClInclude Include="Managers\SceneManager.h" />
     <ClInclude Include="Core\WindowInfo.h" />
     <ClInclude Include="Rendering\Primitives\Triangle.h" />
+    <ClInclude Include="Math\vec2.h" />
+    <ClInclude Include="Math\vec4.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />
