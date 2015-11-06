@@ -73,7 +73,7 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="Math\vec4.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,7 +129,7 @@
       <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Math\vec4.h">
-      <Filter>Header Files</Filter>
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

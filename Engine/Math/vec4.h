@@ -7,6 +7,7 @@ namespace Math
 	{
 	public:
 		vec4();
+		vec4(float f);
 		vec4(float x, float y, float z, float w);
 		vec4(const vec4& rhs);
 		vec4(const vec3& rhs, float w);
@@ -22,6 +23,7 @@ namespace Math
 		vec4 operator+=(const float s) const;
 		vec4 operator-=(const float s) const;
 		vec4 operator*=(const float s) const;
+		vec4 operator*(const float s) const;
 		vec4 operator/=(const float s) const;
 
 		vec4 &operator+=(const float s);
@@ -30,7 +32,9 @@ namespace Math
 		vec4 &operator/=(const float s);
 
 		vec4 operator+(const vec4 rhs) const;
+		vec4 operator+=(const vec4 rhs);
 		vec4 operator-(const vec4 rhs) const;
+		vec4 operator-=(const vec4 rhs);
 
 		void Normalize();
 		vec4 Cross(const vec4 rhs) const;

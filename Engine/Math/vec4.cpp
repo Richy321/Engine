@@ -10,6 +10,14 @@ vec4::vec4()
 {
 }
 
+Math::vec4::vec4(float f)
+{
+	x = f;
+	y = f;
+	z = f;
+	w = f;
+}
+
 vec4::vec4(float nx, float ny, float nz, float nw) : x(nx), y(ny), z(nz), w(nw)
 {
 }
@@ -75,6 +83,14 @@ vec4 Math::vec4::operator*=(const float s) const
 	return vec4(x*s, y*s, z*s, w*s);
 }
 
+vec4 vec4::operator*(float s) const
+{
+	return vec4(x * s,
+				y * s,
+				z * s,
+				w * s);
+}
+
 vec4 Math::vec4::operator/=(const float s) const
 {
 	float recip = 1.0f / s; // one div by s and multiplying by recip*4 is faster than div by s
@@ -89,6 +105,8 @@ vec4 &Math::vec4::operator+=(const float s)
 	w += s;
 	return *this;
 }
+
+
 
 vec4 &Math::vec4::operator-=(const float s)
 {
@@ -125,9 +143,25 @@ vec4 Math::vec4::operator+(const vec4 rhs) const
 	return vec4(x + rhs.x, y + rhs.y, z + rhs.z, w + rhs.w);
 }
 
+vec4 Math::vec4::operator+=(const vec4 rhs)
+{
+	x += rhs.x;
+	y += rhs.y;
+	z += rhs.z;
+	w += rhs.w;
+}
+
 vec4 Math::vec4::operator-(const vec4 rhs) const
 {
 	return vec4(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w);
+}
+
+vec4 Math::vec4::operator-=(const vec4 rhs)
+{
+	x -= rhs.x;
+	y -= rhs.y;
+	z -= rhs.z;
+	w -= rhs.w;
 }
 
 void Math::vec4::Normalize()
