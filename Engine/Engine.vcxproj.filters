@@ -131,6 +131,9 @@
     <ClInclude Include="Math\vec4.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="Math\Utils.h">
+      <Filter>Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">

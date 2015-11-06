@@ -181,6 +181,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClInclude Include="Rendering\Primitives\Triangle.h" />
     <ClInclude Include="Math\vec2.h" />
     <ClInclude Include="Math\vec4.h" />
+    <ClInclude Include="Math\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />
