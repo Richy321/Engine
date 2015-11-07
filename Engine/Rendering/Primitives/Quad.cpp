@@ -26,6 +26,8 @@ void Quad::Create()
 	vertices.push_back(VertexFormat(glm::vec3(0.25, 0.75, 0.0),//pos
 		glm::vec4(0, 0, 1, 1)));   //color
 								   //nothing different from Triangle model
+
+
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);            //here we have 4
 	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * 4, &vertices[0], GL_STATIC_DRAW);

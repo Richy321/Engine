@@ -152,7 +152,6 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClCompile Include="Core\Initialise\InitialiseGLEW.cpp" />
     <ClCompile Include="Core\Initialise\InitialiseGLUT.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Math\mat4.cpp" />
     <ClCompile Include="Math\vec3.cpp" />
     <ClCompile Include="Managers\SceneManager.cpp" />
     <ClCompile Include="Managers\MeshManager.cpp" />
@@ -164,8 +163,13 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ContextInfo.h" />
+    <ClInclude Include="Core\GameObject.h" />
+    <ClInclude Include="Core\IComponent.h" />
+    <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Core\Components\Interfaces\IRenderableComponent.h" />
     <ClInclude Include="Managers\MeshManager.h" />
     <ClInclude Include="Math\mat4.h" />
+    <ClInclude Include="Core\Components\MeshComponent.h" />
     <ClInclude Include="Rendering\Primitives\Quad.h" />
     <ClInclude Include="Rendering\Mesh.h" />
     <ClInclude Include="Rendering\IRenderObject.h" />

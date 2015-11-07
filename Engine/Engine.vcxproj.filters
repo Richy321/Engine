@@ -34,6 +34,12 @@
     <Filter Include="Rendering\Primitives">
       <UniqueIdentifier>{46e83acf-0601-49dd-9a50-b157ba905799}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Components">
+      <UniqueIdentifier>{5f4f21e7-c096-493e-8619-8d6e376f1e2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Components\Interfaces">
+      <UniqueIdentifier>{ed6488b2-90c0-4187-b18e-3e16691bc212}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -65,9 +71,6 @@
     </ClCompile>
     <ClCompile Include="Managers\MeshManager.cpp">
       <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Math\mat4.cpp">
-      <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="Math\vec2.cpp">
       <Filter>Math</Filter>
@@ -133,6 +136,21 @@
     </ClInclude>
     <ClInclude Include="Math\Utils.h">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GameObject.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IComponent.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\Interfaces\IRenderableComponent.h">
+      <Filter>Core\Components\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Timer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\MeshComponent.h">
+      <Filter>Core\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

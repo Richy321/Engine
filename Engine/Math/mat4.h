@@ -1,8 +1,7 @@
 #pragma once
 #include "vec4.h"
 #include <assert.h>
-#include <chrono>
-#include "../Utils.h"
+#include "Utils.h"
 
 namespace Math
 {

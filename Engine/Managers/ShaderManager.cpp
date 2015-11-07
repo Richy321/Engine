@@ -100,7 +100,7 @@ GLuint ShaderManager::CreateProgram(const std::string& shaderName, const std::st
 	return program;
 }
 
-const GLuint Managers::ShaderManager::GetShader(const std::string& shaderName)
+const GLuint ShaderManager::GetShader(const std::string& shaderName)
 {
 	return programs.at(shaderName);
 }

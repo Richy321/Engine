@@ -1,5 +1,7 @@
 #include "SceneManager.h"
+#include "../Core/GameObject.h"
 using namespace Managers;
+using namespace Core;
 
 SceneManager::SceneManager()
 {
@@ -8,6 +10,10 @@ SceneManager::SceneManager()
 	shaderManager->CreateProgram("colorShader", "Shaders\\basicPositionColor.vert", "Shaders\\basicColor.frag");
 
 	meshManager = new MeshManager();
+
+	GameObject* triangleGO = new GameObject();
+
+	gameObjectManager.push_back(*triangleGO);
 }
 
 SceneManager::~SceneManager()
