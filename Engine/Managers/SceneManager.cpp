@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "../Core/GameObject.h"
+#include "../Core/Components/MeshComponent.h"
 using namespace Managers;
 using namespace Core;
 
@@ -9,9 +10,16 @@ SceneManager::SceneManager()
 	shaderManager = new ShaderManager();
 	shaderManager->CreateProgram("colorShader", "Shaders\\basicPositionColor.vert", "Shaders\\basicColor.frag");
 
-	meshManager = new MeshManager();
-
 	GameObject* triangleGO = new GameObject();
+
+	MeshComponent* tri = MeshComponent::CreateTrianglePrimitive();
+	tri->SetProgram(ShaderManager::GetShader("colorShader"));
+	triangleGO->AddComponent(*tri);
+
+	MeshComponent* quad = MeshComponent::CreateQuadPrimitive();
+	quad->SetProgram(ShaderManager::GetShader("colorShader"));
+	triangleGO->AddComponent(*quad);
+
 
 	gameObjectManager.push_back(*triangleGO);
 }
@@ -19,13 +27,14 @@ SceneManager::SceneManager()
 SceneManager::~SceneManager()
 {
 	delete shaderManager;
-	delete meshManager;
 }
 
 void SceneManager::notifyBeginFrame()
 {
-	//nothing here for the moment
-	meshManager->Update();
+	for each (GameObject& go in gameObjectManager)
+	{
+		go.Update(0.0f);
+	}
 }
 
 void SceneManager::notifyDisplayFrame()
@@ -33,7 +42,11 @@ void SceneManager::notifyDisplayFrame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
-	meshManager->Draw();
+	for each (GameObject& go in gameObjectManager)
+	{
+		go.Render();
+	}
+
 }
 
 void SceneManager::notifyEndFrame()

@@ -24,10 +24,10 @@ namespace Core
 
 		void Update(float deltaTime)
 		{
-			//for each (IComponent &comp in components)
-			//{
-			//	comp.Update();
-			//}
+			for each (IComponent &comp in components)
+			{
+				comp.Update();
+			}
 		}
 
 		void UpdatePhysics()
@@ -42,13 +42,13 @@ namespace Core
 
 		void Render()
 		{
-			//for each (IComponent &comp in components)
-			//{
-			//	if (comp.GetComponentTypeFlags() | ComponentFlags::Renderable)
-			//	{
-			//		static_cast<IRenderableComponent&>(comp).Render();
-			//	}
-			//}
+			for each (IComponent &comp in components)
+			{
+				if (comp.GetComponentFlags() | ComponentFlags::Renderable)
+				{
+					static_cast<IRenderableComponent&>(comp).Render();
+				}
+			}
 		}
 
 
@@ -64,7 +64,7 @@ namespace Core
 
 		void RemoveComponent(int componentID)
 		{
-			//components.erase(std::remove_if(components.begin(), components.end(), [&](const IComponent& c) {  return c.id == componentID; }));
+			components.erase(std::remove_if(components.begin(), components.end(), [&](const IComponent& c) {  return c.GetID() == componentID; }));
 		}
 	};
 }

@@ -28,7 +28,7 @@ namespace Core
 		{
 			static unsigned int idCounter = 0;  id = idCounter++;
 		}
-		virtual ~IComponent() = 0;
+		virtual ~IComponent() {}
 		ComponentFlags GetComponentFlags() const { return componentFlags; }
 		
 		virtual void Update() = 0;

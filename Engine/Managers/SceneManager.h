@@ -1,6 +1,5 @@
 #pragma once
 #include "ShaderManager.h"
-#include "MeshManager.h"
 #include "../Core/IListener.h"
 #include "../Core/GameObject.h"
 
@@ -21,7 +20,6 @@ namespace Managers
 			int previous_height);
 	private:
 		Managers::ShaderManager* shaderManager;
-		Managers::MeshManager* meshManager;
 		std::vector<std::reference_wrapper<Core::GameObject>> gameObjectManager;
 	};
 }

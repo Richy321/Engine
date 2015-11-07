@@ -17,6 +17,7 @@ namespace Core
 
 		int startIndex = 0;
 		int vertexCount = 0;
+		GLenum mode = GL_TRIANGLES;
 	public:
 
 		MeshComponent()
@@ -33,7 +34,7 @@ namespace Core
 		{
 			glUseProgram(program);
 			glBindVertexArray(vao);
-			glDrawArrays(GL_TRIANGLES, 0, 3);
+			glDrawArrays(mode, startIndex, vertexCount);
 		}
 
 		void Update() override
@@ -110,12 +111,12 @@ namespace Core
 			glBindVertexArray(vao);
 
 			std::vector<VertexFormat> vertices;
-			vertices.push_back(VertexFormat(glm::vec3(0.25, -0.25, 0.0),
-				glm::vec4(1, 0, 0, 1)));
-			vertices.push_back(VertexFormat(glm::vec3(-0.25, -0.25, 0.0),
-				glm::vec4(0, 1, 0, 1)));
-			vertices.push_back(VertexFormat(glm::vec3(0.25, 0.25, 0.0),
-				glm::vec4(0, 0, 1, 1)));
+			vertices.push_back(VertexFormat(vec3(0.25, -0.25, 0.0),
+				vec4(1, 0, 0, 1)));
+			vertices.push_back(VertexFormat(vec3(-0.25, -0.25, 0.0),
+				vec4(0, 1, 0, 1)));
+			vertices.push_back(VertexFormat(vec3(0.25, 0.25, 0.0),
+				vec4(0, 0, 1, 1)));
 
 			glGenBuffers(1, &vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -130,6 +131,7 @@ namespace Core
 			glBindVertexArray(0);
 
 			//here we assign the values
+			triangleMesh->vertexCount = vertices.size();
 			triangleMesh->vao = vao;
 			triangleMesh->vbos.push_back(vbo);
 
@@ -139,21 +141,22 @@ namespace Core
 		static MeshComponent* CreateQuadPrimitive()
 		{
 			MeshComponent* quadMesh = new MeshComponent();
+
 			GLuint vao;
 			GLuint vbo;
+
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
 
 			std::vector<VertexFormat> vertices;
-			vertices.push_back(VertexFormat(glm::vec3(-0.25, 0.5, 0.0),//pos
-				glm::vec4(1, 0, 0, 1)));   //color
-			vertices.push_back(VertexFormat(glm::vec3(-0.25, 0.75, 0.0),//pos
-				glm::vec4(0, 0, 0, 1)));   //color
-			vertices.push_back(VertexFormat(glm::vec3(0.25, 0.5, 0.0),  //pos
-				glm::vec4(0, 1, 0, 1)));   //color
-										   //4th vertex
-			vertices.push_back(VertexFormat(glm::vec3(0.25, 0.75, 0.0),//pos
-				glm::vec4(0, 0, 1, 1)));   //color
+			vertices.push_back(VertexFormat(vec3(-0.25, 0.5, 0.0),//pos
+				vec4(1, 0, 0, 1)));   //color
+			vertices.push_back(VertexFormat(vec3(-0.25, 0.75, 0.0),//pos
+				vec4(0, 0, 0, 1)));   //color
+			vertices.push_back(VertexFormat(vec3(0.25, 0.5, 0.0),  //pos
+				vec4(0, 1, 0, 1)));   //color				   //4th vertex
+			vertices.push_back(VertexFormat(vec3(0.25, 0.75, 0.0),//pos
+				vec4(0, 0, 1, 1)));   //color
 										   //nothing different from Triangle model
 			glGenBuffers(1, &vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);            //here we have 4
@@ -162,10 +165,12 @@ namespace Core
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
 				sizeof(VertexFormat), (void*)0);
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE,
-				sizeof(VertexFormat),
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexFormat),
 				(void*)(offsetof(VertexFormat, VertexFormat::color)));
 			glBindVertexArray(0);
+
+			quadMesh->mode = GL_TRIANGLE_STRIP;
+			quadMesh->vertexCount = vertices.size();
 			quadMesh->vao = vao;
 			quadMesh->vbos.push_back(vbo);
 

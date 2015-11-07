@@ -28,12 +28,6 @@
     <Filter Include="Core\Initialisation">
       <UniqueIdentifier>{a62d4158-a460-40ab-9224-ad41f0a22d44}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Rendering">
-      <UniqueIdentifier>{1fde6970-8823-4021-b46a-d0cc460bdc02}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Rendering\Primitives">
-      <UniqueIdentifier>{46e83acf-0601-49dd-9a50-b157ba905799}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Components">
       <UniqueIdentifier>{5f4f21e7-c096-493e-8619-8d6e376f1e2d}</UniqueIdentifier>
     </Filter>
@@ -58,18 +52,6 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="Managers\ShaderManager.cpp">
-      <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Primitives\Triangle.cpp">
-      <Filter>Rendering\Primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Mesh.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Primitives\Quad.cpp">
-      <Filter>Rendering\Primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="Managers\MeshManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="Math\vec2.cpp">
@@ -104,26 +86,8 @@
     <ClInclude Include="Core\Initialise\InitialiseGLUT.h">
       <Filter>Core\Initialisation</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\VertexFormat.h">
-      <Filter>Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\IRenderObject.h">
-      <Filter>Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Primitives\Triangle.h">
-      <Filter>Rendering\Primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Mesh.h">
-      <Filter>Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Core\IListener.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Primitives\Quad.h">
-      <Filter>Rendering\Primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="Managers\MeshManager.h">
-      <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="Math\mat4.h">
       <Filter>Math</Filter>
@@ -151,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="Core\Components\MeshComponent.h">
       <Filter>Core\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\VertexFormat.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
