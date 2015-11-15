@@ -7,19 +7,24 @@ namespace Managers
 {
 	class SceneManager : public Core::IListener
 	{
-	public:
+	protected:
 		SceneManager();
+		std::vector<std::reference_wrapper<Core::GameObject>> gameObjectManager;
+	public:
 		~SceneManager();
 
-		virtual void notifyBeginFrame();
-		virtual void notifyDisplayFrame();
-		virtual void notifyEndFrame();
-		virtual void notifyReshape(int width,
-			int height,
-			int previous_width,
-			int previous_height);
-	private:
-		std::vector<std::reference_wrapper<Core::GameObject>> gameObjectManager;
+		virtual void notifyBeginFrame() override;
+		virtual void notifyDisplayFrame() override;
+		virtual void notifyEndFrame() override;
+		virtual void notifyReshape(int width, int height, int previous_width, int previous_height) override;
+
+		virtual void notifyProcessNormalKeys(unsigned char key, int x, int y) override {}
+		virtual void notifyProcessSpecialKeys(int key, int x, int y) override {}
+
+		virtual void notifyProcessMouseState(int button, int state, int x, int y) override {}
+		virtual void notifyProcessMouseActiveMove(int x, int y) override {}
+		virtual void notifyProcessMousePassiveMove(int x, int y) override {}
+		virtual void notifyProcessMouseWindowEntryCallback(int state) override {}
 	};
 }
 

@@ -2,7 +2,7 @@
 
 using namespace Core::Initialisation;
 
-Core::IListener* InitialiseGLUT::listener = NULL;
+Core::IListener* InitialiseGLUT::listener = nullptr;
 Core::WindowInfo InitialiseGLUT::windowInformation;
 
 void InitialiseGLUT::Initialise(const Core::WindowInfo& windowInfo,
@@ -13,7 +13,7 @@ void InitialiseGLUT::Initialise(const Core::WindowInfo& windowInfo,
 
 	//we need to create these fake arguments
 	int fakeargc = 1;
-	char *fakeargv[] = { "fake", NULL };
+	char *fakeargv[] = { "fake", nullptr };
 	glutInit(&fakeargc, fakeargv);
 
 	if (contextInfo.core)
@@ -41,8 +41,16 @@ void InitialiseGLUT::Initialise(const Core::WindowInfo& windowInfo,
 	glutDisplayFunc(DisplayCallback);
 	glutReshapeFunc(ResizeCallback);
 
+	glutKeyboardFunc(ProcessNormalKeysCallback);
+	glutSpecialFunc(ProcessSpecialKeysCallback);
+
+	glutMouseFunc(ProcessMouseStateCallback);
+	glutMotionFunc(ProcessMouseActiveMoveCallback);
+	glutPassiveMotionFunc(ProcessMousePassiveMoveCallback);
+	glutEntryFunc(ProcessMouseWindowEntryCallback);
+
 	//init GLEW, this can be called in main.cpp
-	Initialisation::InitialiseGLEW::Initialise();
+	InitialiseGLEW::Initialise();
 
 	//cleanup
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,
@@ -97,14 +105,52 @@ void InitialiseGLUT::ResizeCallback(int width, int height)
 	{
 		if (listener)
 		{
-			listener->notifyReshape(width,
-				height,
-				windowInformation.width,
+			listener->notifyReshape(width, height, windowInformation.width, 
 				windowInformation.height);
 		}
 		windowInformation.width = width;
 		windowInformation.height = height;
 	}
+}
+
+void InitialiseGLUT::ProcessNormalKeysCallback(unsigned char key, int x, int y) 
+{
+	//escape
+	if (key == 27)
+		exit(0);
+
+	if (listener)
+		listener->notifyProcessNormalKeys(key, x, y);
+}
+
+void InitialiseGLUT::ProcessSpecialKeysCallback(int key, int x, int y)
+{
+	if(listener)
+		listener->notifyProcessSpecialKeys(key, x, y);
+}
+
+void InitialiseGLUT::ProcessMouseStateCallback(int button, int state, int x, int y)
+{
+	if (listener)
+		listener->notifyProcessMouseState(button, state, x, y);
+}
+
+void InitialiseGLUT::ProcessMouseActiveMoveCallback(int x, int y)
+{
+	if (listener)
+		listener->notifyProcessMouseActiveMove(x, y);
+}
+
+void InitialiseGLUT::ProcessMousePassiveMoveCallback(int x, int y)
+{
+	if (listener)
+		listener->notifyProcessMousePassiveMove(x, y);
+}
+
+void InitialiseGLUT::ProcessMouseWindowEntryCallback(int state)
+{
+	if (listener)
+		listener->notifyProcessMouseWindowEntryCallback(state);
 }
 
 void InitialiseGLUT::EnterFullscreen()

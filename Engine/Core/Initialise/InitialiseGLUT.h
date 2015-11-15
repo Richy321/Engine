@@ -25,8 +25,8 @@ namespace Core
 			static void Run();//called from outside
 			static void Close();
 
-			void EnterFullscreen();
-			void ExitFullscreen();
+			static void EnterFullscreen();
+			static void ExitFullscreen();
 
 			//used to print info about GL
 			static void PrintOpenGLInfo(const Core::WindowInfo& windowInfo,
@@ -36,6 +36,14 @@ namespace Core
 			static void DisplayCallback();
 			static void ResizeCallback(int width, int height);
 			static void CloseCallback();
+
+			static void ProcessNormalKeysCallback(unsigned char key, int x, int y);
+			static void ProcessSpecialKeysCallback(int key, int x, int y);
+
+			static void ProcessMouseStateCallback(int button, int state, int x, int y);
+			static void ProcessMouseActiveMoveCallback(int x, int y);
+			static void ProcessMousePassiveMoveCallback(int x, int y);
+			static void ProcessMouseWindowEntryCallback(int state);
 		};
 	}
 }

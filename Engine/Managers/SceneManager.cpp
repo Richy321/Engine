@@ -57,7 +57,8 @@ void SceneManager::notifyReshape(int width,
 	int previous_height)
 {
 	//nothing here for the moment 
-
 }
+
+
 
 
