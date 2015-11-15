@@ -28,19 +28,33 @@ namespace Math
 			v[3] = w;
 		}
 
-		vec4 row(int i) const
+		vec4 GetRow(int i) const
 		{
 			assert(i >= 0 && i < 4);
 			return v[i];
 		}
-
 		
-		vec4 column(int i) const
+		vec4 GetColumn(int i) const
 		{
 			assert(i >= 0 && i < 4);
 			return vec4(v[0][i], v[1][i], v[2][i], v[3][i]);
 		}
 
+		void SetRow(int i, vec4 newValues)
+		{
+			assert(i >= 0 && i < 4);
+			v[i] = newValues;
+		}
+
+		void SetColumn(int i, vec4 newValues)
+		{
+			assert(i >= 0 && i < 4);
+
+			v[0][i] = newValues[0];
+			v[1][i] = newValues[1];
+			v[2][i] = newValues[2];
+			v[3][i] = newValues[3];
+		}
 		mat4 operator+(const mat4 &rhs) const
 		{
 			return mat4(
@@ -172,8 +186,8 @@ namespace Math
 				vec4(0.0f, 0.0f, 0.0f, 1.0f)
 			};
 
-
-			*this = rotation * *this;
+			mat4 combined = *this * rotation;
+			*this = combined;
 			return *this;
 		}
 
@@ -205,11 +219,12 @@ namespace Math
 
 			for (size_t i = 0; i < 4; i++)
 			{
-				result.column(i) = vec4((column(i).Multiply(rhs.row(0))).Sum(),
-										(column(i).Multiply(rhs.row(1))).Sum(),
-										(column(i).Multiply(rhs.row(2))).Sum(),
-										(column(i).Multiply(rhs.row(3))).Sum()
-									   );
+				result.SetColumn(i, vec4(
+					(GetColumn(i) * (rhs.GetRow(0))).Sum(),
+					(GetColumn(i) * (rhs.GetRow(1))).Sum(),
+					(GetColumn(i) * (rhs.GetRow(2))).Sum(),
+					(GetColumn(i) * (rhs.GetRow(3))).Sum()
+					));
 			}
 			return result;
 		}
@@ -220,11 +235,12 @@ namespace Math
 
 			for (size_t i = 0; i < 4; i++)
 			{
-				result.row(i) = vec4((v[i].Multiply(rhs.column(0))).Sum(), 
-									 (v[i].Multiply(rhs.column(1))).Sum(),
-									 (v[i].Multiply(rhs.column(2))).Sum(), 
-									 (v[i].Multiply(rhs.column(3))).Sum()
-									);
+				result.SetRow(i, vec4(
+					(v[i] * (rhs.GetColumn(0))).Sum(),
+					(v[i] * (rhs.GetColumn(1))).Sum(),
+					(v[i] * (rhs.GetColumn(2))).Sum(),
+					(v[i] * (rhs.GetColumn(3))).Sum()
+					));
 			}
 			return result;
 		}
@@ -235,12 +251,23 @@ namespace Math
 
 			for (size_t i = 0; i < 4; i++)
 			{
-				result.row(i) = rhs.row(0).Multiply(vec4(v[i].x())) +
-								rhs.row(1).Multiply(vec4(v[i].y())) +
-								rhs.row(2).Multiply(vec4(v[i].z())) +
-								rhs.row(3).Multiply(vec4(v[i].w()));
+				result.SetRow(i,
+					rhs.GetRow(0) * vec4(v[i].x()) +
+					rhs.GetRow(1) * vec4(v[i].y()) +
+					rhs.GetRow(2) * vec4(v[i].z()) +
+					rhs.GetRow(3) * vec4(v[i].w()));
 			}
 			return result;
+		}
+
+		float* GetMatrixFloatValues()
+		{
+			return &v[0][0];
+		}
+
+		const float* GetMatrixFloatValues() const
+		{
+			return &v[0][0];
 		}
 	};
 }

@@ -48,7 +48,7 @@ vec4& vec4::operator=(const vec4 &rhs)
 
 	return *this;
 }
-bool vec4::operator==(const vec4 & rhs)
+bool vec4::operator==(const vec4 & rhs) const
 {
 	return v[0] == rhs.x() && v[1] == rhs.y() && v[2] == rhs.z() && v[3] == rhs.w();
 }
@@ -68,36 +68,7 @@ vec4 Math::vec4::operator-() const
 #pragma endregion
 
 #pragma region scalar operations
-vec4 Math::vec4::operator+=(const float s) const
-{
-	return vec4(v[0] + s, v[1] + s, v[2] + s, v[3] + s);
-}
-
-vec4 Math::vec4::operator-=(const float s) const
-{
-	return vec4(v[0] - s, v[1] - s, v[2] - s, v[3] - s);
-}
-
-vec4 Math::vec4::operator*=(const float s) const
-{
-	return vec4(v[0]*s, v[1]*s, v[2]*s, v[3]*s);
-}
-
-vec4 vec4::operator*(float s) const
-{
-	return vec4(v[0] * s,
-				v[1] * s,
-				v[2] * s,
-				v[3] * s);
-}
-
-vec4 Math::vec4::operator/=(const float s) const
-{
-	float recip = 1.0f / s; // one div by s and multiplying by recip*4 is faster than div by s
-	return vec4(v[0]*recip, v[1]*recip, v[2]*recip, v[3]*recip);
-}
-
-vec4 &Math::vec4::operator+=(const float s)
+vec4 &vec4::operator+=(const float s)
 {
 	v[0] += s;
 	v[1] += s;
@@ -106,7 +77,7 @@ vec4 &Math::vec4::operator+=(const float s)
 	return *this;
 }
 
-vec4 &Math::vec4::operator-=(const float s)
+vec4 &vec4::operator-=(const float s)
 {
 	v[0] -= s;
 	v[1] -= s;
@@ -115,7 +86,7 @@ vec4 &Math::vec4::operator-=(const float s)
 	return *this;
 }
 
-vec4 &Math::vec4::operator/=(const float s)
+vec4 &vec4::operator/=(const float s)
 {
 	float recip = 1.0f / s;
 	v[0] /= recip;
@@ -125,7 +96,7 @@ vec4 &Math::vec4::operator/=(const float s)
 	return *this;
 }
 
-vec4 &Math::vec4::operator*=(const float s)
+vec4 &vec4::operator*=(const float s)
 {
 	v[0] *= s;
 	v[1] *= s;
@@ -136,35 +107,49 @@ vec4 &Math::vec4::operator*=(const float s)
 #pragma endregion
 
 #pragma region vector operations
-vec4 Math::vec4::operator+(const vec4 rhs) const
+vec4 vec4::operator+(const vec4 &rhs) const
 {
-	return vec4(v[0] + rhs.x(), v[1] + rhs.y(), v[2] + rhs.z(), v[3] + rhs.w());
+	return vec4(v[0] + rhs.x(), 
+				v[1] + rhs.y(), 
+				v[2] + rhs.z(), 
+				v[3] + rhs.w());
 }
 
-vec4 Math::vec4::operator+=(const vec4 rhs)
+vec4 vec4::operator-(const vec4 &rhs) const
 {
-	v[0] += rhs.x();
-	v[1] += rhs.y();
-	v[2] += rhs.z();
-	v[3] += rhs.w();
+	return vec4(v[0] - rhs.x(), 
+				v[1] - rhs.y(), 
+				v[2] - rhs.z(), 
+				v[3] - rhs.w());
+}
+
+vec4 vec4::operator*(const vec4 &rhs) const
+{
+	return vec4(v[0] * rhs.x(), 
+				v[1] * rhs.y(), 
+				v[2] * rhs.z(), 
+				v[3] * rhs.w());
+}
+
+vec4 &vec4::operator+=(const vec4 &rhs)
+{
+	*this = *this - rhs;
 	return *this;
 }
 
-vec4 Math::vec4::operator-(const vec4 rhs) const
+vec4 &vec4::operator-=(const vec4 &rhs)
 {
-	return vec4(v[0] - rhs.x(), v[1] - rhs.y(), v[2] - rhs.z(), v[3] - rhs.w());
-}
-
-vec4 Math::vec4::operator-=(const vec4 rhs)
-{
-	v[0] -= rhs.x();
-	v[1] -= rhs.y();
-	v[2] -= rhs.z();
-	v[3] -= rhs.w();
+	*this = *this - rhs;
 	return *this;
 }
 
-void Math::vec4::Normalize()
+vec4 &vec4::operator*=(const vec4 &rhs)
+{
+	*this = *this * rhs;
+	return *this;
+}
+
+void vec4::Normalize()
 {
 	float magnitudeSquared = v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3];
 	if (magnitudeSquared > 0)
@@ -193,20 +178,21 @@ vec4 vec4::Cross(const vec4 rhs) const
 		0.0f);
 }
 
-float Math::vec4::Dot(const vec4 rhs) const
+float vec4::Dot(const vec4 rhs) const
 {
 	return v[0]*rhs.x() + v[1]*rhs.y() + v[2]*rhs.z() + v[3]*rhs.w();
 }
 
 //Component-wise multiplication of vectors
+/*
 vec4 vec4::Multiply(const vec4& rhs) const
 {
 	return vec4(v[0] * rhs.x(), v[1] * rhs.y(), v[2] * rhs.z(), v[3] * rhs.w());
 }
 
-vec4& vec4::Multiply(const vec4& rhs)
+vec4 &vec4::Multiply(const vec4& rhs)
 {
-	*this = this->Multiply(rhs);
+	*this = vec4(v[0] * rhs.x(), v[1] * rhs.y(), v[2] * rhs.z(), v[3] * rhs.w());
 	return *this;
-}
+}*/
 #pragma endregion

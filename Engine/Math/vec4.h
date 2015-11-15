@@ -16,33 +16,53 @@ namespace Math
 		~vec4();
 
 		vec4 &operator=(const vec4 &rhs);
-		bool operator==(const vec4 &rhs);
+		bool operator==(const vec4 &rhs) const;
 
 		float Length() const;
 
 		vec4 vec4::operator-() const;
 
-		vec4 operator+=(const float s) const;
-		vec4 operator-=(const float s) const;
-		vec4 operator*=(const float s) const;
-		vec4 operator*(const float s) const;
-		vec4 operator/=(const float s) const;
+		#pragma region Scalar operations
+		vec4 operator+(const float s) const
+		{
+			return *this + vec4(s);
+		}
+		vec4 operator-(const float s) const
+		{
+			return *this - vec4(s);
+		}
+		vec4 operator*(const float s) const
+		{
+			return *this * vec4(s);
+		}
+		vec4 operator/(const float s) const
+		{
+			return *this * vec4(1.0f / s);
+		}
+		#pragma endregion
 
+		#pragma region In-place scalar operations
 		vec4 &operator+=(const float s);
 		vec4 &operator-=(const float s);
 		vec4 &operator*=(const float s);
 		vec4 &operator/=(const float s);
+		#pragma endregion 
 
-		vec4 operator+(const vec4 rhs) const;
-		vec4 operator+=(const vec4 rhs);
-		vec4 operator-(const vec4 rhs) const;
-		vec4 operator-=(const vec4 rhs);
+		#pragma region Vector operations
+		vec4 operator+(const vec4 &rhs) const;
+		vec4 operator-(const vec4 &rhs) const;
+		vec4 operator*(const vec4 &rhs) const;
+		#pragma endregion
+
+		#pragma region In-place vector operations
+		vec4 &operator+=(const vec4 &rhs);
+		vec4 &operator-=(const vec4 &rhs);
+		vec4 &operator*=(const vec4 &rhs);
+		#pragma endregion
 
 		void Normalize();
 		vec4 Cross(const vec4 rhs) const;
 		float Dot(const vec4 rhs) const;
-		vec4 Multiply(const vec4 &rhs) const;
-		vec4 &Multiply(const vec4 &rhs);
 
 		float Sum() const
 		{

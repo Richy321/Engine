@@ -34,6 +34,9 @@
     <Filter Include="Core\Components\Interfaces">
       <UniqueIdentifier>{ed6488b2-90c0-4187-b18e-3e16691bc212}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{cb78afed-ba2b-4b16-ad6f-0c622855e628}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -119,12 +122,18 @@
     <ClInclude Include="Rendering\VertexFormat.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="TestScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\basicPositionColor.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\test.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

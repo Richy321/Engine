@@ -177,10 +177,12 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClInclude Include="Math\vec2.h" />
     <ClInclude Include="Math\vec4.h" />
     <ClInclude Include="Math\Utils.h" />
+    <ClInclude Include="TestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />
     <None Include="Shaders\basicPositionColor.vert" />
+    <None Include="Shaders\test.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

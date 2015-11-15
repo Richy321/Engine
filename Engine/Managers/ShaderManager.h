@@ -12,11 +12,18 @@ namespace Managers
 	class ShaderManager
 	{
 	private:
+		ShaderManager();
 		std::string ReadShader(const std::string& fileName);
 		GLuint CreateShader(GLenum shaderType, std::string source, const std::string& shaderName);
 		static std::map<std::string, GLuint> programs;
 	public:
-		ShaderManager();
+
+		static ShaderManager &GetInstance()
+		{
+			static ShaderManager* instance = new ShaderManager();
+			return *instance;
+		}
+		
 		~ShaderManager();
 
 		GLuint CreateProgram(const std::string& shaderName, 

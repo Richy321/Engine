@@ -5,20 +5,14 @@
 #include "Core\Initialise\InitialiseGLUT.h"
 #include "Managers\SceneManager.h"
 
-#include <iostream>
-
+#include "TestScene.h"
 
 using namespace Core;
 using namespace Initialisation;
 
-void InitialiseModels()
-{
-
-}
-
 int main(int argc, char **argv)
 {
-	WindowInfo window(std::string("in2gpu OpenGL Beginner Tutorial "),
+	WindowInfo window(std::string("Engine"),
 		400, 200,//position
 		800, 600, //size
 		true);//resizable
@@ -28,8 +22,8 @@ int main(int argc, char **argv)
 
 	InitialiseGLUT::Initialise(window, context, frameBufferInfo);
 
-	IListener* scene = new Managers::SceneManager();
-	Initialisation::InitialiseGLUT::SetListener(scene);
+	IListener* scene = new TestScene();
+	InitialiseGLUT::SetListener(scene);
 
 	InitialiseGLUT::Run();
 

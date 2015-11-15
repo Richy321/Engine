@@ -7,26 +7,23 @@ using namespace Core;
 SceneManager::SceneManager()
 {
 	glEnable(GL_DEPTH_TEST);
-	shaderManager = new ShaderManager();
-	shaderManager->CreateProgram("colorShader", "Shaders\\basicPositionColor.vert", "Shaders\\basicColor.frag");
+	ShaderManager::GetInstance().CreateProgram("colorShader", "Shaders\\test.vert", "Shaders\\basicColor.frag");
 
 	GameObject* triangleGO = new GameObject();
 
-	MeshComponent* tri = MeshComponent::CreateTrianglePrimitive();
-	tri->SetProgram(ShaderManager::GetShader("colorShader"));
-	triangleGO->AddComponent(*tri);
-
-	MeshComponent* quad = MeshComponent::CreateQuadPrimitive();
-	quad->SetProgram(ShaderManager::GetShader("colorShader"));
-	triangleGO->AddComponent(*quad);
-
+	triangleGO->AddComponent(*MeshComponent::CreateTrianglePrimitive());
+	triangleGO->AddComponent(*MeshComponent::CreateQuadPrimitive());
 
 	gameObjectManager.push_back(*triangleGO);
+
+	
+	triangleGO->world.Translate(0.5, 0.0f, 0.0f);
+	triangleGO->world.RotateZ(90.0f);
 }
 
 SceneManager::~SceneManager()
 {
-	delete shaderManager;
+
 }
 
 void SceneManager::notifyBeginFrame()
@@ -62,3 +59,5 @@ void SceneManager::notifyReshape(int width,
 	//nothing here for the moment 
 
 }
+
+

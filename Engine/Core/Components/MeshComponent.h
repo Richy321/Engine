@@ -131,6 +131,7 @@ namespace Core
 			glBindVertexArray(0);
 
 			//here we assign the values
+			triangleMesh->SetProgram(Managers::ShaderManager::GetShader("colorShader"));
 			triangleMesh->vertexCount = vertices.size();
 			triangleMesh->vao = vao;
 			triangleMesh->vbos.push_back(vbo);
@@ -169,6 +170,8 @@ namespace Core
 				(void*)(offsetof(VertexFormat, VertexFormat::color)));
 			glBindVertexArray(0);
 
+
+			quadMesh->SetProgram(Managers::ShaderManager::GetShader("colorShader"));
 			quadMesh->mode = GL_TRIANGLE_STRIP;
 			quadMesh->vertexCount = vertices.size();
 			quadMesh->vao = vao;

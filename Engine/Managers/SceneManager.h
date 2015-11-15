@@ -19,7 +19,6 @@ namespace Managers
 			int previous_width,
 			int previous_height);
 	private:
-		Managers::ShaderManager* shaderManager;
 		std::vector<std::reference_wrapper<Core::GameObject>> gameObjectManager;
 	};
 }

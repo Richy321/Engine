@@ -104,5 +104,3 @@ const GLuint ShaderManager::GetShader(const std::string& shaderName)
 {
 	return programs.at(shaderName);
 }
-
-

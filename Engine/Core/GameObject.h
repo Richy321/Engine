@@ -10,8 +10,10 @@ namespace Core
 {
 	class GameObject
 	{
+	private:
+		GLuint gWorldLocation;
 	public:
-		mat4 worldTransform;
+		mat4 world;
 		std::vector<std::reference_wrapper<Core::IComponent>> components;
 
 		GameObject()
@@ -22,8 +24,17 @@ namespace Core
 		{
 		}
 
+		void Initialise()
+		{
+			gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
+
+			assert(gWorldLocation != 0xFFFFFFFF);
+		}
+
 		void Update(float deltaTime)
 		{
+			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, world.GetMatrixFloatValues());
+
 			for each (IComponent &comp in components)
 			{
 				comp.Update();
@@ -57,10 +68,10 @@ namespace Core
 			components.push_back(component);
 		}
 
-		void RemoveComponent(IComponent &component)
+		/*void RemoveComponent(IComponent &component)
 		{
-			//components.erase(std::remove(components.begin(), components.end(), component), components.end());
-		}
+			components.erase(std::remove(components.begin(), components.end(), component), components.end());
+		}*/
 
 		void RemoveComponent(int componentID)
 		{
