@@ -113,6 +113,14 @@ namespace Math
 			return *this;
 		}
 
+		mat4 &Scale(float s)
+		{
+			v[0] *= s;
+			v[1] *= s;
+			v[2] *= s;
+			return *this;
+		}
+
 		mat4 &Translate(float x, float y, float z)
 		{
 			v[3] += vec4(x, y, z, 0);

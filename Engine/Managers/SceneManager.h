@@ -2,6 +2,8 @@
 #include "ShaderManager.h"
 #include "../Core/IListener.h"
 #include "../Core/GameObject.h"
+#include "../Core/Timer.h"
+#include <memory>
 
 namespace Managers
 {
@@ -10,8 +12,16 @@ namespace Managers
 	protected:
 		SceneManager();
 		std::vector<std::reference_wrapper<Core::GameObject>> gameObjectManager;
+		std::unique_ptr<Core::Timer> timer;
+		float lastUpdateTime;
 	public:
 		~SceneManager();
+
+		virtual void Initialise() override;
+
+		virtual void OnUpdate(float deltaTime) {};
+		virtual void OnPhysicsUpdate() {};
+		virtual void OnCommsUpdate() {};
 
 		virtual void notifyBeginFrame() override;
 		virtual void notifyDisplayFrame() override;

@@ -5,7 +5,7 @@
 #include "Core\Initialise\InitialiseGLUT.h"
 #include "Managers\SceneManager.h"
 
-#include "TestScene.h"
+#include "Scenes/TestScene.h"
 
 using namespace Core;
 using namespace Initialisation;
@@ -23,6 +23,8 @@ int main(int argc, char **argv)
 	InitialiseGLUT::Initialise(window, context, frameBufferInfo);
 
 	IListener* scene = new TestScene();
+	scene->Initialise();
+	
 	InitialiseGLUT::SetListener(scene);
 
 	InitialiseGLUT::Run();

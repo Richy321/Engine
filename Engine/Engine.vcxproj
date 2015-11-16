@@ -158,7 +158,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClCompile Include="Math\vec4.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\ContextInfo.h" />
     <ClInclude Include="Core\GameObject.h" />
     <ClInclude Include="Core\IComponent.h" />
@@ -178,7 +178,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClInclude Include="Math\vec2.h" />
     <ClInclude Include="Math\vec4.h" />
     <ClInclude Include="Math\Utils.h" />
-    <ClInclude Include="TestScene.h" />
+    <ClInclude Include="Scenes\TestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />

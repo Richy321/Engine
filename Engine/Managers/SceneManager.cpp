@@ -1,24 +1,10 @@
 #include "SceneManager.h"
 #include "../Core/GameObject.h"
-#include "../Core/Components/MeshComponent.h"
 using namespace Managers;
 using namespace Core;
 
-SceneManager::SceneManager()
+SceneManager::SceneManager() : timer(new Timer), lastUpdateTime(0.0f)
 {
-	glEnable(GL_DEPTH_TEST);
-	ShaderManager::GetInstance().CreateProgram("colorShader", "Shaders\\test.vert", "Shaders\\basicColor.frag");
-
-	GameObject* triangleGO = new GameObject();
-
-	triangleGO->AddComponent(*MeshComponent::CreateTrianglePrimitive());
-	triangleGO->AddComponent(*MeshComponent::CreateQuadPrimitive());
-
-	gameObjectManager.push_back(*triangleGO);
-
-	
-	triangleGO->world.Translate(0.5, 0.0f, 0.0f);
-	triangleGO->world.RotateZ(90.0f);
 }
 
 SceneManager::~SceneManager()
@@ -26,8 +12,20 @@ SceneManager::~SceneManager()
 
 }
 
+void SceneManager::Initialise()
+{
+	glEnable(GL_DEPTH_TEST);
+	ShaderManager::GetInstance().CreateProgram("colorShader", "Shaders\\test.vert", "Shaders\\basicColor.frag");
+	timer->Start();
+}
+
 void SceneManager::notifyBeginFrame()
 {
+	timer->Update();
+	OnUpdate(timer->GetElapsedTime());
+	//call these from here for the time being
+	OnPhysicsUpdate(); 
+	OnCommsUpdate();
 	for each (GameObject& go in gameObjectManager)
 	{
 		go.Update(0.0f);
@@ -43,7 +41,6 @@ void SceneManager::notifyDisplayFrame()
 	{
 		go.Render();
 	}
-
 }
 
 void SceneManager::notifyEndFrame()

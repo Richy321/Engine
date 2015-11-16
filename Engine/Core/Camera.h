@@ -1,13 +1,14 @@
 #pragma once
-#include "Math/mat4.h"
 #include <math.h>
-#include "Core/GameObject.h"
+#include "../Math/Utils.h"
+#include "../Math/mat4.h"
+#include "GameObject.h"
 
 using namespace Math;
 
 namespace Core
 {
-	class Camera : public Core::GameObject
+	class Camera : public GameObject
 	{
 	public:
 		enum ProjectionType
