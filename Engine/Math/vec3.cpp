@@ -108,12 +108,12 @@ vec3 & vec3::operator*=(const float s)
 #pragma endregion
 
 #pragma region vector operations
-vec3 vec3::operator+(const vec3 rhs) const
+vec3 vec3::operator+(const vec3 &rhs) const
 {
 	return vec3(x + rhs.x, y + rhs.y, z + rhs.z);
 }
 
-vec3 vec3::operator-(const vec3 rhs) const
+vec3 vec3::operator-(const vec3 &rhs) const
 {
 	return vec3(x - rhs.x, y - rhs.y, z - rhs.z);
 }
@@ -129,13 +129,13 @@ void vec3::normalize()
 		z *= magRecip;
 	}
 }
-vec3 vec3::cross(const vec3 rhs) const
+vec3 vec3::cross(const vec3 &rhs) const
 {
 	return vec3(y * rhs.z - z * rhs.y,
 				z * rhs.x - x * rhs.z,
 				x * rhs.y - y * rhs.x);
 }
-float vec3::dot(const vec3 rhs) const
+float vec3::dot(const vec3 &rhs) const
 {
 	return x*rhs.x + y*rhs.y + z*rhs.z;
 }

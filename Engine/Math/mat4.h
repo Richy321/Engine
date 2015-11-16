@@ -27,6 +27,13 @@ namespace Math
 			v[2] = z;
 			v[3] = w;
 		}
+		mat4::mat4(const float i)
+		{
+			v[0] = i;
+			v[1] = i;
+			v[2] = i;
+			v[3] = i;
+		}
 
 		vec4 GetRow(int i) const
 		{
@@ -91,6 +98,11 @@ namespace Math
 		vec4 operator*(const vec4 &rhs) const
 		{
 			return PostMultiply(rhs);
+		}
+
+		vec4 &operator[](const int i)
+		{
+			return v[i];
 		}
 
 		mat4 &Scale(float x, float y, float z)
