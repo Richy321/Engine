@@ -24,18 +24,43 @@ namespace Core
 		float fovY;
 		float aspectRatio;
 		ProjectionType projectionType = Perspective;
-		Camera()
+		vec3 target;
+
+		Camera() :target(0.0f, 0.0f, 100.0f)
 		{
 			nearPlane = 0.1f;
 			farPlane = 1000.0f;
 
-			fovX = 0;
-			fovY = 90;
-			aspectRatio = 1;
+			fovX = 0.0f;
+			fovY = 90.0f;
+			aspectRatio = 1.0f;
 		}
 
 		~Camera()
 		{
+		}
+
+
+		mat4 view;
+		mat4 projection;
+
+
+		void SetPerspectiveProjection(float fov, float width, float height, float zNear, float zFar)
+		{
+			projectionType = Perspective;
+			projection = BuildPerspectiveProjection(fov, width, height, zNear, zFar);
+		}
+
+		void SetOrthographicProjection(float width, float height, float zNear, float zFar)
+		{
+			projectionType = Orthographic;
+			projection = BuildOrthographicProjection(width, height, zNear, zFar);
+		}
+
+		void Update(float deltaTime) override
+		{
+			//view = gluLookAt()
+			view = LookAt(vec3(world[3][0], world[3][1], world[3][2]), target, vec3(0, 1, 0));
 		}
 
 		static mat4 BuildPerspectiveProjection(float fov, float width, float height, float zNear, float zFar)

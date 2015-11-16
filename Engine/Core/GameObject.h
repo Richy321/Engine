@@ -14,7 +14,7 @@ namespace Core
 		GLuint gWorldLocation;
 	public:
 		mat4 world;
-		std::vector<std::reference_wrapper<Core::IComponent>> components;
+		std::vector<std::reference_wrapper<IComponent>> components;
 
 		GameObject()
 		{
@@ -24,14 +24,14 @@ namespace Core
 		{
 		}
 
-		void Initialise()
+		virtual void Initialise()
 		{
 			gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
 
 			assert(gWorldLocation != 0xFFFFFFFF);
 		}
 
-		void Update(float deltaTime)
+		virtual void Update(float deltaTime)
 		{
 			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, world.GetMatrixFloatValues());
 
@@ -41,17 +41,17 @@ namespace Core
 			}
 		}
 
-		void UpdatePhysics()
+		virtual void UpdatePhysics()
 		{
 			
 		}
 
-		void UpdateNetworkComms()
+		virtual void UpdateNetworkComms()
 		{
 			
 		}
 
-		void Render()
+		virtual void Render()
 		{
 			for each (IComponent &comp in components)
 			{
