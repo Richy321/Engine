@@ -22,9 +22,6 @@
     <Filter Include="Math">
       <UniqueIdentifier>{0a0ac9cf-a7fc-4d59-b897-f1b7d73a1107}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Managers">
-      <UniqueIdentifier>{12894be7-b772-4f78-a6c4-b9092ce3ebb2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Initialisation">
       <UniqueIdentifier>{a62d4158-a460-40ab-9224-ad41f0a22d44}</UniqueIdentifier>
     </Filter>
@@ -37,6 +34,9 @@
     <Filter Include="Scenes">
       <UniqueIdentifier>{cb78afed-ba2b-4b16-ad6f-0c622855e628}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Managers">
+      <UniqueIdentifier>{12894be7-b772-4f78-a6c4-b9092ce3ebb2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -45,17 +45,11 @@
     <ClCompile Include="Math\vec3.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Initialise\InitialiseGLEW.cpp">
-      <Filter>Core\Initialisation</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Initialise\InitialiseGLUT.cpp">
-      <Filter>Core\Initialisation</Filter>
-    </ClCompile>
     <ClCompile Include="Managers\SceneManager.cpp">
-      <Filter>Managers</Filter>
+      <Filter>Core\Managers</Filter>
     </ClCompile>
     <ClCompile Include="Managers\ShaderManager.cpp">
-      <Filter>Managers</Filter>
+      <Filter>Core\Managers</Filter>
     </ClCompile>
     <ClCompile Include="Math\vec2.cpp">
       <Filter>Math</Filter>
@@ -63,13 +57,16 @@
     <ClCompile Include="Math\vec4.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Initialisation\InitialiseGLEW.cpp">
+      <Filter>Core\Initialisation</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Initialisation\InitialiseGLUT.cpp">
+      <Filter>Core\Initialisation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\vec3.h">
       <Filter>Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Initialise\InitialiseGLEW.h">
-      <Filter>Core\Initialisation</Filter>
     </ClInclude>
     <ClInclude Include="Core\ContextInfo.h">
       <Filter>Core\Initialisation</Filter>
@@ -81,13 +78,10 @@
       <Filter>Core\Initialisation</Filter>
     </ClInclude>
     <ClInclude Include="Managers\SceneManager.h">
-      <Filter>Managers</Filter>
+      <Filter>Core\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Managers\ShaderManager.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Initialise\InitialiseGLUT.h">
-      <Filter>Core\Initialisation</Filter>
+      <Filter>Core\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Core\IListener.h">
       <Filter>Core</Filter>
@@ -122,14 +116,20 @@
     <ClInclude Include="Rendering\VertexFormat.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Scenes\TestScene.h">
       <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Core\IGameobject.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Camera.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Initialisation\InitialiseGLEW.h">
+      <Filter>Core\Initialisation</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Initialisation\InitialiseGLUT.h">
+      <Filter>Core\Initialisation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 #include "Dependencies\freeglut\freeglut.h"
 #include "Dependencies\glm\glm.hpp"
 
-#include "Core\Initialise\InitialiseGLUT.h"
+#include "Core\Initialisation\InitialiseGLUT.h"
 #include "Managers\SceneManager.h"
 
 #include "Scenes/TestScene.h"

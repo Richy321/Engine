@@ -149,8 +149,8 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Managers\ShaderManager.cpp" />
-    <ClCompile Include="Core\Initialise\InitialiseGLEW.cpp" />
-    <ClCompile Include="Core\Initialise\InitialiseGLUT.cpp" />
+    <ClCompile Include="Core\Initialisation\InitialiseGLEW.cpp" />
+    <ClCompile Include="Core\Initialisation\InitialiseGLUT.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math\vec3.cpp" />
     <ClCompile Include="Managers\SceneManager.cpp" />
@@ -171,8 +171,8 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClInclude Include="Rendering\VertexFormat.h" />
     <ClInclude Include="Core\FramebufferInfo.h" />
     <ClInclude Include="Core\IListener.h" />
-    <ClInclude Include="Core\Initialise\InitialiseGLEW.h" />
-    <ClInclude Include="Core\Initialise\InitialiseGLUT.h" />
+    <ClInclude Include="Core\Initialisation\InitialiseGLEW.h" />
+    <ClInclude Include="Core\Initialisation\InitialiseGLUT.h" />
     <ClInclude Include="Math\vec3.h" />
     <ClInclude Include="Managers\SceneManager.h" />
     <ClInclude Include="Core\WindowInfo.h" />
