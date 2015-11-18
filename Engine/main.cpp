@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
 	InitialiseGLUT::Initialise(window, context, frameBufferInfo);
 
-	IListener* scene = new TestScene();
+	IListener* scene = new TestScene(window);
 	scene->Initialise();
 	
 	InitialiseGLUT::SetListener(scene);

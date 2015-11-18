@@ -4,16 +4,18 @@
 #include "../Core/GameObject.h"
 #include "../Core/Timer.h"
 #include <memory>
+#include "../Core/WindowInfo.h"
 
 namespace Managers
 {
 	class SceneManager : public Core::IListener
 	{
 	protected:
-		SceneManager();
-		std::vector<std::reference_wrapper<Core::GameObject>> gameObjectManager;
+		SceneManager(Core::WindowInfo winInfo);
+		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
 		std::unique_ptr<Core::Timer> timer;
 		float lastUpdateTime;
+		Core::WindowInfo windowInfo;
 	public:
 		~SceneManager();
 

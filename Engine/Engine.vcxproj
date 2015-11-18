@@ -164,6 +164,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClInclude Include="Core\IComponent.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Components\Interfaces\IRenderableComponent.h" />
+    <ClInclude Include="Core\IGameobject.h" />
     <ClInclude Include="Math\mat4.h" />
     <ClInclude Include="Core\Components\MeshComponent.h" />
     <ClInclude Include="Managers\ShaderManager.h" />

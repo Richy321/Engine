@@ -3,8 +3,9 @@
 using namespace Managers;
 using namespace Core;
 
-SceneManager::SceneManager() : timer(new Timer), lastUpdateTime(0.0f)
+SceneManager::SceneManager(Core::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f)
 {
+	this->windowInfo = windowInfo;
 }
 
 SceneManager::~SceneManager()
@@ -26,9 +27,9 @@ void SceneManager::notifyBeginFrame()
 	//call these from here for the time being
 	OnPhysicsUpdate(); 
 	OnCommsUpdate();
-	for each (GameObject& go in gameObjectManager)
+	for(std::shared_ptr<GameObject>& go : gameObjectManager)
 	{
-		go.Update(0.0f);
+		go->Update(0.0f);
 	}
 }
 
@@ -37,9 +38,9 @@ void SceneManager::notifyDisplayFrame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
-	for each (GameObject& go in gameObjectManager)
+	for(std::shared_ptr<GameObject>& go : gameObjectManager)
 	{
-		go.Render();
+		go->Render();
 	}
 }
 

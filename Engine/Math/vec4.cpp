@@ -133,7 +133,7 @@ vec4 vec4::operator*(const vec4 &rhs) const
 
 vec4 &vec4::operator+=(const vec4 &rhs)
 {
-	*this = *this - rhs;
+	*this = *this + rhs;
 	return *this;
 }
 

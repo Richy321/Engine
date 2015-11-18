@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+#include "IGameObject.h"
 
 namespace Core
 {
@@ -22,15 +24,20 @@ namespace Core
 	protected:
 		unsigned int id;
 		ComponentFlags componentFlags;
+		std::weak_ptr<IGameObject> parentGameObject;
 	public:
 		int GetID() const { return id; }
-		IComponent() : componentFlags(None)
+		IComponent(std::weak_ptr<IGameObject> gameObj) : componentFlags(None), parentGameObject(gameObj)
 		{
+			
 			static unsigned int idCounter = 0;  id = idCounter++;
 		}
 		virtual ~IComponent() {}
 		ComponentFlags GetComponentFlags() const { return componentFlags; }
 		
+		std::weak_ptr<IGameObject> GetParentGameObject() const { return parentGameObject; }
+		void SetParentGameObject(std::weak_ptr<IGameObject> parent) { parentGameObject = parent; }
+
 		virtual void Update() = 0;
 		virtual void Destroy() = 0;
 	};

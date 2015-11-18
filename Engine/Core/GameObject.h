@@ -1,43 +1,44 @@
 #pragma once
 #include "../Math/mat4.h"
+#include "IGameObject.h"
 #include "IComponent.h"
 #include "Components/Interfaces/IRenderableComponent.h"
 #include <vector>
 #include <algorithm>
 
+class IComponent;
 using namespace Math;
 namespace Core
 {
-	class GameObject
+	class GameObject : public IGameObject, public std::enable_shared_from_this<GameObject>
 	{
-	private:
-		GLuint gWorldLocation;
 	public:
 		mat4 world;
-		std::vector<std::reference_wrapper<IComponent>> components;
+		std::vector<std::unique_ptr<IComponent>> components;
+		std::vector<std::weak_ptr<IGameObject>> children;
+		std::weak_ptr<IGameObject> parent;
 
+		std::vector<std::weak_ptr<IGameObject>>& GetChildren() override { return children; }
+		std::weak_ptr<IGameObject>& GetParent() override { return parent; }
+
+		mat4& GetWorldTransform() override { return world; }
 		GameObject()
 		{
 		}
 
-		~GameObject()
+		virtual ~GameObject()
 		{
 		}
 
 		virtual void Initialise()
 		{
-			gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
-
-			assert(gWorldLocation != 0xFFFFFFFF);
 		}
 
 		virtual void Update(float deltaTime)
 		{
-			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, world.GetMatrixFloatValues());
-
-			for each (IComponent &comp in components)
+			for (auto& comp : components)
 			{
-				comp.Update();
+				comp->Update();
 			}
 		}
 
@@ -53,29 +54,29 @@ namespace Core
 
 		virtual void Render()
 		{
-			for each (IComponent &comp in components)
+			for(auto& comp : components)
 			{
-				if (comp.GetComponentFlags() | ComponentFlags::Renderable)
+				if (comp->GetComponentFlags() | ComponentFlags::Renderable)
 				{
-					static_cast<IRenderableComponent&>(comp).Render();
+					static_cast<IRenderableComponent&>(*comp.get()).Render();
 				}
 			}
 		}
 
-
-		void AddComponent(IComponent &component)
+		void AddComponent(std::unique_ptr<IComponent> component)
 		{
-			components.push_back(component);
+			component->SetParentGameObject(shared_from_this());
+			components.push_back(std::move(component));
 		}
 
-		/*void RemoveComponent(IComponent &component)
+		void RemoveComponent(std::unique_ptr<IComponent> &component)
 		{
 			components.erase(std::remove(components.begin(), components.end(), component), components.end());
-		}*/
+		}
 
 		void RemoveComponent(int componentID)
 		{
-			components.erase(std::remove_if(components.begin(), components.end(), [&](const IComponent& c) {  return c.GetID() == componentID; }));
+			components.erase(std::remove_if(components.begin(), components.end(), [&](const std::unique_ptr<IComponent>& c) {  return c->GetID() == componentID; }));
 		}
 	};
 }

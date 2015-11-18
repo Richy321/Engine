@@ -20,8 +20,9 @@ namespace Core
 		GLenum mode = GL_TRIANGLES;
 	public:
 
-		MeshComponent()
+		MeshComponent(std::weak_ptr<IGameObject> parent) : IRenderableComponent(parent)
 		{
+
 		}
 
 		~MeshComponent()
@@ -32,9 +33,13 @@ namespace Core
 
 		void Render() override
 		{
+			static GLuint gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
+			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, this->parentGameObject.lock()->GetWorldTransform().GetMatrixFloatValues());
+
 			glUseProgram(program);
 			glBindVertexArray(vao);
 			glDrawArrays(mode, startIndex, vertexCount);
+			
 		}
 
 		void Update() override
@@ -100,9 +105,9 @@ namespace Core
 			}
 		}
 
-		static MeshComponent* CreateTrianglePrimitive()
+		static std::unique_ptr<MeshComponent> CreateTrianglePrimitive()
 		{
-			MeshComponent* triangleMesh = new MeshComponent();
+			std::unique_ptr<MeshComponent> triangleMesh = std::make_unique<MeshComponent>(std::weak_ptr<IGameObject>());
 
 			GLuint vao;
 			GLuint vbo;
@@ -139,9 +144,9 @@ namespace Core
 			return triangleMesh;
 		}
 
-		static MeshComponent* CreateQuadPrimitive()
+		static std::unique_ptr<MeshComponent>CreateQuadPrimitive()
 		{
-			MeshComponent* quadMesh = new MeshComponent();
+			std::unique_ptr<MeshComponent> quadMesh = std::make_unique<MeshComponent>(std::weak_ptr<IGameObject>());
 
 			GLuint vao;
 			GLuint vbo;
@@ -180,9 +185,14 @@ namespace Core
 			return quadMesh;
 		}
 
-		static MeshComponent* CreateCubePrimitive()
+		static std::unique_ptr<MeshComponent> CreateCubePrimitive(float size = 1.0f)
 		{
-			MeshComponent* cubeMesh = new MeshComponent();
+			return CreateBoxPrimitive(size, size, size);
+		}
+
+		static std::unique_ptr<MeshComponent> CreateBoxPrimitive(float width, float height, float depth)
+		{
+			std::unique_ptr<MeshComponent> cubeMesh = std::make_unique<MeshComponent>(std::weak_ptr<IGameObject>());
 
 			GLuint vao;
 			GLuint vbo;
@@ -192,93 +202,93 @@ namespace Core
 
 			std::vector<VertexFormat> vertices;
 			//vertices for the front face of the cube
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, depth),
 				vec4(1.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
 
 			//vertices for the right face of the cube
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, depth),
 				vec4(1.0, 0.0, 1.0, 1.0)));
 
 			//vertices for the back face of the cube
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, -depth),
 				vec4(0.0, 1.0, 0.0, 1.0)));
 
 			//vertices for the left face of the cube
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, -depth),
 				vec4(0.0, 1.0, 0.0, 1.0)));
 
 			//vertices for the upper face of the cube
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, 1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, height, -depth),
 				vec4(0.0, 1.0, 0.0, 1.0)));
 
 			//vertices for the bottom face of the cube
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, -1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(1.0, -1.0, 1.0),
+			vertices.push_back(VertexFormat(vec3(width, -height, depth),
 				vec4(1.0, 0.0, 1.0, 1.0)));
 
 			glGenBuffers(1, &vbo);

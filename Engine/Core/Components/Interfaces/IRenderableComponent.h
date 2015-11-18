@@ -7,9 +7,9 @@ namespace Core
 	{
 	public:
 
-		IRenderableComponent()
+		IRenderableComponent(std::weak_ptr<IGameObject> gameObj) : IComponent(gameObj)
 		{
-			componentFlags |= ComponentFlags::Renderable;
+			componentFlags |= Renderable;
 		}
 		virtual void Render() = 0;
 	};
