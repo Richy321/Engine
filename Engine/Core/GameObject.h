@@ -52,13 +52,13 @@ namespace Core
 			
 		}
 
-		virtual void Render()
+		virtual void Render(mat4 &view, mat4 &projection)
 		{
 			for(auto& comp : components)
 			{
 				if (comp->GetComponentFlags() | ComponentFlags::Renderable)
 				{
-					static_cast<IRenderableComponent&>(*comp.get()).Render();
+					static_cast<IRenderableComponent&>(*comp.get()).Render(view, projection);
 				}
 			}
 		}

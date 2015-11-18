@@ -289,6 +289,11 @@ namespace Math
 		{
 			return &v[0][0];
 		}
+
+		static mat4 GetIdentity()
+		{
+			return mat4();
+		}
 	};
 }
 

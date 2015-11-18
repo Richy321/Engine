@@ -5,6 +5,7 @@
 #include "../Core/Timer.h"
 #include <memory>
 #include "../Core/WindowInfo.h"
+#include "../Core/Camera.h"
 
 namespace Managers
 {
@@ -16,6 +17,8 @@ namespace Managers
 		std::unique_ptr<Core::Timer> timer;
 		float lastUpdateTime;
 		Core::WindowInfo windowInfo;
+
+		std::weak_ptr<Core::Camera> mainCamera;
 	public:
 		~SceneManager();
 
@@ -37,6 +40,8 @@ namespace Managers
 		virtual void notifyProcessMouseActiveMove(int x, int y) override {}
 		virtual void notifyProcessMousePassiveMove(int x, int y) override {}
 		virtual void notifyProcessMouseWindowEntryCallback(int state) override {}
+
+		virtual void SetMainCamera(std::weak_ptr<Core::Camera> cam) { mainCamera = cam; }
 	};
 }
 

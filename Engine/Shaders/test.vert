@@ -18,6 +18,6 @@ void main(void)
 	//mat4 wvp = gProjection * gView * gWorld;
 	//mat4 wvp = gProjection * gWorld; //* gProjection;
 	//mat4 wvp = gWP;
-	mat4 wvp = gWorld;
+	//mat4 wvp = gWorld;
 	gl_Position = wvp * vec4(in_position, 1.0);
 }

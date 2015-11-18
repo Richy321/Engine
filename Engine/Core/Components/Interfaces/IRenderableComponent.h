@@ -11,7 +11,7 @@ namespace Core
 		{
 			componentFlags |= Renderable;
 		}
-		virtual void Render() = 0;
+		virtual void Render(Math::mat4 &view, Math::mat4 &projection) = 0;
 	};
 }
 

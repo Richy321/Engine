@@ -31,10 +31,23 @@ namespace Core
 		}
 		
 
-		void Render() override
+		void Render(mat4 &view, mat4 &projection) override
 		{
 			static GLuint gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
-			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, this->parentGameObject.lock()->GetWorldTransform().GetMatrixFloatValues());
+			static GLuint gViewUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gView");
+			static GLuint gProjectionUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gProjection");
+			static GLuint gWP = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWP");
+
+
+
+			mat4 worldMat = this->parentGameObject.lock()->GetWorldTransform();
+			mat4 wp = worldMat * projection;
+
+			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, worldMat.GetMatrixFloatValues());
+			glUniformMatrix4fv(gViewUniform, 1, GL_FALSE, view.GetMatrixFloatValues());
+			glUniformMatrix4fv(gProjectionUniform, 1, GL_FALSE, projection.GetMatrixFloatValues());
+			glUniformMatrix4fv(gWP, 1, GL_FALSE, wp.GetMatrixFloatValues());
+
 
 			glUseProgram(program);
 			glBindVertexArray(vao);
