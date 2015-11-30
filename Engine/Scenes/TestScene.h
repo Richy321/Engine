@@ -28,22 +28,21 @@ public:
 	{
 		SceneManager::Initialise();
 
-		//assert(gViewUniform != 0xFFFFFFFF);
-		//assert(gProjectionUniform != 0xFFFFFFFF);
-
-		camera->SetPerspectiveProjection(30.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 0.1f, 1000.0f);
+		camera->SetPerspectiveProjection(30.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
+		//camera->SetOrthographicProjection(static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), -1, 1);
 		SetMainCamera(camera);
-		
+		camera->GetWorldTransform().Translate(2.0f, 0.0f, 20.0f);
+
 		cube = std::make_shared<GameObject>();
 		cube->AddComponent(MeshComponent::CreateCubePrimitive());
 		//cube->world.Translate(-0.25f, -0.25f, 0.0f);
-		cube->world.Scale(0.05f);
+		//cube->world.Translate(0.0f, 0.0f, -0.90f);
+		cube->world.Scale(0.5f);
 
 		cubeBack = std::make_shared<GameObject>();
 		cubeBack->AddComponent(MeshComponent::CreateCubePrimitive());
-		cubeBack->world.Translate(0.0f, 0.25f, 1.0f);
-		cubeBack->world.Scale(0.05f);
-		
+		cubeBack->world.Translate(0.0f, 0.0f, -10.0f);
+		cubeBack->world.Scale(1.5f);
 		
 		gameObjectManager.push_back(cubeBack);
 		gameObjectManager.push_back(cube);
@@ -54,14 +53,28 @@ public:
 		camera->Update(deltaTime);
 
 		cube->world.RotateY(deltaTime * 75);
-
 		cubeBack->world.RotateY(deltaTime * -75);
+	}
 
-		mat4 wp = cube->world * camera->projection;
+	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
+	{
+		mat4 camTransform;
+		const float cameraMovementSpeed = 0.1f;
 
-		//glUniformMatrix4fv(gViewUniform, 1, GL_FALSE, camera->view.GetMatrixFloatValues());
-		//glUniformMatrix4fv(gProjectionUniform, 1, GL_FALSE, camera->projection.GetMatrixFloatValues());
-		//glUniformMatrix4fv(gWP, 1, GL_FALSE, wp.GetMatrixFloatValues());
+		if(key == 'a')
+			mainCamera.lock()->GetWorldTransform().Translate(-cameraMovementSpeed, 0.0f, 0.0f);
+		if(key == 'd')
+			mainCamera.lock()->GetWorldTransform().Translate(cameraMovementSpeed, 0.0f, 0.0f);
+		
+		if (key == 'w')
+			mainCamera.lock()->GetWorldTransform().Translate(0.0f, 0.0f, -cameraMovementSpeed);
+		if (key == 's')
+			mainCamera.lock()->GetWorldTransform().Translate(0.0f, 0.0f, cameraMovementSpeed);
+
+		if (key == 'q')
+			mainCamera.lock()->GetWorldTransform().Translate(0.0f, cameraMovementSpeed, 0.0f);
+		if (key == 'e')
+			mainCamera.lock()->GetWorldTransform().Translate(0.0f, -cameraMovementSpeed, 0.0f);
 	}
 };
 

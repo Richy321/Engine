@@ -3,6 +3,8 @@
 
 namespace Core
 {
+	class Camera;
+
 	class IRenderableComponent : public IComponent
 	{
 	public:
@@ -11,7 +13,7 @@ namespace Core
 		{
 			componentFlags |= Renderable;
 		}
-		virtual void Render(Math::mat4 &view, Math::mat4 &projection) = 0;
+		virtual void Render(std::shared_ptr<Camera> mainCamera) = 0;
 	};
 }
 

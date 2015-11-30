@@ -34,7 +34,7 @@
     <Filter Include="Scenes">
       <UniqueIdentifier>{cb78afed-ba2b-4b16-ad6f-0c622855e628}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\Managers">
+    <Filter Include="Core\Initialisation\Managers">
       <UniqueIdentifier>{12894be7-b772-4f78-a6c4-b9092ce3ebb2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -46,10 +46,10 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="Managers\SceneManager.cpp">
-      <Filter>Core\Managers</Filter>
+      <Filter>Core\Initialisation\Managers</Filter>
     </ClCompile>
     <ClCompile Include="Managers\ShaderManager.cpp">
-      <Filter>Core\Managers</Filter>
+      <Filter>Core\Initialisation\Managers</Filter>
     </ClCompile>
     <ClCompile Include="Math\vec2.cpp">
       <Filter>Math</Filter>
@@ -78,10 +78,10 @@
       <Filter>Core\Initialisation</Filter>
     </ClInclude>
     <ClInclude Include="Managers\SceneManager.h">
-      <Filter>Core\Managers</Filter>
+      <Filter>Core\Initialisation\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Managers\ShaderManager.h">
-      <Filter>Core\Managers</Filter>
+      <Filter>Core\Initialisation\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Core\IListener.h">
       <Filter>Core</Filter>

@@ -52,13 +52,13 @@ namespace Core
 			
 		}
 
-		virtual void Render(mat4 &view, mat4 &projection)
+		virtual void Render(std::shared_ptr<Camera> mainCamera)
 		{
 			for(auto& comp : components)
 			{
 				if (comp->GetComponentFlags() | ComponentFlags::Renderable)
 				{
-					static_cast<IRenderableComponent&>(*comp.get()).Render(view, projection);
+					static_cast<IRenderableComponent&>(*comp.get()).Render(mainCamera);
 				}
 			}
 		}

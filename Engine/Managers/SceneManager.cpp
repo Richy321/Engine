@@ -40,15 +40,11 @@ void SceneManager::notifyDisplayFrame()
 
 	for(std::shared_ptr<GameObject>& go : gameObjectManager)
 	{
+		assert(!mainCamera.expired());
 		if(!mainCamera.expired())
 		{
 			std::shared_ptr<Camera> mainCamPtr = mainCamera.lock();
-			go->Render(mainCamPtr->view, mainCamPtr->projection);
-		}
-		else
-		{
-			mat4 identity;
-			go->Render(identity, identity);
+			go->Render(mainCamPtr);
 		}
 	}
 }

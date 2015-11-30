@@ -294,6 +294,23 @@ namespace Math
 		{
 			return mat4();
 		}
+
+		mat4 InvertQuick() const {
+			mat4 d;
+			// transpose x, y, z
+			for (int i = 0; i != 3; ++i) {
+				d[i] = vec4(v[0][i], v[1][i], v[2][i], 0.0f);
+			}
+			d[3] = vec4(0, 0, 0, 1);
+			// translate by new matrix
+			d[3] = d.PreMultiply(vec4(-v[3][0], -v[3][1], -v[3][2], 1.0f));
+			return d;
+		}
+
+		mat4 Transpose() const
+		{
+			return mat4(GetColumn(0), GetColumn(1), GetColumn(2), GetColumn(3));
+		}
 	};
 }
 
