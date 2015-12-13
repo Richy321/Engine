@@ -131,6 +131,9 @@
     <ClInclude Include="Core\Initialisation\InitialiseGLUT.h">
       <Filter>Core\Initialisation</Filter>
     </ClInclude>
+    <ClInclude Include="Math\quat.h">
+      <Filter>Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">
