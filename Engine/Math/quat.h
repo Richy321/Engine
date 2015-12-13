@@ -28,11 +28,27 @@ namespace Math
 		}
 
 		quat operator*(const quat &r) const { return mul(r); }
-
-
-		quat mul(const quat &q) const
+		quat operator*(float r) const { return quat(v[0] * r, v[1]*r, v[2]*r, v[3]*r); }
+		quat &operator*=(const quat &r) { *this = mul(r); return *this; }
+		quat mul(const quat &r) const
 		{
-			
+			return quat(
+				v[0] * r.v[3] + v[3] * r.v[0] + v[1] * r.v[2] - v[2] * r.v[1],
+				v[1] * r.v[3] + v[3] * r.v[1] + v[2] * r.v[0] - v[0] * r.v[2],
+				v[2] * r.v[3] + v[3] * r.v[2] + v[0] * r.v[1] - v[1] * r.v[0],
+				v[3] * r.v[3] - v[0] * r.v[0] - v[1] * r.v[1] - v[2] * r.v[2]
+				);
+		}
+
+		quat conjugate() const
+		{
+			return *this * quat(-1, -1, -1, 1);
+		}
+		
+		vec4 rotate(const vec4 &r) const 
+		{
+			quat q = (*this * r) * conjugate();
+			return vec4(q.v[0], q.v[1], q.v[2], q.v[3]);
 		}
 
 	};
