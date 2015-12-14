@@ -5,6 +5,7 @@
 #include "../../Dependencies/glew/glew.h"
 #include "../../Dependencies/freeglut/freeglut.h"
 #include "../../Rendering/VertexFormat.h"
+#include "../../Dependencies/glm/gtc/type_ptr.hpp"
 
 namespace Core
 {
@@ -40,12 +41,12 @@ namespace Core
 
 			mat4 modelToWorld = this->parentGameObject.lock()->GetWorldTransform();
 
-			mat4 wp = modelToWorld * mainCamera->worldToProjection;
+			mat4 wp = mainCamera->worldToProjection *  modelToWorld;
 
-			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, modelToWorld.GetMatrixFloatValues());
-			glUniformMatrix4fv(gViewUniform, 1, GL_FALSE, mainCamera->view.GetMatrixFloatValues());
-			glUniformMatrix4fv(gProjectionUniform, 1, GL_FALSE, mainCamera->projection.GetMatrixFloatValues());
-			glUniformMatrix4fv(gWP, 1, GL_FALSE, wp.GetMatrixFloatValues());
+			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, glm::value_ptr(modelToWorld));
+			glUniformMatrix4fv(gViewUniform, 1, GL_FALSE, glm::value_ptr(mainCamera->view));
+			glUniformMatrix4fv(gProjectionUniform, 1, GL_FALSE, glm::value_ptr(mainCamera->projection));
+			glUniformMatrix4fv(gWP, 1, GL_FALSE, glm::value_ptr(wp));
 
 			glUseProgram(program);
 			glBindVertexArray(vao);
