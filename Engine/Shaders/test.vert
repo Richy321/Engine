@@ -15,11 +15,7 @@ void main(void)
 {
 	color = in_color;
 
-	//mat4 wvp = gProjection * gView * gWorld;
-	//mat4 wvp = gWorld * gView * gProjection;
-	//mat4 wvp = gProjection * gWorld; //* gProjection;
-	mat4 wvp = gWP;
-	//mat4 wvp = gWorld;
+	mat4 wvp = gProjection * gView * gWorld;
 	gl_Position = wvp * vec4(in_position, 1.0);
 
 	//color = vec4(clamp(in_position, 0.0, 1.0), 1.0);

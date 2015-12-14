@@ -2,20 +2,21 @@
 #include "../Managers/SceneManager.h"
 #include "../Core/Components/MeshComponent.h"
 #include "../Core/Camera.h"
+#include "../CameraFPS.h"
 using namespace Core;
 
 class TestScene : public Managers::SceneManager
 {
 public:
 
-	std::shared_ptr<Camera> camera;
+	std::shared_ptr<CameraFPS> camera;
 	GLuint gViewUniform;
 	GLuint gProjectionUniform;
 	GLuint gWP;
 	std::shared_ptr<GameObject> cube;
 	std::shared_ptr<GameObject> cubeBack;
 
-	TestScene(WindowInfo windowInfo) : SceneManager(windowInfo), camera(new Camera())
+	TestScene(WindowInfo windowInfo) : SceneManager(windowInfo), camera(new CameraFPS())
 	{
 	}
 
@@ -27,7 +28,7 @@ public:
 	{
 		SceneManager::Initialise();
 
-		camera->SetPerspectiveProjection(30.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
+		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 		SetMainCamera(camera);
 		
 		camera->Translate(0.0f, 0.0f, 20.0f);
@@ -54,21 +55,15 @@ public:
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
-		mat4 camTransform;
-		const float cameraMovementSpeed = 0.1f;
+		camera->OnKey(key, x, y);
+		
+	}
 
-		if (key == 'a')
-			mainCamera.lock()->Translate(-cameraMovementSpeed, 0.0f, 0.0f);
-		if(key == 'd')
-			mainCamera.lock()->Translate(cameraMovementSpeed, 0.0f, 0.0f);
-		if (key == 'w')
-			mainCamera.lock()->Translate(0.0f, 0.0f, -cameraMovementSpeed);
-		if (key == 's')
-			mainCamera.lock()->Translate(0.0f, 0.0f, cameraMovementSpeed);
-		if (key == 'q')
-			mainCamera.lock()->Translate(0.0f, cameraMovementSpeed, 0.0f);
-		if (key == 'e')
-			mainCamera.lock()->Translate(0.0f, -cameraMovementSpeed, 0.0f);
+	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
+	{
+		camera->OnMouseMove(deltaX, deltaY);
+		
+		//restore cursor to center of screen
+		//glutWarpPointer(windowInfo.width / 2, windowInfo.height / 2);
 	}
 };
-

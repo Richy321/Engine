@@ -1,7 +1,5 @@
 #pragma once
-#include <math.h>
 #include "GameObject.h"
-#include "../Math/Utils.h"
 
 using namespace glm;
 
@@ -36,7 +34,7 @@ namespace Core
 			aspectRatio = 1.0f;
 		}
 
-		~Camera()
+		virtual ~Camera()
 		{
 		}
 
@@ -56,7 +54,7 @@ namespace Core
 			projection = BuildOrthographicProjection(left, right, bottom, top, zNear, zFar);
 		}
 
-		void Update(float deltaTime) override
+		virtual void Update(float deltaTime) override
 		{
 			view = glm::inverse(world);
 			worldToProjection = projection * view;
@@ -72,6 +70,10 @@ namespace Core
 		{
 			return glm::ortho(left, right, bottom, top, zNear, zFar);
 		}
+
+		virtual void OnMouseMove(int x, int y) = 0;
+
+		virtual void OnKey(unsigned char key, int x, int y) = 0;
 	};
 }
 

@@ -19,6 +19,10 @@ namespace Managers
 		Core::WindowInfo windowInfo;
 
 		std::weak_ptr<Core::Camera> mainCamera;
+		int mousePosX;
+		int mousePosY;
+		int mouseDeltaX;
+		int mouseDeltaY;
 	public:
 		~SceneManager();
 
@@ -38,10 +42,30 @@ namespace Managers
 
 		virtual void notifyProcessMouseState(int button, int state, int x, int y) override {}
 		virtual void notifyProcessMouseActiveMove(int x, int y) override {}
-		virtual void notifyProcessMousePassiveMove(int x, int y) override {}
+		void notifyProcessMousePassiveMove(int x, int y) override 
+		{
+			if (mousePosX != -1 && mousePosY != -1)
+			{
+				mouseDeltaX = x - mousePosX;
+				mouseDeltaY = y = mousePosY;
+			}
+
+			mousePosX = x;
+			mousePosY = y;
+			OnMousePassiveMove(mousePosX, mousePosY, mouseDeltaX, mouseDeltaY);
+		}
+		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) {}
+
 		virtual void notifyProcessMouseWindowEntryCallback(int state) override {}
 
 		virtual void SetMainCamera(std::weak_ptr<Core::Camera> cam) { mainCamera = cam; }
+
+
+		void DisableCursor()
+		{
+			ShowCursor(FALSE);
+			SetCapture()
+		}
 	};
 }
 

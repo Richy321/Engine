@@ -6,6 +6,8 @@ using namespace Core;
 SceneManager::SceneManager(Core::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f)
 {
 	this->windowInfo = windowInfo;
+	mousePosX = mousePosY = -1;
+	mouseDeltaX = mouseDeltaY = 0;
 }
 
 SceneManager::~SceneManager()
