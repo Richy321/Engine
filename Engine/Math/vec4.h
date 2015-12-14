@@ -91,5 +91,8 @@ namespace Math
 		const float &y() const { return v[1]; }
 		const float &z() const { return v[2]; }
 		const float &w() const { return v[3]; }
+
+
+		vec3 xyz() { return vec3(this->x(), this->y(), this->z()); }
 	};
 }

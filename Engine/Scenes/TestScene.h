@@ -31,8 +31,7 @@ public:
 		camera->SetPerspectiveProjection(30.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 		//camera->SetOrthographicProjection(static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), -1, 1);
 		SetMainCamera(camera);
-		camera->GetWorldTransform().Translate(2.0f, 0.0f, 20.0f);
-
+		camera->GetWorldTransform().Translate(20.0f, 0.0f, 20.0f);
 		cube = std::make_shared<GameObject>();
 		cube->AddComponent(MeshComponent::CreateCubePrimitive());
 		//cube->world.Translate(-0.25f, -0.25f, 0.0f);
@@ -46,7 +45,10 @@ public:
 		
 		gameObjectManager.push_back(cubeBack);
 		gameObjectManager.push_back(cube);
+
+		//camera->LookAt(cube->GetWorldTransform().GetRow(3).xyz());
 	}
+
 
 	void OnUpdate(float deltaTime) override
 	{

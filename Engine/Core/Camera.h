@@ -40,7 +40,6 @@ namespace Core
 		{
 		}
 
-
 		mat4 view;
 		mat4 projection;
 		mat4 worldToCamera;
@@ -67,6 +66,13 @@ namespace Core
 			//view = LookAt(vec3(world[3][0], world[3][1], world[3][2]), target, vec3(0, 1, 0));
 			worldToCamera = GetWorldTransform().InvertQuick();
 			worldToProjection = worldToCamera * projection;
+		}
+
+		void LookAt(const vec3 &target)
+		{
+			this->target = target;
+			vec3 pos = GetWorldTransform().GetRow(3).xyz();
+			this->GetWorldTransform() = BuildLookAt(pos, target, vec3(0.0f, 1.0f, 0.0f));
 		}
 
 		static mat4 BuildPerspectiveProjection(float fov, float width, float height, float zNear, float zFar)
@@ -112,7 +118,7 @@ namespace Core
 			return m;
 		}
 
-		static mat4 LookAt(const vec3 &position, const vec3 &target, const vec3 &up)
+		static mat4 BuildLookAt(const vec3 &position, const vec3 &target, const vec3 &up)
 		{
 			//get forwards
 			vec3 f = position - target;
@@ -177,7 +183,6 @@ namespace Core
 				);
 			return mul;
 		}
-
 
 		static mat4 BuildOrthographicProjection(float left, float right, float bottom, float top, float nearVal, float farVal)
 		{

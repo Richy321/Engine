@@ -78,6 +78,11 @@ namespace Core
 		{
 			components.erase(std::remove_if(components.begin(), components.end(), [&](const std::unique_ptr<IComponent>& c) {  return c->GetID() == componentID; }));
 		}
+
+		vec3 GetPosition()
+		{
+			return world.GetRow(3).xyz();
+		}
 	};
 }
 
