@@ -82,8 +82,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
-      <Message>Copy freeglut &amp; glew</Message>
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\assimp\$(PlatformTarget)\assimp.dll" "$(OutDir)"</Command>
+      <Message>Copy dependancy dlls</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,13 +118,14 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"</Command>
-      <Message>Copy freeglut &amp; glew</Message>
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\assimp\$(PlatformTarget)\assimp.dll" "$(OutDir)"</Command>
+      <Message>Copy dependancy dlls</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
