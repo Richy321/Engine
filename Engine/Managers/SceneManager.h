@@ -11,6 +11,9 @@ namespace Managers
 {
 	class SceneManager : public Core::IListener
 	{
+	private:
+		bool captureCursor = false;
+		bool isWarpingCursor = false;
 	protected:
 		SceneManager(Core::WindowInfo winInfo);
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
@@ -44,10 +47,23 @@ namespace Managers
 		virtual void notifyProcessMouseActiveMove(int x, int y) override {}
 		void notifyProcessMousePassiveMove(int x, int y) override 
 		{
-			if (mousePosX != -1 && mousePosY != -1)
+			if (isWarpingCursor)
+			{
+				isWarpingCursor = false;
+				return;
+			}
+			if (mousePosX != -1 && mousePosY != -1) //ignore first delta
 			{
 				mouseDeltaX = x - mousePosX;
-				mouseDeltaY = y = mousePosY;
+				mouseDeltaY = y - mousePosY;
+			}
+
+			if (captureCursor)
+			{
+				isWarpingCursor = true;
+				glutWarpPointer(windowInfo.width / 2, windowInfo.height / 2);
+				x = windowInfo.width / 2;
+				y = windowInfo.height / 2;
 			}
 
 			mousePosX = x;
@@ -61,10 +77,10 @@ namespace Managers
 		virtual void SetMainCamera(std::weak_ptr<Core::Camera> cam) { mainCamera = cam; }
 
 
-		void DisableCursor()
+		void CaptureCursor(bool capture)
 		{
-			ShowCursor(FALSE);
-			SetCapture()
+			captureCursor = capture;
+			glutSetCursor(!capture ? GLUT_CURSOR_INHERIT : GLUT_CURSOR_NONE);
 		}
 	};
 }

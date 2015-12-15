@@ -10,6 +10,9 @@
 using namespace Core;
 using namespace Initialisation;
 
+//Force use of dedicated graphics card rather than embedded
+extern "C" { _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
+
 int main(int argc, char **argv)
 {
 	WindowInfo window(std::string("Engine"),

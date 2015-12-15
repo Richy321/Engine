@@ -27,6 +27,7 @@ public:
 	void Initialise() override
 	{
 		SceneManager::Initialise();
+		CaptureCursor(true);
 
 		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 		SetMainCamera(camera);
@@ -62,8 +63,5 @@ public:
 	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
 	{
 		camera->OnMouseMove(deltaX, deltaY);
-		
-		//restore cursor to center of screen
-		//glutWarpPointer(windowInfo.width / 2, windowInfo.height / 2);
 	}
 };
