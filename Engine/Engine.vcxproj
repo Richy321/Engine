@@ -160,6 +160,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClCompile Include="Math\vec4.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\AssetManager.h" />
     <ClInclude Include="CameraFPS.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\ContextInfo.h" />

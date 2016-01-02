@@ -137,6 +137,9 @@
     <ClInclude Include="CameraFPS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\AssetManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">
