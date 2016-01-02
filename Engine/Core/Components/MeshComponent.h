@@ -11,7 +11,7 @@ namespace Core
 {
 	class MeshComponent : public IRenderableComponent
 	{
-	protected:
+	public:
 		GLuint vao;
 		GLuint program;
 		std::vector<GLuint> vbos;
@@ -19,7 +19,10 @@ namespace Core
 		int startIndex = 0;
 		int vertexCount = 0;
 		GLenum mode = GL_TRIANGLES;
-	public:
+		bool isIndexed = false;
+
+		std::vector<VertexFormat> vertices;
+		std::vector<unsigned int> indices;
 
 		MeshComponent(std::weak_ptr<IGameObject> parent) : IRenderableComponent(parent)
 		{
@@ -50,8 +53,15 @@ namespace Core
 
 			glUseProgram(program);
 			glBindVertexArray(vao);
-			glDrawArrays(mode, startIndex, vertexCount);
-			
+			if(indices.size() > 0)
+				glDrawArrays(mode, startIndex, vertexCount);
+			else
+				glDrawElements(
+					mode,      // mode
+					indices.size(),    // count
+					GL_UNSIGNED_INT,   // type
+					(void*)0           // element array buffer offset
+					);
 		}
 
 		void Update() override
