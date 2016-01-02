@@ -130,9 +130,11 @@ namespace Core
 
 			std::unique_ptr<MeshComponent> rval = std::make_unique<MeshComponent>(std::weak_ptr<IGameObject>());
 
+			//todo - split into mesh.h and allow for submeshes
 			//todo - load textures from scene
 			//todo - detect vertex format based on Has* functions
-
+			//todo - proper asset caching
+			//todo - extend asset manager to textures (devIL ? )
 			recursiveImport(scene, scene->mRootNode, rval);
 
 			return rval;
