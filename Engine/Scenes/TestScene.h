@@ -2,8 +2,9 @@
 #include "../Managers/SceneManager.h"
 #include "../Core/Components/MeshComponent.h"
 #include "../Core/Camera.h"
-#include "../CameraFPS.h"
+#include "../Core/CameraFPS.h"
 #include "../Core/AssetManager.h"
+#include "../Core/CameraFPS.h"
 using namespace Core;
 
 class TestScene : public Managers::SceneManager
@@ -37,7 +38,7 @@ public:
 		cube = std::make_shared<GameObject>();
 		cube->AddComponent(MeshComponent::CreateCubePrimitive());
 		cube->Translate(0.0f, 0.0f, 0.0f);
-		
+
 		model = std::make_shared<GameObject>();
 		model->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
 		model->Translate(0.0f, 0.0f, -10.0f);
@@ -50,7 +51,7 @@ public:
 	{
 		camera->Update(deltaTime);
 
-		cube->RotateY(deltaTime * 1.0f);
+		//cube->RotateY(deltaTime * 1.0f);
 	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override

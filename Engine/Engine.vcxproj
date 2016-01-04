@@ -161,7 +161,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\AssetManager.h" />
-    <ClInclude Include="CameraFPS.h" />
+    <ClInclude Include="Core\CameraFPS.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\ContextInfo.h" />
     <ClInclude Include="Core\GameObject.h" />
@@ -173,6 +173,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(
     <ClInclude Include="Core\Components\MeshComponent.h" />
     <ClInclude Include="Managers\ShaderManager.h" />
     <ClInclude Include="Math\quat.h" />
+    <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Rendering\VertexFormat.h" />
     <ClInclude Include="Core\FramebufferInfo.h" />
     <ClInclude Include="Core\IListener.h" />
