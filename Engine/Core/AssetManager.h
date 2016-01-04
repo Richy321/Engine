@@ -29,9 +29,21 @@ namespace Core
 		{
 		}
 
+		static void CopyaiMat(const aiMatrix4x4 *from, glm::mat4 &to) {
+			to[0][0] = from->a1; to[1][0] = from->a2;
+			to[2][0] = from->a3; to[3][0] = from->a4;
+			to[0][1] = from->b1; to[1][1] = from->b2;
+			to[2][1] = from->b3; to[3][1] = from->b4;
+			to[0][2] = from->c1; to[1][2] = from->c2;
+			to[2][2] = from->c3; to[3][2] = from->c4;
+			to[0][3] = from->d1; to[1][3] = from->d2;
+			to[2][3] = from->d3; to[3][3] = from->d4;
+		}
 
-		static void recursiveImport(const struct aiScene* scene, const struct aiNode* nd, std::unique_ptr<MeshComponent>& meshComponent)
+		static void recursiveImport(const struct aiScene* scene, const struct aiNode* nd, std::shared_ptr<MeshNode> meshNode)
 		{
+			CopyaiMat(&nd->mTransformation, meshNode->toParent);
+
 			// import all node meshes
 			for (size_t n = 0; n < nd->mNumMeshes; n++)
 			{
@@ -92,27 +104,31 @@ namespace Core
 						colour));   //color
 				}
 
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, subMesh->indices.size() * sizeof(unsigned int), &subMesh->indices[0], GL_STATIC_DRAW);
+
 				glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * subMesh->vertices.size(), &subMesh->vertices[0], GL_STATIC_DRAW);
 				glEnableVertexAttribArray(0);
 				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)0);
+				
 				glEnableVertexAttribArray(1);
 				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)offsetof(VertexFormat, VertexFormat::color));
 				glBindVertexArray(0);
 
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, subMesh->indices.size() * sizeof(unsigned int), &subMesh->indices[0], GL_STATIC_DRAW);
-
 				subMesh->SetProgram(Managers::ShaderManager::GetShader("colorShader"));
 				subMesh->vao = vao;
+				subMesh->ebo = elementbuffer;
 				subMesh->vbos.push_back(vbo);
 
-				meshComponent->AddMesh(subMesh);
+				meshNode->AddMesh(subMesh);
 			}
 
 			// import all children
-			for (size_t n = 0; n < nd->mNumChildren; ++n)
+ 			for (size_t n = 0; n < nd->mNumChildren; ++n)
 			{
-				recursiveImport(scene, nd->mChildren[n], meshComponent);
+				std::shared_ptr<MeshNode> childNode = std::make_shared<MeshNode>();
+				meshNode->AddChild(childNode);
+				recursiveImport(scene, nd->mChildren[n], childNode);
 			}
 		}
 
@@ -135,7 +151,7 @@ namespace Core
 			//todo - detect vertex format based on Has* functions
 			//todo - proper asset caching
 			//todo - extend asset manager to textures (devIL ? )
-			recursiveImport(scene, scene->mRootNode, rval);
+			recursiveImport(scene, scene->mRootNode, rval->rootMeshNode);
 
 			return rval;
 		}

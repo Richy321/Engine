@@ -18,8 +18,9 @@ public:
 	std::shared_ptr<GameObject> cube;
 	std::shared_ptr<GameObject> model;
 
-	TestScene(WindowInfo windowInfo) : SceneManager(windowInfo), camera(new CameraFPS())
+	TestScene(WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
+		camera = std::make_shared<CameraFPS>();
 	}
 
 	~TestScene()
@@ -44,7 +45,7 @@ public:
 		model->Translate(0.0f, 0.0f, -10.0f);
 
 		gameObjectManager.push_back(model);
-		gameObjectManager.push_back(cube);
+		//gameObjectManager.push_back(cube);
 	}
 
 	void OnUpdate(float deltaTime) override

@@ -134,10 +134,16 @@
     <ClInclude Include="Math\quat.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="CameraFPS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\AssetManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\MeshNode.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CameraFPS.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Mesh.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

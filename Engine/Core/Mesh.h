@@ -15,6 +15,7 @@ namespace Core
 	{
 	public:
 		GLuint vao;
+		GLuint ebo;
 		GLuint program;
 		std::vector<GLuint> vbos;
 
@@ -22,11 +23,9 @@ namespace Core
 		std::vector<unsigned int> indices;
 		std::vector<glm::vec3> normals;
 		std::vector<glm::vec2> uvs;
+		std::vector<unsigned int> materialIndex;
 
 		GLenum mode = GL_TRIANGLES;
-		glm::mat4 toParent;
-
-		std::vector<std::shared_ptr<Mesh>> subMeshes;
 
 		Mesh()
 		{
@@ -48,19 +47,16 @@ namespace Core
 			glDeleteVertexArrays(1, &vao);
 			glDeleteBuffers(vbos.size(), &vbos[0]);
 			vbos.clear();
-
-			for (size_t i = 0; i < subMeshes.size(); i++)
-				subMeshes[i]->Destroy();
 		}
 
-		void Render(std::shared_ptr<Camera> mainCamera)
+		void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld)
 		{
 			static GLuint gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
 			static GLuint gViewUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gView");
 			static GLuint gProjectionUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gProjection");
 			static GLuint gWP = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWP");
 
-			glm::mat4 modelToWorld = toParent;
+			glm::mat4 modelToWorld = toWorld;
 
 			glm::mat4 wp = mainCamera->worldToProjection *  modelToWorld;
 
@@ -72,17 +68,14 @@ namespace Core
 			glUseProgram(program);
 			glBindVertexArray(vao);
 			if (indices.size() > 0)
-				glDrawArrays(mode, 0, vertices.size());
-			else
 				glDrawElements(
 					mode,      // mode
 					indices.size(),    // count
 					GL_UNSIGNED_INT,   // type
 					(void*)0           // element array buffer offset
 					);
-
-			for (size_t i = 0; i < subMeshes.size(); i++)
-				subMeshes[i]->Render(mainCamera);
+			else
+				glDrawArrays(mode, 0, vertices.size());
 		}
 
 		void SetProgram(GLuint program) { this->program = program; }
@@ -122,24 +115,22 @@ namespace Core
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
 
-			std::vector<VertexFormat> vertices;
-			vertices.push_back(VertexFormat(vec3(0.25, -0.25, 0.0),
+			triangleMesh->vertices.push_back(VertexFormat(vec3(0.25, -0.25, 0.0),
 				vec4(1, 0, 0, 1)));
-			vertices.push_back(VertexFormat(vec3(-0.25, -0.25, 0.0),
+			triangleMesh->vertices.push_back(VertexFormat(vec3(-0.25, -0.25, 0.0),
 				vec4(0, 1, 0, 1)));
-			vertices.push_back(VertexFormat(vec3(0.25, 0.25, 0.0),
+			triangleMesh->vertices.push_back(VertexFormat(vec3(0.25, 0.25, 0.0),
 				vec4(0, 0, 1, 1)));
 
 			glGenBuffers(1, &vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * 3, &vertices[0], GL_STATIC_DRAW);
+
+			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * triangleMesh->vertices.size(), &triangleMesh->vertices[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat),
-				(void*)0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)0);
+
 			glEnableVertexAttribArray(1);
-			// you can use offsetof to get the offset of an attribute
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexFormat),
-				(void*)(offsetof(VertexFormat, VertexFormat::color)));
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(offsetof(VertexFormat, VertexFormat::color)));
 			glBindVertexArray(0);
 
 			//here we assign the values
@@ -159,19 +150,18 @@ namespace Core
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
 
-			std::vector<VertexFormat> vertices;
-			vertices.push_back(VertexFormat(vec3(-0.25, 0.5, 0.0),//pos
+			quadMesh->vertices.push_back(VertexFormat(vec3(-0.25, 0.5, 0.0),//pos
 				vec4(1, 0, 0, 1)));   //color
-			vertices.push_back(VertexFormat(vec3(-0.25, 0.75, 0.0),//pos
+			quadMesh->vertices.push_back(VertexFormat(vec3(-0.25, 0.75, 0.0),//pos
 				vec4(0, 0, 0, 1)));   //color
-			vertices.push_back(VertexFormat(vec3(0.25, 0.5, 0.0),  //pos
+			quadMesh->vertices.push_back(VertexFormat(vec3(0.25, 0.5, 0.0),  //pos
 				vec4(0, 1, 0, 1)));   //color				   //4th vertex
-			vertices.push_back(VertexFormat(vec3(0.25, 0.75, 0.0),//pos
+			quadMesh->vertices.push_back(VertexFormat(vec3(0.25, 0.75, 0.0),//pos
 				vec4(0, 0, 1, 1)));   //color
 									  //nothing different from Triangle model
 			glGenBuffers(1, &vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);            //here we have 4
-			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * 4, &vertices[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * 4, &quadMesh->vertices[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
 				sizeof(VertexFormat), (void*)0);
@@ -204,101 +194,100 @@ namespace Core
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
 
-			std::vector<VertexFormat> vertices;
 			//vertices for the front face of the cube
-			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, depth),
 				vec4(1.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
 
 			//vertices for the right face of the cube
-			vertices.push_back(VertexFormat(vec3(width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, depth),
 				vec4(1.0, 0.0, 1.0, 1.0)));
 
 			//vertices for the back face of the cube
-			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, -depth),
 				vec4(0.0, 1.0, 0.0, 1.0)));
 
 			//vertices for the left face of the cube
-			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, -depth),
 				vec4(0.0, 1.0, 0.0, 1.0)));
 
 			//vertices for the upper face of the cube
-			vertices.push_back(VertexFormat(vec3(width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, depth),
 				vec4(1.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(-width, height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, depth),
 				vec4(0.0, 1.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, height, -depth),
 				vec4(1.0, 1.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, height, -depth),
 				vec4(0.0, 1.0, 0.0, 1.0)));
 
 			//vertices for the bottom face of the cube
-			vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, -depth),
 				vec4(0.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
 
-			vertices.push_back(VertexFormat(vec3(width, -height, -depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, -depth),
 				vec4(1.0, 0.0, 0.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(-width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(-width, -height, depth),
 				vec4(0.0, 0.0, 1.0, 1.0)));
-			vertices.push_back(VertexFormat(vec3(width, -height, depth),
+			cubeMesh->vertices.push_back(VertexFormat(vec3(width, -height, depth),
 				vec4(1.0, 0.0, 1.0, 1.0)));
 
 			glGenBuffers(1, &vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * cubeMesh->vertices.size(), &cubeMesh->vertices[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)0);
 			glEnableVertexAttribArray(1);
