@@ -3,9 +3,11 @@
 using namespace Managers;
 using namespace Core;
 
-SceneManager::SceneManager(Core::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f)
+SceneManager::SceneManager(Initialisation::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f)
 {
 	this->windowInfo = windowInfo;
+	mousePosX = mousePosY = -1;
+	mouseDeltaX = mouseDeltaY = 0;
 }
 
 SceneManager::~SceneManager()
@@ -16,7 +18,8 @@ SceneManager::~SceneManager()
 void SceneManager::Initialise()
 {
 	glEnable(GL_DEPTH_TEST);
-	ShaderManager::GetInstance().CreateProgram("colorShader", "Shaders\\test.vert", "Shaders\\basicColor.frag");
+	ShaderManager::GetInstance().CreateProgram("basicColor", "Shaders\\basicColor.vert", "Shaders\\basicColor.frag");
+	ShaderManager::GetInstance().CreateProgram("basicLighting", "Shaders\\basicLighting.vert", "Shaders\\basicLighting.frag");
 	timer->Start();
 }
 

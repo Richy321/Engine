@@ -2,22 +2,25 @@
 #include "../Managers/SceneManager.h"
 #include "../Core/Components/MeshComponent.h"
 #include "../Core/Camera.h"
-
+#include "../Core/CameraFPS.h"
+#include "../Core/AssetManager.h"
+#include "../Core/CameraFPS.h"
 using namespace Core;
 
 class TestScene : public Managers::SceneManager
 {
 public:
 
-	std::shared_ptr<Camera> camera;
+	std::shared_ptr<CameraFPS> camera;
 	GLuint gViewUniform;
 	GLuint gProjectionUniform;
 	GLuint gWP;
 	std::shared_ptr<GameObject> cube;
-	std::shared_ptr<GameObject> cubeBack;
+	std::shared_ptr<GameObject> model;
 
-	TestScene(WindowInfo windowInfo) : SceneManager(windowInfo), camera(new Camera)
+	TestScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
+		camera = std::make_shared<CameraFPS>();
 	}
 
 	~TestScene()
@@ -27,56 +30,38 @@ public:
 	void Initialise() override
 	{
 		SceneManager::Initialise();
+		CaptureCursor(true);
 
-		camera->SetPerspectiveProjection(30.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
-		//camera->SetOrthographicProjection(static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), -1, 1);
+		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 		SetMainCamera(camera);
-		camera->GetWorldTransform().Translate(20.0f, 0.0f, 20.0f);
+		camera->Translate(0.0f, 0.0f, 20.0f);
+
 		cube = std::make_shared<GameObject>();
 		cube->AddComponent(MeshComponent::CreateCubePrimitive());
-		//cube->world.Translate(-0.25f, -0.25f, 0.0f);
-		//cube->world.Translate(0.0f, 0.0f, -0.90f);
-		cube->world.Scale(0.5f);
+		cube->Translate(0.0f, 0.0f, 0.0f);
 
-		cubeBack = std::make_shared<GameObject>();
-		cubeBack->AddComponent(MeshComponent::CreateCubePrimitive());
-		cubeBack->world.Translate(0.0f, 0.0f, -10.0f);
-		cubeBack->world.Scale(1.5f);
-		
-		gameObjectManager.push_back(cubeBack);
+		model = std::make_shared<GameObject>();
+		model->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
+		model->Translate(0.0f, 0.0f, -10.0f);
+
+		gameObjectManager.push_back(model);
 		gameObjectManager.push_back(cube);
-
-		//camera->LookAt(cube->GetWorldTransform().GetRow(3).xyz());
 	}
-
 
 	void OnUpdate(float deltaTime) override
 	{
 		camera->Update(deltaTime);
 
-		cube->world.RotateY(deltaTime * 75);
-		cubeBack->world.RotateY(deltaTime * -75);
+		//cube->RotateY(deltaTime * 1.0f);
 	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
-		mat4 camTransform;
-		const float cameraMovementSpeed = 0.1f;
+		camera->OnKey(key, x, y);	
+	}
 
-		if(key == 'a')
-			mainCamera.lock()->GetWorldTransform().Translate(-cameraMovementSpeed, 0.0f, 0.0f);
-		if(key == 'd')
-			mainCamera.lock()->GetWorldTransform().Translate(cameraMovementSpeed, 0.0f, 0.0f);
-		
-		if (key == 'w')
-			mainCamera.lock()->GetWorldTransform().Translate(0.0f, 0.0f, -cameraMovementSpeed);
-		if (key == 's')
-			mainCamera.lock()->GetWorldTransform().Translate(0.0f, 0.0f, cameraMovementSpeed);
-
-		if (key == 'q')
-			mainCamera.lock()->GetWorldTransform().Translate(0.0f, cameraMovementSpeed, 0.0f);
-		if (key == 'e')
-			mainCamera.lock()->GetWorldTransform().Translate(0.0f, -cameraMovementSpeed, 0.0f);
+	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
+	{
+		camera->OnMouseMove(deltaX, deltaY);
 	}
 };
-

@@ -4,21 +4,28 @@
 #include "../Core/GameObject.h"
 #include "../Core/Timer.h"
 #include <memory>
-#include "../Core/WindowInfo.h"
+#include "../Core/Initialisation/WindowInfo.h"
 #include "../Core/Camera.h"
 
 namespace Managers
 {
 	class SceneManager : public Core::IListener
 	{
+	private:
+		bool captureCursor = false;
+		bool isWarpingCursor = false;
 	protected:
-		SceneManager(Core::WindowInfo winInfo);
+		SceneManager(Core::Initialisation::WindowInfo winInfo);
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
 		std::unique_ptr<Core::Timer> timer;
 		float lastUpdateTime;
-		Core::WindowInfo windowInfo;
+		Core::Initialisation::WindowInfo windowInfo;
 
 		std::weak_ptr<Core::Camera> mainCamera;
+		int mousePosX;
+		int mousePosY;
+		int mouseDeltaX;
+		int mouseDeltaY;
 	public:
 		~SceneManager();
 
@@ -38,10 +45,43 @@ namespace Managers
 
 		virtual void notifyProcessMouseState(int button, int state, int x, int y) override {}
 		virtual void notifyProcessMouseActiveMove(int x, int y) override {}
-		virtual void notifyProcessMousePassiveMove(int x, int y) override {}
+		void notifyProcessMousePassiveMove(int x, int y) override 
+		{
+			if (isWarpingCursor)
+			{
+				isWarpingCursor = false;
+				return;
+			}
+			if (mousePosX != -1 && mousePosY != -1) //ignore first delta
+			{
+				mouseDeltaX = x - mousePosX;
+				mouseDeltaY = y - mousePosY;
+			}
+
+			if (captureCursor)
+			{
+				isWarpingCursor = true;
+				glutWarpPointer(windowInfo.width / 2, windowInfo.height / 2);
+				x = windowInfo.width / 2;
+				y = windowInfo.height / 2;
+			}
+
+			mousePosX = x;
+			mousePosY = y;
+			OnMousePassiveMove(mousePosX, mousePosY, mouseDeltaX, mouseDeltaY);
+		}
+		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) {}
+
 		virtual void notifyProcessMouseWindowEntryCallback(int state) override {}
 
 		virtual void SetMainCamera(std::weak_ptr<Core::Camera> cam) { mainCamera = cam; }
+
+
+		void CaptureCursor(bool capture)
+		{
+			captureCursor = capture;
+			glutSetCursor(!capture ? GLUT_CURSOR_INHERIT : GLUT_CURSOR_NONE);
+		}
 	};
 }
 

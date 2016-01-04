@@ -29,7 +29,6 @@ namespace Core
 		int GetID() const { return id; }
 		IComponent(std::weak_ptr<IGameObject> gameObj) : componentFlags(None), parentGameObject(gameObj)
 		{
-			
 			static unsigned int idCounter = 0;  id = idCounter++;
 		}
 		virtual ~IComponent() {}

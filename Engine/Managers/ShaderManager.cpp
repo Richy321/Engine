@@ -73,7 +73,10 @@ GLuint ShaderManager::CreateProgram(const std::string& shaderName, const std::st
 	std::string fragmentShaderCode = ReadShader(fragmentShaderFilename);
 
 	GLuint vertexShader = CreateShader(GL_VERTEX_SHADER, vertexShaderCode, "vertex shader");
+	assert(vertexShader != 0 && "Vertex Shader failed to compile");
+	
 	GLuint fragmentShader = CreateShader(GL_FRAGMENT_SHADER, fragmentShaderCode, "fragment shader");
+	assert(fragmentShader != 0 && "Fragment Shader failed to compile");
 
 	int linkResult = 0;
 	//create the program handle, attach the shaders and link it

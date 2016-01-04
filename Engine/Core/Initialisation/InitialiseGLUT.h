@@ -1,10 +1,11 @@
 #pragma once
-#include "../ContextInfo.h"
-#include "../FrameBufferInfo.h"
-#include "../WindowInfo.h"
 #include "../IListener.h"
 #include "InitialiseGLEW.h"
 #include <iostream>
+#include "WindowInfo.h"
+#include "FramebufferInfo.h"
+#include "ContextInfo.h"
+
 namespace Core
 {
 	namespace Initialisation
@@ -13,12 +14,12 @@ namespace Core
 		{
 		private:
 			static Core::IListener* listener;
-			static Core::WindowInfo windowInformation;
+			static WindowInfo windowInformation;
 
 		public: 
-			static void Initialise(const Core::WindowInfo& window,
-				const Core::ContextInfo& context,
-				const Core::FramebufferInfo& framebufferInfo);
+			static void Initialise(const WindowInfo& window,
+				const ContextInfo& context,
+				const Core::Initialisation::FramebufferInfo& framebufferInfo);
 
 		public:
 			static void SetListener(Core::IListener*& iListener);
@@ -29,8 +30,8 @@ namespace Core
 			static void ExitFullscreen();
 
 			//used to print info about GL
-			static void PrintOpenGLInfo(const Core::WindowInfo& windowInfo,
-				const Core::ContextInfo& context);
+			static void PrintOpenGLInfo(const WindowInfo& windowInfo,
+				const ContextInfo& context);
 		private:
 			static void IdleCallback();
 			static void DisplayCallback();

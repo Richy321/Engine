@@ -68,15 +68,6 @@
     <ClInclude Include="Math\vec3.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Core\ContextInfo.h">
-      <Filter>Core\Initialisation</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\FramebufferInfo.h">
-      <Filter>Core\Initialisation</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\WindowInfo.h">
-      <Filter>Core\Initialisation</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\SceneManager.h">
       <Filter>Core\Initialisation\Managers</Filter>
     </ClInclude>
@@ -113,9 +104,6 @@
     <ClInclude Include="Core\Components\MeshComponent.h">
       <Filter>Core\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\VertexFormat.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Scenes\TestScene.h">
       <Filter>Scenes</Filter>
     </ClInclude>
@@ -134,15 +122,45 @@
     <ClInclude Include="Math\quat.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="Core\AssetManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\MeshNode.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CameraFPS.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Mesh.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Initialisation\ContextInfo.h">
+      <Filter>Core\Initialisation</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Initialisation\FramebufferInfo.h">
+      <Filter>Core\Initialisation</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Initialisation\WindowInfo.h">
+      <Filter>Core\Initialisation</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VertexFormat.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\basicPositionColor.vert">
+    <None Include="Shaders\basicLighting.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\test.vert">
+    <None Include="Shaders\basicLighting.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\basicColor.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
