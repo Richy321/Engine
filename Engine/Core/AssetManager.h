@@ -103,14 +103,19 @@ namespace Core
 				glBufferData(GL_ELEMENT_ARRAY_BUFFER, subMesh->indices.size() * sizeof(unsigned int), &subMesh->indices[0], GL_STATIC_DRAW);
 
 				glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * subMesh->vertices.size(), &subMesh->vertices[0], GL_STATIC_DRAW);
+				
 				glEnableVertexAttribArray(0);
 				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)0);
 				
 				glEnableVertexAttribArray(1);
 				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)offsetof(VertexFormat, VertexFormat::color));
+				
+				
 				glBindVertexArray(0);
 
-				subMesh->SetProgram(Managers::ShaderManager::GetShader("colorShader"));
+
+
+				subMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
 				subMesh->vao = vao;
 				subMesh->ebo = elementbuffer;
 				subMesh->vbos.push_back(vbo);

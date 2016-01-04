@@ -18,7 +18,8 @@ SceneManager::~SceneManager()
 void SceneManager::Initialise()
 {
 	glEnable(GL_DEPTH_TEST);
-	ShaderManager::GetInstance().CreateProgram("colorShader", "Shaders\\basicColor.vert", "Shaders\\basicColor.frag");
+	ShaderManager::GetInstance().CreateProgram("basicColor", "Shaders\\basicColor.vert", "Shaders\\basicColor.frag");
+	ShaderManager::GetInstance().CreateProgram("basicLighting", "Shaders\\basicLighting.vert", "Shaders\\basicLighting.frag");
 	timer->Start();
 }
 

@@ -3,7 +3,6 @@
 #include "VertexFormat.h"
 #include "../Dependencies/glm/detail/type_vec3.hpp"
 #include "../Dependencies/glew/glew.h"
-#include "../Dependencies/glm/mat4x2.hpp"
 #include "../Managers/ShaderManager.h"
 #include "../Dependencies/glm/gtc/type_ptr.hpp"
 #include <memory>
@@ -49,14 +48,13 @@ namespace Core
 			vbos.clear();
 		}
 
-		void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld)
+		void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld) const
 		{
-			//todo - convert to shared view and proj uniforms
-			static GLuint gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
-			static GLuint gViewUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gView");
-			static GLuint gProjectionUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gProjection");
-
-			glm::mat4 wp = mainCamera->worldToProjection * toWorld;
+			//todo - convert to shared view and proj uniforms function
+			//Set uniforms
+			static GLuint gWorldLocation = glGetUniformLocation(program, "gWorld");
+			static GLuint gViewUniform = glGetUniformLocation(program, "gView");
+			static GLuint gProjectionUniform = glGetUniformLocation(program, "gProjection");
 
 			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, glm::value_ptr(toWorld));
 			glUniformMatrix4fv(gViewUniform, 1, GL_FALSE, glm::value_ptr(mainCamera->view));
@@ -131,7 +129,7 @@ namespace Core
 			glBindVertexArray(0);
 
 			//here we assign the values
-			triangleMesh->SetProgram(Managers::ShaderManager::GetShader("colorShader"));
+			triangleMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
 			triangleMesh->vao = vao;
 			triangleMesh->vbos.push_back(vbo);
 			return triangleMesh;
@@ -155,7 +153,7 @@ namespace Core
 				vec4(0, 1, 0, 1)));   //color				   //4th vertex
 			quadMesh->vertices.push_back(VertexFormat(vec3(0.25, 0.75, 0.0),//pos
 				vec4(0, 0, 1, 1)));   //color
-									  //nothing different from Triangle model
+									  
 			glGenBuffers(1, &vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);            //here we have 4
 			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * 4, &quadMesh->vertices[0], GL_STATIC_DRAW);
@@ -168,7 +166,7 @@ namespace Core
 			glBindVertexArray(0);
 
 
-			quadMesh->SetProgram(Managers::ShaderManager::GetShader("colorShader"));
+			quadMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
 			quadMesh->mode = GL_TRIANGLE_STRIP;
 			quadMesh->vao = vao;
 			quadMesh->vbos.push_back(vbo);
@@ -291,7 +289,7 @@ namespace Core
 			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)offsetof(VertexFormat, VertexFormat::color));
 			glBindVertexArray(0);
 
-			cubeMesh->SetProgram(Managers::ShaderManager::GetShader("colorShader"));
+			cubeMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
 			cubeMesh->mode = GL_TRIANGLE_STRIP;
 			cubeMesh->vao = vao;
 			cubeMesh->vbos.push_back(vbo);
