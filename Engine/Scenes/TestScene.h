@@ -18,7 +18,7 @@ public:
 	std::shared_ptr<GameObject> cube;
 	std::shared_ptr<GameObject> model;
 
-	TestScene(WindowInfo windowInfo) : SceneManager(windowInfo)
+	TestScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
 		camera = std::make_shared<CameraFPS>();
 	}

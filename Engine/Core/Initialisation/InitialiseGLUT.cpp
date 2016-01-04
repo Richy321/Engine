@@ -3,11 +3,11 @@
 using namespace Core::Initialisation;
 
 Core::IListener* InitialiseGLUT::listener = nullptr;
-Core::WindowInfo InitialiseGLUT::windowInformation;
+WindowInfo InitialiseGLUT::windowInformation;
 
-void InitialiseGLUT::Initialise(const Core::WindowInfo& windowInfo,
-	const Core::ContextInfo& contextInfo,
-	const Core::FramebufferInfo& framebufferInfo)
+void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
+	const ContextInfo& contextInfo,
+	const FramebufferInfo& framebufferInfo)
 {
 	windowInformation = windowInfo;//add this line
 
@@ -163,8 +163,8 @@ void InitialiseGLUT::ExitFullscreen()
 	glutLeaveFullScreen();
 }
 
-void InitialiseGLUT::PrintOpenGLInfo(const Core::WindowInfo& windowInfo,
-	const Core::ContextInfo& contextInfo) {
+void InitialiseGLUT::PrintOpenGLInfo(const WindowInfo& windowInfo,
+	const ContextInfo& contextInfo) {
 
 	const unsigned char* renderer = glGetString(GL_RENDERER);
 	const unsigned char* vendor = glGetString(GL_VENDOR);

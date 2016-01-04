@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "../Rendering/VertexFormat.h"
+#include "VertexFormat.h"
 #include "../Dependencies/glm/detail/type_vec3.hpp"
 #include "../Dependencies/glew/glew.h"
 #include "../Dependencies/glm/mat4x2.hpp"
@@ -21,8 +21,8 @@ namespace Core
 
 		std::vector<VertexFormat> vertices;
 		std::vector<unsigned int> indices;
-		std::vector<glm::vec3> normals;
-		std::vector<glm::vec2> uvs;
+		std::vector<vec3> normals;
+		std::vector<vec2> uvs;
 		std::vector<unsigned int> materialIndex;
 
 		GLenum mode = GL_TRIANGLES;
@@ -51,19 +51,16 @@ namespace Core
 
 		void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld)
 		{
+			//todo - convert to shared view and proj uniforms
 			static GLuint gWorldLocation = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWorld");
 			static GLuint gViewUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gView");
 			static GLuint gProjectionUniform = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gProjection");
-			static GLuint gWP = glGetUniformLocation(Managers::ShaderManager::GetInstance().GetShader("colorShader"), "gWP");
 
-			glm::mat4 modelToWorld = toWorld;
+			glm::mat4 wp = mainCamera->worldToProjection * toWorld;
 
-			glm::mat4 wp = mainCamera->worldToProjection *  modelToWorld;
-
-			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, glm::value_ptr(modelToWorld));
+			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, glm::value_ptr(toWorld));
 			glUniformMatrix4fv(gViewUniform, 1, GL_FALSE, glm::value_ptr(mainCamera->view));
 			glUniformMatrix4fv(gProjectionUniform, 1, GL_FALSE, glm::value_ptr(mainCamera->projection));
-			glUniformMatrix4fv(gWP, 1, GL_FALSE, glm::value_ptr(wp));
 
 			glUseProgram(program);
 			glBindVertexArray(vao);

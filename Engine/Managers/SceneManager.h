@@ -4,7 +4,7 @@
 #include "../Core/GameObject.h"
 #include "../Core/Timer.h"
 #include <memory>
-#include "../Core/WindowInfo.h"
+#include "../Core/Initialisation/WindowInfo.h"
 #include "../Core/Camera.h"
 
 namespace Managers
@@ -15,11 +15,11 @@ namespace Managers
 		bool captureCursor = false;
 		bool isWarpingCursor = false;
 	protected:
-		SceneManager(Core::WindowInfo winInfo);
+		SceneManager(Core::Initialisation::WindowInfo winInfo);
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
 		std::unique_ptr<Core::Timer> timer;
 		float lastUpdateTime;
-		Core::WindowInfo windowInfo;
+		Core::Initialisation::WindowInfo windowInfo;
 
 		std::weak_ptr<Core::Camera> mainCamera;
 		int mousePosX;

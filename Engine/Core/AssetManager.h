@@ -81,19 +81,14 @@ namespace Core
 					{
 						int vertexIndex = face->mIndices[i];	// get group index for current index
 						subMesh->indices.push_back(vertexIndex);
-						/*
-						if (mesh->mColors[0] != NULL)
-							Color4f(&mesh->mColors[0][vertexIndex]);
+						
 						if (mesh->mNormals != NULL)
+							subMesh->normals.push_back(vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z));
 
-							if (mesh->HasTextureCoords(0))		//HasTextureCoords(texture_coordinates_set)
-							{
-								glTexCoord2f(mesh->mTextureCoords[0][vertexIndex].x, 1 - mesh->mTextureCoords[0][vertexIndex].y); //mTextureCoords[channel][vertex]
-							}
-							
-
-						glNormal3fv(&mesh->mNormals[vertexIndex].x);
-						*/
+						if (mesh->HasTextureCoords(0))		//HasTextureCoords(texture_coordinates_set)
+						{
+							subMesh->uvs.push_back(vec2(mesh->mTextureCoords[0][vertexIndex].x, /*1 - */mesh->mTextureCoords[0][vertexIndex].y)); //mTextureCoords[channel][vertex]
+						}
 					}
 				}
 
@@ -146,7 +141,6 @@ namespace Core
 
 			std::unique_ptr<MeshComponent> rval = std::make_unique<MeshComponent>(std::weak_ptr<IGameObject>());
 
-			//todo - split into mesh.h and allow for submeshes
 			//todo - load textures from scene
 			//todo - detect vertex format based on Has* functions
 			//todo - proper asset caching

@@ -3,7 +3,7 @@
 using namespace Managers;
 using namespace Core;
 
-SceneManager::SceneManager(Core::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f)
+SceneManager::SceneManager(Initialisation::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f)
 {
 	this->windowInfo = windowInfo;
 	mousePosX = mousePosY = -1;
@@ -18,7 +18,7 @@ SceneManager::~SceneManager()
 void SceneManager::Initialise()
 {
 	glEnable(GL_DEPTH_TEST);
-	ShaderManager::GetInstance().CreateProgram("colorShader", "Shaders\\test.vert", "Shaders\\basicColor.frag");
+	ShaderManager::GetInstance().CreateProgram("colorShader", "Shaders\\basicColor.vert", "Shaders\\basicColor.frag");
 	timer->Start();
 }
 
