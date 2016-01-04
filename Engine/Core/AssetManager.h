@@ -40,6 +40,7 @@ namespace Core
 			to[2][3] = from->d3; to[3][3] = from->d4;
 		}
 
+
 		static void recursiveImport(const struct aiScene* scene, const struct aiNode* nd, std::shared_ptr<MeshNode> meshNode)
 		{
 			CopyaiMat(&nd->mTransformation, meshNode->toParent);
@@ -51,74 +52,48 @@ namespace Core
 
 				const struct aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 
-				GLuint vao;
-				glGenVertexArrays(1, &vao);
-				glBindVertexArray(vao);
-				subMesh->vertices.clear();
-
-				GLuint elementbuffer;
-				glGenBuffers(1, &elementbuffer);
-				subMesh->indices.clear();
-
-				GLuint vbo;
-				glGenBuffers(1, &vbo);
-				glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
 				vec4 colour(1, 0, 0, 1);
 
 				for (size_t t = 0; t < mesh->mNumFaces; ++t)
 				{
 					const struct aiFace* face = &mesh->mFaces[t];
-					switch (face->mNumIndices)
+
+					//detect mode from number of points in first face
+					if (t == 0)
 					{
+						switch (face->mNumIndices)
+						{
 						case 1: subMesh->mode = GL_POINTS; break;
 						case 2: subMesh->mode = GL_LINES; break;
 						case 3: subMesh->mode = GL_TRIANGLES; break;
 						default: subMesh->mode = GL_POLYGON; break;
+						}
 					}
 
-					for (size_t i = 0; i < face->mNumIndices; i++)		// go through all vertices in face
+					for (size_t i = 0; i < face->mNumIndices; i++) // go through all vertices in face
 					{
 						int vertexIndex = face->mIndices[i];	// get group index for current index
 						subMesh->indices.push_back(vertexIndex);
-						
-						if (mesh->mNormals != NULL)
-							subMesh->normals.push_back(vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z));
-
-						if (mesh->HasTextureCoords(0))		//HasTextureCoords(texture_coordinates_set)
-						{
-							subMesh->uvs.push_back(vec2(mesh->mTextureCoords[0][vertexIndex].x, /*1 - */mesh->mTextureCoords[0][vertexIndex].y)); //mTextureCoords[channel][vertex]
-						}
 					}
 				}
 
-
 				for (size_t v = 0; v < mesh->mNumVertices; v++)
 				{
-					subMesh->vertices.push_back(VertexFormat(vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z),//pos
-						colour));   //color
+					subMesh->positions.push_back(vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z));
+
+					if (mesh->mNormals != nullptr)
+						subMesh->normals.push_back(vec3(mesh->mNormals[v].x, mesh->mNormals[v].y, mesh->mNormals[v].z));
+					else
+						subMesh->normals.push_back(vec3(0.0f, 0.0f, 1.0f));
+					if (mesh->HasTextureCoords(0))		//HasTextureCoords(texture_coordinates_set)
+						subMesh->uvs.push_back(vec2(mesh->mTextureCoords[0][v].x, /*1 - */mesh->mTextureCoords[0][v].y)); //mTextureCoords[channel][vertex]
+					else
+						subMesh->uvs.push_back(vec2(0.0f, 0.0f));
 				}
 
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, subMesh->indices.size() * sizeof(unsigned int), &subMesh->indices[0], GL_STATIC_DRAW);
+				subMesh->BuildAndBindVertexPositionNormalTexturedBuffer();
+				subMesh->SetProgram(Managers::ShaderManager::GetShader("basicLighting"));
 
-				glBufferData(GL_ARRAY_BUFFER, sizeof(VertexFormat) * subMesh->vertices.size(), &subMesh->vertices[0], GL_STATIC_DRAW);
-				
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)0);
-				
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)offsetof(VertexFormat, VertexFormat::color));
-				
-				
-				glBindVertexArray(0);
-
-
-
-				subMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
-				subMesh->vao = vao;
-				subMesh->ebo = elementbuffer;
-				subMesh->vbos.push_back(vbo);
 
 				meshNode->AddMesh(subMesh);
 			}

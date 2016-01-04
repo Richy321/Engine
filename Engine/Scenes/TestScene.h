@@ -45,14 +45,14 @@ public:
 		model->Translate(0.0f, 0.0f, -10.0f);
 
 		gameObjectManager.push_back(model);
-		//gameObjectManager.push_back(cube);
+		gameObjectManager.push_back(cube);
 	}
 
 	void OnUpdate(float deltaTime) override
 	{
 		camera->Update(deltaTime);
 
-		//cube->RotateY(deltaTime * 1.0f);
+		cube->RotateY(deltaTime * 1.0f);
 	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
