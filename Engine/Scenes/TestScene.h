@@ -52,7 +52,7 @@ public:
 	{
 		camera->Update(deltaTime);
 
-		cube->RotateY(deltaTime * 1.0f);
+		//cube->RotateY(deltaTime * 1.0f);
 	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override

@@ -146,6 +146,9 @@
     <ClInclude Include="Core\VertexFormat.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">

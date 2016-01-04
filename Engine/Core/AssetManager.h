@@ -6,6 +6,7 @@
 #include "../Dependencies/assimp/Importer.hpp"      // C++ importer interface
 #include "../Dependencies/assimp/scene.h"           // Output data structure
 #include "../Dependencies/assimp/postprocess.h"     // Post processing fla
+#include "../Texture.h"
 
 using namespace glm;
 
@@ -21,6 +22,8 @@ namespace Core
 		}
 
 		std::vector<MeshComponent> meshComponents;
+		std::map<std::string, Texture> textures;
+
 		AssetManager()
 		{
 		}
@@ -107,7 +110,7 @@ namespace Core
 			}
 		}
 
-		std::unique_ptr<MeshComponent> LoadMeshFromFile(const std::string& filename) const
+		std::unique_ptr<MeshComponent> LoadMeshFromFile(const std::string& filename)
 		{
 			// Create a logger instance 
 			Assimp::Importer importer;
@@ -117,6 +120,11 @@ namespace Core
 			{
 				printf("AssImp Failed: %s", importer.GetErrorString());
 				assert(scene);
+			}
+
+			if(scene->HasTextures())
+			{
+				ImportTexturesFromModel(scene);
 			}
 
 			std::unique_ptr<MeshComponent> rval = std::make_unique<MeshComponent>(std::weak_ptr<IGameObject>());
@@ -129,5 +137,11 @@ namespace Core
 
 			return rval;
 		}
+
+		void ImportTexturesFromModel(const aiScene *scene)
+		{
+			
+		}
+
 	};
 }
