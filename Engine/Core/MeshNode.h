@@ -36,8 +36,9 @@ namespace Core
 			mat4 m = toParent * toWorld;
 
 			for (size_t i = 0; i < meshes.size(); i++)
+			{
 				meshes[i]->Render(mainCamera, m);
-
+			}
 			for (size_t i = 0; i < children.size(); i++)
 				children[i]->Render(mainCamera, m);
 		}
@@ -47,6 +48,5 @@ namespace Core
 			for (size_t i = 0; i < meshes.size(); i++)
 				meshes[i]->Update();
 		}
-
 	};
 }

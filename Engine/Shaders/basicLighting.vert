@@ -10,12 +10,11 @@ layout(location = 1) out vec2 out_uv;
 uniform mat4 gWorld;
 uniform mat4 gView;
 uniform mat4 gProjection;
-uniform mat4 gWP;
 
 void main(void)
 {
 	//propagate normal and uv
-	out_normal = in_normal;
+	out_normal = (gWorld * vec4(in_normal, 0.0)).xyz;
 	out_uv = in_uv;
 
 	mat4 wvp = gProjection * gView * gWorld;

@@ -149,6 +149,9 @@
     <ClInclude Include="Texture.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="IAssetManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">

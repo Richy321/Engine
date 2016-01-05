@@ -37,7 +37,7 @@ public:
 		camera->Translate(0.0f, 0.0f, 20.0f);
 
 		cube = std::make_shared<GameObject>();
-		cube->AddComponent(MeshComponent::CreateCubePrimitive());
+		cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
 		cube->Translate(0.0f, 0.0f, 0.0f);
 
 		model = std::make_shared<GameObject>();
