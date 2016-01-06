@@ -6,6 +6,7 @@
 #include <memory>
 #include "../Core/Initialisation/WindowInfo.h"
 #include "../Core/Camera.h"
+#include "../Core/Lights.h"
 
 namespace Managers
 {
@@ -26,6 +27,7 @@ namespace Managers
 		int mousePosY;
 		int mouseDeltaX;
 		int mouseDeltaY;
+
 	public:
 		~SceneManager();
 
@@ -75,7 +77,6 @@ namespace Managers
 		virtual void notifyProcessMouseWindowEntryCallback(int state) override {}
 
 		virtual void SetMainCamera(std::weak_ptr<Core::Camera> cam) { mainCamera = cam; }
-
 
 		void CaptureCursor(bool capture)
 		{

@@ -18,6 +18,10 @@ public:
 	std::shared_ptr<GameObject> cube;
 	std::shared_ptr<GameObject> model;
 
+	DirectionalLight* directionalLight;
+	std::vector<SpotLight> spotLights;
+	std::vector<PointLight> pointLights;
+
 	TestScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
 		camera = std::make_shared<CameraFPS>();

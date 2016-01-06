@@ -55,7 +55,6 @@ ShaderManager::ShaderManager()
 {
 }
 
-
 ShaderManager::~ShaderManager()
 {
 	std::map<std::string, GLuint>::iterator i;

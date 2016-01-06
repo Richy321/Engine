@@ -37,6 +37,9 @@
     <Filter Include="Core\Initialisation\Managers">
       <UniqueIdentifier>{12894be7-b772-4f78-a6c4-b9092ce3ebb2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\ShaderEffects">
+      <UniqueIdentifier>{9b4ae110-5a95-4de4-b390-405b5ce0c1e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -146,11 +149,20 @@
     <ClInclude Include="Core\VertexFormat.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="Core\Lights.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="IAssetManager.h">
+    <ClInclude Include="Core\Texture.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IAssetManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseShaderEffect.h">
+      <Filter>Core\ShaderEffects</Filter>
+    </ClInclude>
+    <ClInclude Include="LitTexturedMeshEffect.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

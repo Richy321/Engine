@@ -7,7 +7,7 @@
 #include "../Dependencies/glm/gtc/type_ptr.hpp"
 #include <memory>
 #include "Camera.h"
-#include "../IAssetManager.h"
+#include "IAssetManager.h"
 
 namespace Core
 {

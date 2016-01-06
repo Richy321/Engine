@@ -3,7 +3,6 @@
 #include <vector>
 #include "../Mesh.h"
 #include "../MeshNode.h"
-#include "../IAssetManager.h"
 
 namespace Core
 {
@@ -12,8 +11,6 @@ namespace Core
 	public:
 
 		std::shared_ptr<MeshNode> rootMeshNode;
-		IAssetManager* assetManager;
-
 
 		MeshComponent(std::weak_ptr<IGameObject> parent) : IRenderableComponent(parent)
 		{

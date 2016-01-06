@@ -1,15 +1,11 @@
 #pragma once
 #include "../Dependencies/glm/glm.hpp"
-#include "../Dependencies/glm/gtc/matrix_transform.hpp"
-#include "Components/MeshComponent.h"
-
 #include "../Dependencies/assimp/Importer.hpp"      // C++ importer interface
 #include "../Dependencies/assimp/scene.h"           // Output data structure
 #include "../Dependencies/assimp/postprocess.h"     // Post processing fla
-#include "../Texture.h"
 #include "../Dependencies/freeImage/FreeImage.h"
-#include "../IAssetManager.h"
-
+#include "IAssetManager.h"
+#include "Components/MeshComponent.h"
 using namespace glm;
 
 namespace Core
@@ -33,7 +29,8 @@ namespace Core
 		{
 		}
 
-		static void CopyaiMat(const aiMatrix4x4 *from, glm::mat4 &to) {
+		static void CopyaiMat(const aiMatrix4x4 *from, glm::mat4 &to) 
+		{
 			to[0][0] = from->a1; to[1][0] = from->a2;
 			to[2][0] = from->a3; to[3][0] = from->a4;
 			to[0][1] = from->b1; to[1][1] = from->b2;
