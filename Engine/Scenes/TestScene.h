@@ -82,6 +82,11 @@ public:
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
 
+		vec3 cameraPos = vec3(camera->GetWorldTransform()[3]);
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
+
 		SceneManager::notifyDisplayFrame();
-	}	
+	}
 };

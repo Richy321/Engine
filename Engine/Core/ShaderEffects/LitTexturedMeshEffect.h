@@ -42,7 +42,17 @@ namespace Core
 				projectionMatrixLocation == INVALID_UNIFORM_LOCATION ||
 				colourMapLocation== INVALID_UNIFORM_LOCATION)
 				return false;
-			
+
+
+			matSpecularIntensityLocation = GetUniformLocation("gMatSpecularIntensity");
+			matSpecularPowerLocation = GetUniformLocation("gSpecularPower");
+			eyeWorldPosLocation = GetUniformLocation("gEyeWorldPos");
+
+			if (matSpecularIntensityLocation == INVALID_UNIFORM_LOCATION ||
+				matSpecularPowerLocation == INVALID_UNIFORM_LOCATION ||
+				eyeWorldPosLocation == INVALID_UNIFORM_LOCATION)
+				return false;
+
 			dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Color");
 			dirLightLocation.AmbientIntensity = GetUniformLocation("gDirectionalLight.AmbientIntensity");
 			dirLightLocation.Direction = GetUniformLocation("gDirectionalLight.Direction");
@@ -77,6 +87,20 @@ namespace Core
 			glUniform1i(colourMapLocation, TextureUnit);
 		}
 
+		void SetEyeWorldPos(const vec3& EyeWorldPos) const
+		{
+			glUniform3f(eyeWorldPosLocation, EyeWorldPos.x, EyeWorldPos.y, EyeWorldPos.z);
+		}
+
+		void SetMatSpecularIntensity(float Intensity) const
+		{
+			glUniform1f(matSpecularIntensityLocation, Intensity);
+		}
+
+		void SetMatSpecularPower(float Power) const
+		{
+			glUniform1f(matSpecularPowerLocation, Power);
+		}
 		
 		void SetDirectionalLight(std::shared_ptr<DirectionalLight> Light) const
 		{
@@ -93,6 +117,10 @@ namespace Core
 		GLuint projectionMatrixLocation;
 		GLuint colourMapLocation;
 		
+		GLuint eyeWorldPosLocation;
+		GLuint matSpecularIntensityLocation;
+		GLuint matSpecularPowerLocation;
+
 		struct {
 			GLuint Color;
 			GLuint AmbientIntensity;

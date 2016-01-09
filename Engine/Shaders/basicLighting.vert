@@ -6,6 +6,7 @@ layout(location = 2) in vec2 in_uv;
 
 layout(location = 0) out vec3 out_normal;
 layout(location = 1) out vec2 out_uv;
+layout(location = 2) out vec3 out_worldPos;
 
 uniform mat4 gWorld;
 uniform mat4 gView;
@@ -13,9 +14,9 @@ uniform mat4 gProjection;
 
 void main(void)
 {
-	//propagate normal and uv
 	out_normal = (gWorld * vec4(in_normal, 0.0)).xyz;
 	out_uv = in_uv;
+	out_worldPos = (gWorld * vec4(in_position, 1.0)).xyz;
 
 	mat4 wvp = gProjection * gView * gWorld;
 	gl_Position = wvp * vec4(in_position, 1.0);
