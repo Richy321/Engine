@@ -1,6 +1,7 @@
 #version 430 core
 
 const int MAX_POINT_LIGHTS = 2;
+const int MAX_SPOT_LIGHTS = 2;
 
 layout(location = 0) in vec3 in_normal;
 layout(location = 1) in vec2 in_uv;
@@ -35,6 +36,12 @@ struct PointLight
     Attenuation Atten;                                                                      
 };
 
+struct SpotLight
+{
+    struct PointLight Base;
+    vec3 Direction;
+    float Cutoff;
+};
 
 uniform DirectionalLight gDirectionalLight;
 uniform sampler2D gColorMap; 
@@ -44,6 +51,9 @@ uniform float gSpecularPower;
 
 uniform PointLight gPointLights[MAX_POINT_LIGHTS];
 uniform int gNumPointLights;
+
+uniform SpotLight gSpotLights[MAX_SPOT_LIGHTS];
+uniform int gNumSpotLights;
 
 vec4 CalcLightInternal(BaseLight light, vec3 lightDirection, vec3 normal)
 {
@@ -75,18 +85,32 @@ vec4 CalcDirectionalLight(vec3 Normal)
     return CalcLightInternal(gDirectionalLight.Base, gDirectionalLight.Direction, Normal); 
 }  
 
-vec4 CalcPointLight(int Index, vec3 Normal)                                                 
+vec4 CalcPointLight(PointLight l, vec3 Normal)                                                 
 {                                                                                           
-    vec3 LightDirection = in_worldPos - gPointLights[Index].Position;                         
+    vec3 LightDirection = in_worldPos - l.Position;                         
     float Distance = length(LightDirection);                                                
     LightDirection = normalize(LightDirection);                                             
                                                                                             
-    vec4 Color = CalcLightInternal(gPointLights[Index].Base, LightDirection, Normal);       
-    float Attenuation =  gPointLights[Index].Atten.Constant +                               
-                         gPointLights[Index].Atten.Linear * Distance +                      
-                         gPointLights[Index].Atten.Exp * Distance * Distance;               
+    vec4 Color = CalcLightInternal(l.Base, LightDirection, Normal);       
+    float Attenuation = l.Atten.Constant +                               
+                        l.Atten.Linear * Distance +                      
+                        l.Atten.Exp * Distance * Distance;               
                                                                                             
     return Color / Attenuation;                                                             
+} 
+
+vec4 CalcSpotLight(SpotLight l, vec3 Normal)                                                
+{                                                                                           
+    vec3 LightToPixel = normalize(in_worldPos - l.Base.Position);                             
+    float SpotFactor = dot(LightToPixel, l.Direction);                                      
+                                                                                            
+    if (SpotFactor > l.Cutoff) {                                                            
+        vec4 Color = CalcPointLight(l.Base, Normal);                                        
+        return Color * (1.0 - (1.0 - SpotFactor) * 1.0/(1.0 - l.Cutoff));                   
+    }                                                                                       
+    else {                                                                                  
+        return vec4(0,0,0,0);                                                               
+    }                                                                                       
 } 
 
 void main()
@@ -96,8 +120,13 @@ void main()
 
 	for (int i = 0 ; i < gNumPointLights; i++) 
 	{                                           
-        TotalLight += CalcPointLight(i, Normal);                                            
-    } 
+        TotalLight += CalcPointLight(gPointLights[i], Normal);                                            
+    }
+
+	for (int i = 0 ; i < gNumSpotLights; i++) 
+	{                                            
+        TotalLight += CalcSpotLight(gSpotLights[i], Normal);                               
+    }    
 
 	out_color = texture2D(gColorMap, in_uv.xy) * TotalLight;
 }

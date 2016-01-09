@@ -14,6 +14,7 @@ namespace Core
 	public:
 
 		static const unsigned int MAX_POINT_LIGHTS = 2;
+		static const unsigned int MAX_SPOT_LIGHTS = 2;
 
 		LitTexturedMeshEffect()
 		{
@@ -104,6 +105,51 @@ namespace Core
 				}
 			}
 
+			m_numSpotLightsLocation = GetUniformLocation("gNumSpotLights");
+			for (unsigned int i = 0; i < MAX_SPOT_LIGHTS; i++)
+			{
+				char Name[128];
+				memset(Name, 0, sizeof(Name));
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Base.Color", i);
+				m_spotLightsLocation[i].Color = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Base.AmbientIntensity", i);
+				m_spotLightsLocation[i].AmbientIntensity = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Position", i);
+				m_spotLightsLocation[i].Position = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Direction", i);
+				m_spotLightsLocation[i].Direction = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Cutoff", i);
+				m_spotLightsLocation[i].Cutoff = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Base.DiffuseIntensity", i);
+				m_spotLightsLocation[i].DiffuseIntensity = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Atten.Constant", i);
+				m_spotLightsLocation[i].Atten.Constant = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Atten.Linear", i);
+				m_spotLightsLocation[i].Atten.Linear = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Atten.Exp", i);
+				m_spotLightsLocation[i].Atten.Exp = GetUniformLocation(Name);
+
+				if (m_spotLightsLocation[i].Color == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].AmbientIntensity == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].Position == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].Direction == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].Cutoff == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].DiffuseIntensity == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].Atten.Constant == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].Atten.Linear == INVALID_UNIFORM_LOCATION ||
+					m_spotLightsLocation[i].Atten.Exp == INVALID_UNIFORM_LOCATION) {
+					return false;
+				}
+			}
+
 			return true;
 		}
 
@@ -166,6 +212,24 @@ namespace Core
 			}
 		}
 
+		void SetSpotLights(std::vector<std::shared_ptr<SpotLight>> spotLights) const
+		{
+			glUniform1i(m_numSpotLightsLocation, spotLights.size());
+
+			for (unsigned int i = 0; i < spotLights.size(); i++) 
+			{
+				glUniform3f(m_spotLightsLocation[i].Color, spotLights[i]->Color.x, spotLights[i]->Color.y, spotLights[i]->Color.z);
+				glUniform1f(m_spotLightsLocation[i].AmbientIntensity, spotLights[i]->AmbientIntensity);
+				glUniform1f(m_spotLightsLocation[i].DiffuseIntensity, spotLights[i]->DiffuseIntensity);
+				glUniform3f(m_spotLightsLocation[i].Position, spotLights[i]->Position.x, spotLights[i]->Position.y, spotLights[i]->Position.z);
+				vec3 Direction = normalize(spotLights[i]->Direction);
+				glUniform3f(m_spotLightsLocation[i].Direction, Direction.x, Direction.y, Direction.z);
+				glUniform1f(m_spotLightsLocation[i].Cutoff, cosf(radians(spotLights[i]->Cutoff)));
+				glUniform1f(m_spotLightsLocation[i].Atten.Constant, spotLights[i]->Attenuation.Constant);
+				glUniform1f(m_spotLightsLocation[i].Atten.Linear, spotLights[i]->Attenuation.Linear);
+				glUniform1f(m_spotLightsLocation[i].Atten.Exp, spotLights[i]->Attenuation.Exp);
+			}
+		}
 
 	private:
 		GLuint worldMatrixLocation;
@@ -178,6 +242,8 @@ namespace Core
 		GLuint matSpecularPowerLocation;
 
 		GLuint numPointLightsLocation;
+
+		GLuint m_numSpotLightsLocation;
 
 		struct 
 		{
@@ -200,5 +266,20 @@ namespace Core
 				GLuint Exp;
 			} Atten;
 		} m_pointLightsLocation[MAX_POINT_LIGHTS];
+
+		struct 
+		{
+			GLuint Color;
+			GLuint AmbientIntensity;
+			GLuint DiffuseIntensity;
+			GLuint Position;
+			GLuint Direction;
+			GLuint Cutoff;
+			struct {
+				GLuint Constant;
+				GLuint Linear;
+				GLuint Exp;
+			} Atten;
+		} m_spotLightsLocation[MAX_SPOT_LIGHTS];
 	};
 }
