@@ -18,11 +18,18 @@ public:
 	GLuint gWP;
 	//std::shared_ptr<GameObject> cube;
 	std::shared_ptr<GameObject> model;
+	std::shared_ptr<GameObject> floor;
+
 
 	std::shared_ptr<DirectionalLight> directionalLight;
 	std::vector<std::shared_ptr<SpotLight>> spotLights;
 	std::vector<std::shared_ptr<PointLight>> pointLights;
 
+	const float floorWidth = 30.0f;
+	const float floorDepth = 30.0f;
+	float m_scale = 0.0f;
+
+	const std::string defaultCheckeredTexture = "Default Checkered";
 	TestScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
 		camera = std::make_shared<CameraFPS>();
@@ -36,50 +43,63 @@ public:
 	{
 		SceneManager::Initialise();
 		CaptureCursor(true);
+	
+		InitialiseTextures();
+		InitialiseLights();
 
+		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
+		SetMainCamera(camera);
+		camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
+
+		//cube = std::make_shared<GameObject>();
+		//cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
+		//cube->Translate(0.0f, 0.0f, 0.0f);
+		//gameObjectManager.push_back(cube);
+
+		model = std::make_shared<GameObject>();
+		model->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
+		model->Translate(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
+		model->Scale(0.05);
+		gameObjectManager.push_back(model);
+
+		floor = std::make_shared<GameObject>();
+		floor->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
+		gameObjectManager.push_back(floor);
+	}
+
+
+	void InitialiseTextures()
+	{
+		AssetManager::GetInstance().LoadTextureFromFile("Resources/checkered.jpg", defaultCheckeredTexture, GL_BGRA, GL_RGBA, 0, 0);
+	}
+
+	void InitialiseLights()
+	{
 		directionalLight = std::make_shared<DirectionalLight>();
 		directionalLight->Color = vec3(1.0f, 1.0f, 1.0f);
 		directionalLight->AmbientIntensity = 0.01f;
 		directionalLight->DiffuseIntensity = 0.75f;
 		directionalLight->Direction = vec3(0.0f, 0.0, -1.0);
-		
-
 
 		pointLights.push_back(std::make_shared<PointLight>());
-		pointLights[0]->DiffuseIntensity = 0.5f;
+		pointLights[0]->DiffuseIntensity = 0.75f;
 		pointLights[0]->Color = vec3(1.0f, 0.5f, 0.0f);
-		//pointLights[0]->Position = vec3(3.0f, 1.0f, FieldDepth * (cosf(m_scale) + 1.0f) / 2.0f);
 		pointLights[0]->Position = vec3(3.0f, 1.0f, 5.0f);
 		pointLights[0]->Attenuation.Linear = 0.1f;
 
 		pointLights.push_back(std::make_shared<PointLight>());
-		pointLights[1]->DiffuseIntensity = 0.5f;
+		pointLights[1]->DiffuseIntensity = 0.75f;
 		pointLights[1]->Color = vec3(0.0f, 0.5f, 1.0f);
 		pointLights[0]->Position = vec3(7.0f, 1.0f, 1.0f);
-		//pointLights[1]->Position = vec3(7.0f, 1.0f, FieldDepth * (sinf(m_scale) + 1.0f) / 2.0f);
 		pointLights[1]->Attenuation.Linear = 0.1f;
-		
-
-
-		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
-		SetMainCamera(camera);
-		camera->Translate(0.0f, 40.0f, 70.0f);
-
-		//cube = std::make_shared<GameObject>();
-		//cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
-		//cube->Translate(0.0f, 0.0f, 0.0f);
-
-		model = std::make_shared<GameObject>();
-		model->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
-		model->Translate(0.0f, 0.0f, -10.0f);
-
-		gameObjectManager.push_back(model);
-		//gameObjectManager.push_back(cube);
 	}
 
 	void OnUpdate(float deltaTime) override
 	{
+		m_scale += 0.0057f;
 		camera->Update(deltaTime);
+		pointLights[0]->Position = vec3(floorWidth * 0.25f, 1.0f, floorDepth * (cosf(m_scale) + 1.0f) / 2.0f);
+		pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
 
 		//cube->RotateY(deltaTime * 1.0f);
 	}

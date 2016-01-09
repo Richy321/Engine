@@ -243,7 +243,7 @@ namespace Core
 			return true;
 		}
 
-		bool UnloadTexture(const std::string texID)
+		bool UnloadTexture(const std::string texID) override
 		{
 			//if this texture ID mapped, unload it's texture, and remove it from the map
 			if (textureIDs.find(texID) != textureIDs.end())
@@ -258,7 +258,7 @@ namespace Core
 			return true;
 		}
 
-		bool BindTexture(const std::string texID, GLenum TextureUnit)
+		bool BindTexture(const std::string texID, GLenum TextureUnit) override
 		{
 			//if this texture ID mapped, bind it's texture as current
 			if (textureIDs.find(texID) != textureIDs.end())
@@ -271,7 +271,7 @@ namespace Core
 			return false;
 		}
 
-		void UnloadAllTextures()
+		void UnloadAllTextures() override
 		{
 			//start at the begginning of the texture map
 			std::map<std::string, GLuint>::iterator i = textureIDs.begin();
@@ -284,14 +284,14 @@ namespace Core
 			textureIDs.clear();
 		}
 
-		GLuint GetOGLTextureID(const std::string texID)
+		GLuint GetOGLTextureID(const std::string texID) override
 		{
 			if (textureIDs.find(texID) != textureIDs.end())
 				return textureIDs[texID];
 			return NULL;
 		}
 
-		std::shared_ptr<Mesh> CreateTrianglePrimitive()
+		std::shared_ptr<Mesh> CreateTrianglePrimitive() override
 		{
 			std::shared_ptr<Mesh> triangleMesh = std::make_shared<Mesh>(&GetInstance());
 
@@ -308,7 +308,7 @@ namespace Core
 			return triangleMesh;
 		}
 
-		std::shared_ptr<Mesh> CreateQuadPrimitive()
+		std::shared_ptr<Mesh> CreateQuadPrimitive() override
 		{
 			std::shared_ptr<Mesh> quadMesh = std::make_shared<Mesh>(&GetInstance());
 
@@ -328,12 +328,48 @@ namespace Core
 			return quadMesh;
 		}
 
-		std::shared_ptr<Mesh> CreateCubePrimitive(float size = 1.0f)
+		std::shared_ptr<Mesh> CreateQuadPrimitiveAdv(float width, float depth) const
+		{
+			const vec3 upNormal = vec3(0.0, 1.0f, 0.0f);
+
+			std::shared_ptr<Mesh> quadMesh = std::make_shared<Mesh>(&GetInstance());
+			
+			quadMesh->positions.push_back(vec3(0.0f, 0.0f, 0.0f));
+			quadMesh->normals.push_back(upNormal);
+			quadMesh->uvs.push_back(vec2(0.0f, 0.0f));
+
+			quadMesh->positions.push_back(vec3(0.0f, 0.0f, depth));
+			quadMesh->normals.push_back(upNormal);
+			quadMesh->uvs.push_back(vec2(0.0f, 1.0f));
+
+			quadMesh->positions.push_back(vec3(width, 0.0f, depth));
+			quadMesh->normals.push_back(upNormal);
+			quadMesh->uvs.push_back(vec2(1.0f, 1.0f));
+
+			quadMesh->positions.push_back(vec3(width, 0.0f, 0.0f));
+			quadMesh->normals.push_back(upNormal);
+			quadMesh->uvs.push_back(vec2(1.0f, 0.0f));
+
+			quadMesh->indices.push_back(0);
+			quadMesh->indices.push_back(1);
+			quadMesh->indices.push_back(3);
+
+			quadMesh->indices.push_back(3);
+			quadMesh->indices.push_back(1);
+			quadMesh->indices.push_back(2);
+
+			quadMesh->BuildAndBindVertexPositionNormalTexturedBuffer();
+			quadMesh->mode = GL_TRIANGLES;
+
+			return quadMesh;
+		}
+
+		std::shared_ptr<Mesh> CreateCubePrimitive(float size = 1.0f) override
 		{
 			return CreateBoxPrimitive(size, size, size);
 		}
 
-		std::shared_ptr<Mesh> CreateBoxPrimitive(float width, float height, float depth)
+		std::shared_ptr<Mesh> CreateBoxPrimitive(float width, float height, float depth) const
 		{
 			std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>(&GetInstance());
 
@@ -456,11 +492,19 @@ namespace Core
 			return cubeMesh;
 		}
 
-		std::unique_ptr<MeshComponent> CreateBoxPrimitiveMeshComponent(float width, float height, float depth)
+		std::unique_ptr<MeshComponent> CreateBoxPrimitiveMeshComponent(float width, float height, float depth) const
 		{
 			std::unique_ptr<MeshComponent> boxMesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());
 			boxMesh->AddRootMesh(CreateBoxPrimitive(width, height, depth));
 			return boxMesh;
+		}
+
+		std::unique_ptr<MeshComponent> CreateQuadPrimitiveMeshComponent(float width, float depth, std::string texture = nullptr) const
+		{
+			std::unique_ptr<MeshComponent> quadMesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());
+			quadMesh->AddRootMesh(CreateQuadPrimitiveAdv(width, depth));
+			quadMesh->rootMeshNode->meshes[0]->materialID = texture;
+			return quadMesh;
 		}
 	};
 }
