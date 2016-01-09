@@ -1,9 +1,5 @@
 #pragma once
-#include <string>
 #include "Dependencies/glew/glew.h"
-
-
-
 
 namespace Core
 {

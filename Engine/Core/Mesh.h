@@ -53,26 +53,20 @@ namespace Core
 
 		void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld) const
 		{
-			//todo - convert to shared view and proj uniforms function
-			//Set uniforms
-			static GLuint gWorldLocation = glGetUniformLocation(program, "gWorld");
-			static GLuint gViewUniform = glGetUniformLocation(program, "gView");
-			static GLuint gProjectionUniform = glGetUniformLocation(program, "gProjection");
-			static GLuint gColorMap = glGetUniformLocation(program, "gColorMap");
-
-			glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, glm::value_ptr(toWorld));
-			glUniformMatrix4fv(gViewUniform, 1, GL_FALSE, glm::value_ptr(mainCamera->view));
-			glUniformMatrix4fv(gProjectionUniform, 1, GL_FALSE, glm::value_ptr(mainCamera->projection));
-			glUniform1i(gColorMap, 0);
-
+			//todo - investigate moving view/prj into common
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetWorldMatrix(toWorld);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(mainCamera->view);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(mainCamera->projection);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetTextureUnit(0);
+			
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			glUseProgram(program);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->Enable();
 			glBindVertexArray(vao);
-
+			
 			if(!materialID.empty())
 				assetManager->BindTexture(materialID, GL_TEXTURE0);
 

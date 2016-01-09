@@ -1,4 +1,5 @@
 #include "InitialiseGLUT.h"
+#include "../../Utils.h"
 
 using namespace Core::Initialisation;
 
@@ -28,6 +29,14 @@ void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
 		glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
 	}
 
+	//Support for glDebugMessageCallback in debug builds
+	glutInitContextFlags(GLUT_FORWARD_COMPATIBLE
+	#if _DEBUG
+		| GLUT_DEBUG
+	#endif
+		);
+
+
 	glutInitDisplayMode(framebufferInfo.flags);
 	glutInitWindowPosition(windowInfo.position_x, windowInfo.position_y);
 	glutInitWindowSize(windowInfo.width, windowInfo.height);
@@ -49,6 +58,25 @@ void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
 	glutPassiveMotionFunc(ProcessMousePassiveMoveCallback);
 	glutEntryFunc(ProcessMouseWindowEntryCallback);
 
+#if _DEBUG
+	if (glDebugMessageCallback) 
+	{
+		std::cout << "Register OpenGL debug callback " << std::endl;
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(ProcessErrorCallback, nullptr);
+		GLuint unusedIds = 0;
+		glDebugMessageControl(GL_DONT_CARE,
+			GL_DONT_CARE,
+			GL_DONT_CARE,
+			0,
+			&unusedIds,
+			true);
+	}
+	else
+		std::cout << "glDebugMessageCallback not available" << std::endl;
+#endif
+
+
 	//init GLEW, this can be called in main.cpp
 	InitialiseGLEW::Initialise();
 
@@ -58,6 +86,7 @@ void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
 
 	//our method to display some info. Needs contextInfo and windowinfo
 	PrintOpenGLInfo(windowInfo, contextInfo);
+	Check_GLError();
 }
 
 //starts the rendering Loop
@@ -180,4 +209,15 @@ void InitialiseGLUT::PrintOpenGLInfo(const WindowInfo& windowInfo,
 void InitialiseGLUT::SetListener(Core::IListener*& iListener)
 {
 	listener = iListener;
+}
+void APIENTRY InitialiseGLUT::ProcessErrorCallback(GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	if (listener)
+		listener->notifyErrorCallback(source, type, id, severity, length, message, userParam);
 }

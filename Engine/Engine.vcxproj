@@ -166,7 +166,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClCompile Include="Math\vec4.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseShaderEffect.h" />
+    <ClInclude Include="Core\ShaderEffects\BaseShaderEffect.h" />
     <ClInclude Include="Core\Lights.h" />
     <ClInclude Include="Core\AssetManager.h" />
     <ClInclude Include="Core\CameraFPS.h" />
@@ -178,7 +178,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\Components\Interfaces\IRenderableComponent.h" />
     <ClInclude Include="Core\IGameobject.h" />
     <ClInclude Include="Core\IAssetManager.h" />
-    <ClInclude Include="LitTexturedMeshEffect.h" />
+    <ClInclude Include="Core\ShaderEffects\LitTexturedMeshEffect.h" />
     <ClInclude Include="Math\mat4.h" />
     <ClInclude Include="Core\Components\MeshComponent.h" />
     <ClInclude Include="Managers\ShaderManager.h" />
@@ -198,6 +198,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Math\Utils.h" />
     <ClInclude Include="Scenes\TestScene.h" />
     <ClInclude Include="Core\Texture.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />

@@ -158,10 +158,13 @@
     <ClInclude Include="Core\IAssetManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="BaseShaderEffect.h">
+    <ClInclude Include="Core\ShaderEffects\LitTexturedMeshEffect.h">
       <Filter>Core\ShaderEffects</Filter>
     </ClInclude>
-    <ClInclude Include="LitTexturedMeshEffect.h">
+    <ClInclude Include="Core\ShaderEffects\BaseShaderEffect.h">
+      <Filter>Core\ShaderEffects</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -96,8 +96,7 @@ namespace Core
 				}
 
 				subMesh->BuildAndBindVertexPositionNormalTexturedBuffer();
-				subMesh->SetProgram(Managers::ShaderManager::GetShader("basicLighting"));
-
+				//subMesh->SetProgram(Managers::ShaderManager::GetShader("basicLighting"));
 
 				meshNode->AddMesh(subMesh);
 			}
@@ -151,7 +150,7 @@ namespace Core
 			else {
 				Dir = filename.substr(0, SlashIndex);
 			}
-
+			//todo - Check for embedded textures in model if possible?
 			for (size_t i = 0; i < scene->mNumMaterials; i++)
 			{
 				const aiMaterial* pMaterial = scene->mMaterials[i];
@@ -166,6 +165,7 @@ namespace Core
 
 						if (!LoadTextureFromFile(fullPath, texID, GL_BGRA, GL_RGBA, 0, 0))
 						{
+							//Todo - Handle missing textures from models
 							printf("Error loading texture '%s'\n", fullPath.c_str());
 							UnloadTexture(texID);
 						}

@@ -1,9 +1,9 @@
 #pragma once
-#include "Dependencies/glew/glew.h"
 #include <cstdio>
 #include <string>
-#include "Managers/ShaderManager.h"
 #include <list>
+#include <fstream>
+#include <vector>
 
 #define GLCheckError() (glGetError() == GL_NO_ERROR)
 #define INVALID_UNIFORM_LOCATION 0xffffffff
@@ -45,8 +45,10 @@ namespace Core
 			return true;
 		}
 
-		bool AddShader(GLenum shaderType, std::string source, const std::string& shaderName)
+		bool AddShader(GLenum shaderType, std::string shaderFileName, const std::string& shaderName)
 		{
+			std::string source = ReadShader(shaderFileName);
+
 			GLuint shader = glCreateShader(shaderType);
 			if (shader == 0) {
 				fprintf(stderr, "Error creating shader type %d\n", shaderType);
@@ -95,16 +97,29 @@ namespace Core
 				return 0;
 			}
 
+			glValidateProgram(shaderProgram);
+			glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &linkResult);
+			if (linkResult == GL_FALSE) 
+			{
+				int infoLogLength = 0;
+				glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
+				std::vector<char> program_log(infoLogLength);
+				glGetProgramInfoLog(shaderProgram, infoLogLength, nullptr, &program_log[0]);
+				std::cout << "Shader Loader : VALIDATION ERROR" << std::endl << &program_log[0] << std::endl;
+				//   return false;
+			}
+
+
 			// Delete the intermediate shader objects that have been added to the program
 			for (ShaderObjList::iterator it = m_shaderObjList.begin(); it != m_shaderObjList.end(); ++it)
 				glDeleteShader(*it);
 
 			m_shaderObjList.clear();
 
-			return GLCheckError();
+			return true;
 		}
 
-		void Enable()
+		void Enable() const
 		{
 			glUseProgram(shaderProgram);
 		}
@@ -127,7 +142,7 @@ namespace Core
 			return ret;
 		}
 
-	private:
+	protected:
 		typedef std::list<GLuint> ShaderObjList;
 		ShaderObjList m_shaderObjList;
 		GLuint shaderProgram;

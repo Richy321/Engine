@@ -2,7 +2,7 @@
 #include <assert.h> 
 
 using namespace Managers;
-
+//todo - change to header only
 std::map<std::string, GLuint> ShaderManager::programs;
 
 std::string ShaderManager::ReadShader(const std::string& filename)
@@ -53,6 +53,7 @@ GLuint ShaderManager::CreateShader(GLenum shaderType, std::string source, const 
 
 ShaderManager::ShaderManager()
 {
+	
 }
 
 ShaderManager::~ShaderManager()

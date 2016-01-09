@@ -1,8 +1,7 @@
 #pragma once
 #include "BaseShaderEffect.h"
-#include "Dependencies/glm/glm.hpp"
-#include "Core/Lights.h"
-#include "Dependencies/glm/gtc/type_ptr.inl"
+#include "../../Dependencies/glm/gtc/type_ptr.hpp"
+#include "../../Utils.h"
 
 using namespace glm;
 
@@ -20,16 +19,30 @@ namespace Core
 		{
 			if (!BaseShaderEffect::Initialise())
 				return false;
-
+			Check_GLError();
 			if (!AddShader(GL_VERTEX_SHADER, "Shaders\\basicLighting.vert", "basicLightingVert"))
 				return false;
-
+			Check_GLError();
 			if (!AddShader(GL_FRAGMENT_SHADER, "Shaders\\basicLighting.frag", "basicLightingFrag"))
 				return false;
+			Check_GLError();
+			Finalise();
+			Check_GLError();
 
-			if (!Finalise())
+			//Set uniforms
+			worldMatrixLocation = glGetUniformLocation(shaderProgram, "gWorld");
+			viewMatrixLocation= glGetUniformLocation(shaderProgram, "gView");
+			projectionMatrixLocation = glGetUniformLocation(shaderProgram, "gProjection");
+			colourMapLocation = glGetUniformLocation(shaderProgram, "gColorMap");
+
+			if (worldMatrixLocation == INVALID_UNIFORM_LOCATION ||
+				viewMatrixLocation == INVALID_UNIFORM_LOCATION ||
+				projectionMatrixLocation == INVALID_UNIFORM_LOCATION ||
+				colourMapLocation== INVALID_UNIFORM_LOCATION)
 				return false;
+			
 
+			/*
 			WVPLocation = GetUniformLocation("gWVP");
 			WorldMatrixLocation = GetUniformLocation("gWorld");
 			samplerLocation = GetUniformLocation("gSampler");
@@ -46,27 +59,32 @@ namespace Core
 				dirLightLocation.DiffuseIntensity == INVALID_UNIFORM_LOCATION ||
 				dirLightLocation.Direction == INVALID_UNIFORM_LOCATION)
 				return false;
+				*/
 
 			return true;
 		}
-		void SetWVP(const mat4& WVP) const
+
+		void SetWorldMatrix(const mat4& worldMatrix) const
 		{
-			glUniformMatrix4fv(WVPLocation, 1, GL_TRUE, value_ptr(WVP));
+			glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, value_ptr(worldMatrix));
 		}
 
-
-		void SetWorldMatrix(const mat4& WorldInverse) const
+		void SetViewMatrix(const mat4& viewMatrix) const
 		{
-			glUniformMatrix4fv(WorldMatrixLocation, 1, GL_TRUE, value_ptr(WorldInverse));
+			glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, value_ptr(viewMatrix));
 		}
 
+		void SetProjectionMatrix(const mat4& projectionMatrix) const
+		{
+			glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, value_ptr(projectionMatrix));
+		}
 
 		void SetTextureUnit(unsigned int TextureUnit) const
 		{
-			glUniform1i(samplerLocation, TextureUnit);
+			glUniform1i(colourMapLocation, TextureUnit);
 		}
 
-
+		/*
 		void SetDirectionalLight(const DirectionalLight& Light) const
 		{
 			glUniform3f(dirLightLocation.Color, Light.Color.x, Light.Color.y, Light.Color.z);
@@ -74,18 +92,19 @@ namespace Core
 			vec3 Direction = normalize(Light.Direction);
 			glUniform3f(dirLightLocation.Direction, Direction.x, Direction.y, Direction.z);
 			glUniform1f(dirLightLocation.DiffuseIntensity, Light.DiffuseIntensity);
-		}
+		}*/
 
 	private:
-		GLuint WVPLocation;
-		GLuint WorldMatrixLocation;
-		GLuint samplerLocation;
-
+		GLuint worldMatrixLocation;
+		GLuint viewMatrixLocation;
+		GLuint projectionMatrixLocation;
+		GLuint colourMapLocation;
+		/*
 		struct {
 			GLuint Color;
 			GLuint AmbientIntensity;
 			GLuint Direction;
 			GLuint DiffuseIntensity;
-		} dirLightLocation;
+		} dirLightLocation;*/
 	};
 }

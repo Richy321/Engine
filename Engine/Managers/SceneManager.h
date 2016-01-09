@@ -76,6 +76,15 @@ namespace Managers
 
 		virtual void notifyProcessMouseWindowEntryCallback(int state) override {}
 
+		virtual void notifyErrorCallback(GLenum source,
+			GLenum type,
+			GLuint id,
+			GLenum severity,
+			GLsizei length,
+			const GLchar* message,
+			const void* userParam) override;
+
+
 		virtual void SetMainCamera(std::weak_ptr<Core::Camera> cam) { mainCamera = cam; }
 
 		void CaptureCursor(bool capture)

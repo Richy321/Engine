@@ -1,4 +1,6 @@
 #pragma once
+#include "../Dependencies/glew/glew.h"
+
 namespace Core
 {
 	class IListener
@@ -22,6 +24,15 @@ namespace Core
 		virtual void notifyProcessMouseActiveMove(int x, int y) = 0;
 		virtual void notifyProcessMousePassiveMove(int x, int y) = 0;
 		virtual void notifyProcessMouseWindowEntryCallback(int state) = 0;
+
+		//debug logger
+		virtual void notifyErrorCallback(GLenum source,
+			GLenum type,
+			GLuint id,
+			GLenum severity,
+			GLsizei length,
+			const GLchar* message,
+			const void* userParam) = 0;
 	};
 	inline IListener::~IListener() 
 	{

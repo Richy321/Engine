@@ -3,9 +3,8 @@
 #include "..\Dependencies\glew\glew.h"
 #include "..\Dependencies\freeglut\freeglut.h"
 #include <iostream>
-#include <fstream>
-#include <vector>
 #include <map>
+#include "../Core/ShaderEffects/LitTexturedMeshEffect.h"
 
 namespace Managers
 {
@@ -17,7 +16,13 @@ namespace Managers
 		GLuint CreateShader(GLenum shaderType, std::string source, const std::string& shaderName);
 		static std::map<std::string, GLuint> programs;
 	public:
+		Core::LitTexturedMeshEffect* litTexturedMeshEffect;
 
+		void Initialise()
+		{
+			litTexturedMeshEffect = new Core::LitTexturedMeshEffect();
+			litTexturedMeshEffect->Initialise();
+		}
 		static ShaderManager &GetInstance()
 		{
 			static ShaderManager* instance = new ShaderManager();

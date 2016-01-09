@@ -45,6 +45,14 @@ namespace Core
 			static void ProcessMouseActiveMoveCallback(int x, int y);
 			static void ProcessMousePassiveMoveCallback(int x, int y);
 			static void ProcessMouseWindowEntryCallback(int state);
+
+			static void APIENTRY ProcessErrorCallback(GLenum source,
+				GLenum type,
+				GLuint id,
+				GLenum severity,
+				GLsizei length,
+				const GLchar* message,
+				const void* userParam);
 		};
 	}
 }
