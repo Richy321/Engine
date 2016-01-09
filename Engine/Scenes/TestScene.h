@@ -20,8 +20,8 @@ public:
 	std::shared_ptr<GameObject> model;
 
 	std::shared_ptr<DirectionalLight> directionalLight;
-	std::vector<SpotLight> spotLights;
-	std::vector<PointLight> pointLights;
+	std::vector<std::shared_ptr<SpotLight>> spotLights;
+	std::vector<std::shared_ptr<PointLight>> pointLights;
 
 	TestScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
@@ -42,10 +42,28 @@ public:
 		directionalLight->AmbientIntensity = 0.01f;
 		directionalLight->DiffuseIntensity = 0.75f;
 		directionalLight->Direction = vec3(0.0f, 0.0, -1.0);
+		
+
+
+		pointLights.push_back(std::make_shared<PointLight>());
+		pointLights[0]->DiffuseIntensity = 0.5f;
+		pointLights[0]->Color = vec3(1.0f, 0.5f, 0.0f);
+		//pointLights[0]->Position = vec3(3.0f, 1.0f, FieldDepth * (cosf(m_scale) + 1.0f) / 2.0f);
+		pointLights[0]->Position = vec3(3.0f, 1.0f, 5.0f);
+		pointLights[0]->Attenuation.Linear = 0.1f;
+
+		pointLights.push_back(std::make_shared<PointLight>());
+		pointLights[1]->DiffuseIntensity = 0.5f;
+		pointLights[1]->Color = vec3(0.0f, 0.5f, 1.0f);
+		pointLights[0]->Position = vec3(7.0f, 1.0f, 1.0f);
+		//pointLights[1]->Position = vec3(7.0f, 1.0f, FieldDepth * (sinf(m_scale) + 1.0f) / 2.0f);
+		pointLights[1]->Attenuation.Linear = 0.1f;
+		
+
 
 		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 		SetMainCamera(camera);
-		camera->Translate(0.0f, 0.0f, 20.0f);
+		camera->Translate(0.0f, 40.0f, 70.0f);
 
 		//cube = std::make_shared<GameObject>();
 		//cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
@@ -78,7 +96,9 @@ public:
 
 	virtual void notifyDisplayFrame() override
 	{
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
+
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
 

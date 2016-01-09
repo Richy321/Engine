@@ -13,6 +13,8 @@ namespace Core
 	{
 	public:
 
+		static const unsigned int MAX_POINT_LIGHTS = 2;
+
 		LitTexturedMeshEffect()
 		{
 		}
@@ -53,16 +55,54 @@ namespace Core
 				eyeWorldPosLocation == INVALID_UNIFORM_LOCATION)
 				return false;
 
-			dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Color");
-			dirLightLocation.AmbientIntensity = GetUniformLocation("gDirectionalLight.AmbientIntensity");
+			dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Base.Color");
+			dirLightLocation.AmbientIntensity = GetUniformLocation("gDirectionalLight.Base.AmbientIntensity");
+			dirLightLocation.DiffuseIntensity = GetUniformLocation("gDirectionalLight.Base.DiffuseIntensity");
 			dirLightLocation.Direction = GetUniformLocation("gDirectionalLight.Direction");
-			dirLightLocation.DiffuseIntensity = GetUniformLocation("gDirectionalLight.DiffuseIntensity");
 
 			if (dirLightLocation.AmbientIntensity == INVALID_UNIFORM_LOCATION ||
 				dirLightLocation.Color == INVALID_UNIFORM_LOCATION ||
 				dirLightLocation.DiffuseIntensity == INVALID_UNIFORM_LOCATION ||
 				dirLightLocation.Direction == INVALID_UNIFORM_LOCATION)
 				return false;
+
+			numPointLightsLocation = GetUniformLocation("gNumPointLights");
+
+			for (unsigned int i = 0; i < MAX_POINT_LIGHTS; i++)
+			{
+				char Name[128];
+				memset(Name, 0, sizeof(Name));
+				_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.Color", i);
+				m_pointLightsLocation[i].Color = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.AmbientIntensity", i);
+				m_pointLightsLocation[i].AmbientIntensity = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Position", i);
+				m_pointLightsLocation[i].Position = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.DiffuseIntensity", i);
+				m_pointLightsLocation[i].DiffuseIntensity = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Constant", i);
+				m_pointLightsLocation[i].Atten.Constant = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Linear", i);
+				m_pointLightsLocation[i].Atten.Linear = GetUniformLocation(Name);
+
+				_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Exp", i);
+				m_pointLightsLocation[i].Atten.Exp = GetUniformLocation(Name);
+
+				if (m_pointLightsLocation[i].Color == INVALID_UNIFORM_LOCATION ||
+					m_pointLightsLocation[i].AmbientIntensity == INVALID_UNIFORM_LOCATION ||
+					m_pointLightsLocation[i].Position == INVALID_UNIFORM_LOCATION ||
+					m_pointLightsLocation[i].DiffuseIntensity == INVALID_UNIFORM_LOCATION ||
+					m_pointLightsLocation[i].Atten.Constant == INVALID_UNIFORM_LOCATION ||
+					m_pointLightsLocation[i].Atten.Linear == INVALID_UNIFORM_LOCATION ||
+					m_pointLightsLocation[i].Atten.Exp == INVALID_UNIFORM_LOCATION) {
+					return false;
+				}
+			}
 
 			return true;
 		}
@@ -111,6 +151,22 @@ namespace Core
 			glUniform1f(dirLightLocation.DiffuseIntensity, Light->DiffuseIntensity);
 		}
 
+		void SetPointLights(std::vector<std::shared_ptr<PointLight>> pointLights) const
+		{
+			glUniform1i(numPointLightsLocation, pointLights.size());
+
+			for (unsigned int i = 0; i < pointLights.size(); i++) {
+				glUniform3f(m_pointLightsLocation[i].Color, pointLights[i]->Color.x, pointLights[i]->Color.y, pointLights[i]->Color.z);
+				glUniform1f(m_pointLightsLocation[i].AmbientIntensity, pointLights[i]->AmbientIntensity);
+				glUniform1f(m_pointLightsLocation[i].DiffuseIntensity, pointLights[i]->DiffuseIntensity);
+				glUniform3f(m_pointLightsLocation[i].Position, pointLights[i]->Position.x, pointLights[i]->Position.y, pointLights[i]->Position.z);
+				glUniform1f(m_pointLightsLocation[i].Atten.Constant, pointLights[i]->Attenuation.Constant);
+				glUniform1f(m_pointLightsLocation[i].Atten.Linear, pointLights[i]->Attenuation.Linear);
+				glUniform1f(m_pointLightsLocation[i].Atten.Exp, pointLights[i]->Attenuation.Exp);
+			}
+		}
+
+
 	private:
 		GLuint worldMatrixLocation;
 		GLuint viewMatrixLocation;
@@ -121,11 +177,28 @@ namespace Core
 		GLuint matSpecularIntensityLocation;
 		GLuint matSpecularPowerLocation;
 
-		struct {
+		GLuint numPointLightsLocation;
+
+		struct 
+		{
 			GLuint Color;
 			GLuint AmbientIntensity;
 			GLuint Direction;
 			GLuint DiffuseIntensity;
 		} dirLightLocation;
+
+		struct 
+		{
+			GLuint Color;
+			GLuint AmbientIntensity;
+			GLuint DiffuseIntensity;
+			GLuint Position;
+			struct
+			{
+				GLuint Constant;
+				GLuint Linear;
+				GLuint Exp;
+			} Atten;
+		} m_pointLightsLocation[MAX_POINT_LIGHTS];
 	};
 }

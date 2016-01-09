@@ -14,10 +14,10 @@ uniform mat4 gProjection;
 
 void main(void)
 {
+	mat4 wvp = gProjection * gView * gWorld;
+
 	out_normal = (gWorld * vec4(in_normal, 0.0)).xyz;
 	out_uv = in_uv;
 	out_worldPos = (gWorld * vec4(in_position, 1.0)).xyz;
-
-	mat4 wvp = gProjection * gView * gWorld;
 	gl_Position = wvp * vec4(in_position, 1.0);
 }
