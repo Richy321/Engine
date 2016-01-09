@@ -19,11 +19,9 @@ public:
 	//std::shared_ptr<GameObject> cube;
 	std::shared_ptr<GameObject> model;
 
-	DirectionalLight* directionalLight;
+	std::shared_ptr<DirectionalLight> directionalLight;
 	std::vector<SpotLight> spotLights;
 	std::vector<PointLight> pointLights;
-
-	
 
 	TestScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
@@ -38,6 +36,12 @@ public:
 	{
 		SceneManager::Initialise();
 		CaptureCursor(true);
+
+		directionalLight = std::make_shared<DirectionalLight>();
+		directionalLight->Color = vec3(1.0f, 1.0f, 1.0f);
+		directionalLight->AmbientIntensity = 0.01f;
+		directionalLight->DiffuseIntensity = 0.75f;
+		directionalLight->Direction = vec3(0.0f, 0.0, -1.0);
 
 		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 		SetMainCamera(camera);
@@ -71,4 +75,13 @@ public:
 	{
 		camera->OnMouseMove(deltaX, deltaY);
 	}
+
+	virtual void notifyDisplayFrame() override
+	{
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
+
+		SceneManager::notifyDisplayFrame();
+	}	
 };

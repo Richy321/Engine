@@ -17,7 +17,9 @@ SceneManager::~SceneManager()
 
 void SceneManager::Initialise()
 {
-	ShaderManager::GetInstance().Initialise();
+	if (!ShaderManager::GetInstance().Initialise())
+		printf("Failed to Initialise Shader Manager");
+
 	glEnable(GL_DEPTH_TEST);
 	//ShaderManager::GetInstance().CreateProgram("basicColor", "Shaders\\basicColor.vert", "Shaders\\basicColor.frag");
 	//ShaderManager::GetInstance().CreateProgram("basicLighting", "Shaders\\basicLighting.vert", "Shaders\\basicLighting.frag");

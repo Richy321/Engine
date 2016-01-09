@@ -18,10 +18,13 @@ namespace Managers
 	public:
 		Core::LitTexturedMeshEffect* litTexturedMeshEffect;
 
-		void Initialise()
+		bool Initialise()
 		{
+			bool success = true;
 			litTexturedMeshEffect = new Core::LitTexturedMeshEffect();
-			litTexturedMeshEffect->Initialise();
+			success &= litTexturedMeshEffect->Initialise();
+
+			return success;
 		}
 		static ShaderManager &GetInstance()
 		{

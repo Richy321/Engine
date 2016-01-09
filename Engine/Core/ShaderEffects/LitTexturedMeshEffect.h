@@ -2,6 +2,8 @@
 #include "BaseShaderEffect.h"
 #include "../../Dependencies/glm/gtc/type_ptr.hpp"
 #include "../../Utils.h"
+#include "../Lights.h"
+#include <memory>
 
 using namespace glm;
 
@@ -41,25 +43,16 @@ namespace Core
 				colourMapLocation== INVALID_UNIFORM_LOCATION)
 				return false;
 			
-
-			/*
-			WVPLocation = GetUniformLocation("gWVP");
-			WorldMatrixLocation = GetUniformLocation("gWorld");
-			samplerLocation = GetUniformLocation("gSampler");
 			dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Color");
 			dirLightLocation.AmbientIntensity = GetUniformLocation("gDirectionalLight.AmbientIntensity");
 			dirLightLocation.Direction = GetUniformLocation("gDirectionalLight.Direction");
 			dirLightLocation.DiffuseIntensity = GetUniformLocation("gDirectionalLight.DiffuseIntensity");
 
 			if (dirLightLocation.AmbientIntensity == INVALID_UNIFORM_LOCATION ||
-				WVPLocation == INVALID_UNIFORM_LOCATION ||
-				WorldMatrixLocation == INVALID_UNIFORM_LOCATION ||
-				samplerLocation == INVALID_UNIFORM_LOCATION ||
 				dirLightLocation.Color == INVALID_UNIFORM_LOCATION ||
 				dirLightLocation.DiffuseIntensity == INVALID_UNIFORM_LOCATION ||
 				dirLightLocation.Direction == INVALID_UNIFORM_LOCATION)
 				return false;
-				*/
 
 			return true;
 		}
@@ -84,27 +77,27 @@ namespace Core
 			glUniform1i(colourMapLocation, TextureUnit);
 		}
 
-		/*
-		void SetDirectionalLight(const DirectionalLight& Light) const
+		
+		void SetDirectionalLight(std::shared_ptr<DirectionalLight> Light) const
 		{
-			glUniform3f(dirLightLocation.Color, Light.Color.x, Light.Color.y, Light.Color.z);
-			glUniform1f(dirLightLocation.AmbientIntensity, Light.AmbientIntensity);
-			vec3 Direction = normalize(Light.Direction);
+			glUniform3f(dirLightLocation.Color, Light->Color.x, Light->Color.y, Light->Color.z);
+			glUniform1f(dirLightLocation.AmbientIntensity, Light->AmbientIntensity);
+			vec3 Direction = normalize(Light->Direction);
 			glUniform3f(dirLightLocation.Direction, Direction.x, Direction.y, Direction.z);
-			glUniform1f(dirLightLocation.DiffuseIntensity, Light.DiffuseIntensity);
-		}*/
+			glUniform1f(dirLightLocation.DiffuseIntensity, Light->DiffuseIntensity);
+		}
 
 	private:
 		GLuint worldMatrixLocation;
 		GLuint viewMatrixLocation;
 		GLuint projectionMatrixLocation;
 		GLuint colourMapLocation;
-		/*
+		
 		struct {
 			GLuint Color;
 			GLuint AmbientIntensity;
 			GLuint Direction;
 			GLuint DiffuseIntensity;
-		} dirLightLocation;*/
+		} dirLightLocation;
 	};
 }
