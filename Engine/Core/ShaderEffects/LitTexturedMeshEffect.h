@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseShaderEffect.h"
 #include "../../Dependencies/glm/gtc/type_ptr.hpp"
-#include "../../Utils.h"
+#include "../../Core/Utils.h"
 #include "../Lights.h"
 #include <memory>
 

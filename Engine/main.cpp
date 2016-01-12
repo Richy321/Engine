@@ -6,6 +6,8 @@
 #include "Managers\SceneManager.h"
 
 #include "Scenes/TestScene.h"
+#include "Scenes/ServerScene.h"
+#include "Scenes/ClientScene.h"
 
 using namespace Core;
 using namespace Initialisation;
@@ -25,9 +27,14 @@ int main(int argc, char **argv)
 
 	InitialiseGLUT::Initialise(window, context, frameBufferInfo);
 
-	IListener* scene = new TestScene(window);
+
+#if IS_SERVER
+	IListener* scene = new ServerScene(window);
+#else
+	//IListener* scene = new TestScene(window);
+	IListener* scene = new ClientScene(window);
+#endif
 	scene->Initialise();
-	
 	InitialiseGLUT::SetListener(scene);
 
 	InitialiseGLUT::Run();

@@ -40,6 +40,9 @@
     <Filter Include="Core\ShaderEffects">
       <UniqueIdentifier>{9b4ae110-5a95-4de4-b390-405b5ce0c1e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Networking">
+      <UniqueIdentifier>{fe47ac95-65f6-49c1-9463-e61d729ee092}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -93,9 +96,6 @@
       <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Core\GameObject.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\IComponent.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Components\Interfaces\IRenderableComponent.h">
@@ -164,7 +164,70 @@
     <ClInclude Include="Core\ShaderEffects\BaseShaderEffect.h">
       <Filter>Core\ShaderEffects</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="Core\Networking\Address.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\Connection.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\FlowControl.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\IConnection.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\INetworkService.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\ISocket.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\NetworkServices.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\NetworkServicesUnix.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\NetworkServicesWindows.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\PacketQueue.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\PlatformDetection.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\ReliabilitySystem.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\ReliableConnection.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\SharedNetworkConfiguration.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Networking\WinSocket.h">
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\ServerScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\Interfaces\INetworkViewComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\Interfaces\IComponent.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\ClientScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\NetworkViewComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

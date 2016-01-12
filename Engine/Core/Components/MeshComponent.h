@@ -27,7 +27,7 @@ namespace Core
 			rootMeshNode->Render(mainCamera, GetParentGameObject().lock()->GetWorldTransform());
 		}
 
-		void Update() override
+		void Update(float deltaTime) override
 		{
 			rootMeshNode->Update();
 		}

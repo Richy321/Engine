@@ -3,7 +3,7 @@
 using namespace Managers;
 using namespace Core;
 
-SceneManager::SceneManager(Initialisation::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f)
+SceneManager::SceneManager(Initialisation::WindowInfo windowInfo) : timer(new Timer), lastUpdateTime(0.0f), lastUpdateCommsTime(0.0f)
 {
 	this->windowInfo = windowInfo;
 	mousePosX = mousePosY = -1;
@@ -29,14 +29,26 @@ void SceneManager::Initialise()
 void SceneManager::notifyBeginFrame()
 {
 	timer->Update();
-	OnUpdate(timer->GetElapsedTime());
-	//call these from here for the time being
-	OnPhysicsUpdate(); 
-	OnCommsUpdate();
-	for(std::shared_ptr<GameObject>& go : gameObjectManager)
+
+	float elapsedTime = timer->GetElapsedTime();
+
+	OnPhysicsUpdate();
+
+	float nowTime = timer->GetRunningTime();
+	if (nowTime > lastUpdateCommsTime + CommsTickDurationMs * 0.001)
 	{
-		go->Update(0.0f);
+		for (std::shared_ptr<GameObject>& go : gameObjectManager)
+			go->UpdateNetworkComms(elapsedTime);
+
+		OnCommsUpdate(nowTime - lastUpdateCommsTime);
+
+		lastUpdateCommsTime = nowTime;
 	}
+
+	for(std::shared_ptr<GameObject>& go : gameObjectManager)
+		go->Update(elapsedTime);
+
+	OnUpdate(elapsedTime);
 }
 
 void SceneManager::notifyDisplayFrame()

@@ -1,9 +1,10 @@
 #pragma once
 #include "IGameObject.h"
-#include "IComponent.h"
 #include "Components/Interfaces/IRenderableComponent.h"
 #include <vector>
 #include <algorithm>
+#include "Components/Interfaces/IComponent.h"
+#include "Components/NetworkViewComponent.h"
 
 class IComponent;
 
@@ -11,19 +12,25 @@ namespace Core
 {
 	class GameObject : public IGameObject, public std::enable_shared_from_this<GameObject>
 	{
+	private:
+		unsigned int ID;
 	public:
 		glm::mat4 world;
-		std::vector<std::unique_ptr<IComponent>> components;
+		std::vector<std::shared_ptr<IComponent>> components;
 		std::vector<std::weak_ptr<IGameObject>> children;
 		std::weak_ptr<IGameObject> parent;
 
 		std::vector<std::weak_ptr<IGameObject>>& GetChildren() override { return children; }
 		std::weak_ptr<IGameObject>& GetParent() override { return parent; }
 
-		glm::mat4& GetWorldTransform() override { return world; }
-
+		mat4& GetWorldTransform() override { return world; }
+		
+		unsigned int GetID() override { return ID; }
+		
 		GameObject()
 		{
+			static unsigned int IDCounter = 0;
+			ID = IDCounter++;
 		}
 
 		virtual ~GameObject()
@@ -38,7 +45,7 @@ namespace Core
 		{
 			for (auto& comp : components)
 			{
-				comp->Update();
+				comp->Update(deltaTime);
 			}
 		}
 
@@ -47,16 +54,20 @@ namespace Core
 			
 		}
 
-		virtual void UpdateNetworkComms()
+		virtual void UpdateNetworkComms(float deltaTime)
 		{
-			
+			for (auto& comp : components)
+			{
+				if (comp->GetComponentFlags() & NetworkSyncable)
+					std::dynamic_pointer_cast<INetworkViewComponent>(comp)->UpdateComms(deltaTime);
+			}
 		}
 
 		virtual void Render(std::shared_ptr<Camera> mainCamera)
 		{
 			for(auto& comp : components)
 			{
-				if (comp->GetComponentFlags() | ComponentFlags::Renderable)
+				if (comp->GetComponentFlags() & Renderable)
 				{
 					static_cast<IRenderableComponent&>(*comp.get()).Render(mainCamera);
 				}
@@ -64,20 +75,20 @@ namespace Core
 		}
 			
 		#pragma region Component Management
-		void AddComponent(std::unique_ptr<IComponent> component)
+		void AddComponent(std::shared_ptr<IComponent> component)
 		{
 			component->SetParentGameObject(shared_from_this());
-			components.push_back(std::move(component));
+			components.push_back(component);
 		}
 
-		void RemoveComponent(std::unique_ptr<IComponent> &component)
+		void RemoveComponent(std::shared_ptr<IComponent> &component)
 		{
 			components.erase(std::remove(components.begin(), components.end(), component), components.end());
 		}
 
 		void RemoveComponent(int componentID)
 		{
-			components.erase(std::remove_if(components.begin(), components.end(), [&](const std::unique_ptr<IComponent>& c) {  return c->GetID() == componentID; }));
+			components.erase(std::remove_if(components.begin(), components.end(), [&](const std::shared_ptr<IComponent>& c) {  return c->GetID() == componentID; }));
 		}
 		#pragma endregion
 
@@ -126,6 +137,7 @@ namespace Core
 		{
 			world = glm::scale(world, scale);
 		}
+
 		#pragma endregion 
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "Dependencies/glew/glew.h"
+#include "../Dependencies/glew/glew.h"
 
 #define Check_GLError() Utils::CheckGLError(__FILE__,__LINE__)
 

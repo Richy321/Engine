@@ -192,3 +192,7 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+/Engine/Server Debug
+/Engine/Server Release
+/Engine/x64/Server Release
+/Engine/x64/Server Debug

@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "IGameObject.h"
+#include "../../IGameObject.h"
 
 namespace Core
 {
@@ -8,7 +8,7 @@ namespace Core
 	{
 		None = 1,
 		Renderable = 2,
-
+		NetworkSyncable = 4 
 	};
 
 	template<class T> inline T operator~ (T a) { return (T)~(int)a; }
@@ -37,7 +37,7 @@ namespace Core
 		std::weak_ptr<IGameObject> GetParentGameObject() const { return parentGameObject; }
 		void SetParentGameObject(std::weak_ptr<IGameObject> parent) { parentGameObject = parent; }
 
-		virtual void Update() = 0;
+		virtual void Update(float deltaTime) = 0;
 		virtual void Destroy() = 0;
 	};
 }

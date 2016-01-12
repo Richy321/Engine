@@ -20,6 +20,7 @@ namespace Managers
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
 		std::unique_ptr<Core::Timer> timer;
 		float lastUpdateTime;
+		float lastUpdateCommsTime;
 		Core::Initialisation::WindowInfo windowInfo;
 
 		std::weak_ptr<Core::Camera> mainCamera;
@@ -35,7 +36,7 @@ namespace Managers
 
 		virtual void OnUpdate(float deltaTime) {};
 		virtual void OnPhysicsUpdate() {};
-		virtual void OnCommsUpdate() {};
+		virtual void OnCommsUpdate(float deltaTime) {};
 
 		virtual void notifyBeginFrame() override;
 		virtual void notifyDisplayFrame() override;

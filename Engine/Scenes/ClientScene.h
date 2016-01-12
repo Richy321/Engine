@@ -6,9 +6,10 @@
 #include "../Core/AssetManager.h"
 #include "../Core/CameraFPS.h"
 #include "../Core/ShaderEffects/LitTexturedMeshEffect.h"
+#include "../Core/Components/NetworkViewComponent.h"
 using namespace Core;
 
-class TestScene : public Managers::SceneManager
+class ClientScene : public Managers::SceneManager
 {
 public:
 
@@ -16,8 +17,8 @@ public:
 	GLuint gViewUniform;
 	GLuint gProjectionUniform;
 	GLuint gWP;
-	//std::shared_ptr<GameObject> cube;
-	std::shared_ptr<GameObject> model;
+
+	std::shared_ptr<GameObject> player;
 	std::shared_ptr<GameObject> floor;
 
 	std::shared_ptr<DirectionalLight> directionalLight;
@@ -31,49 +32,75 @@ public:
 	std::vector<std::shared_ptr<GameObject>> otherPlayers;
 
 	const std::string defaultCheckeredTexture = "Default Checkered";
-	TestScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
+	ClientScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
 		camera = std::make_shared<CameraFPS>();
 	}
 
-	~TestScene()
+	~ClientScene()
 	{
 	}
 
 	void Initialise() override
 	{
 		SceneManager::Initialise();
-		CaptureCursor(true);
-	
-		InitialiseTextures();
-		InitialiseLights();
+		//CaptureCursor(true);
 
 		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 		SetMainCamera(camera);
 		camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
 
-		//cube = std::make_shared<GameObject>();
-		//cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
-		//cube->Translate(0.0f, 0.0f, 0.0f);
-		//gameObjectManager.push_back(cube);
-		model = InitialisePlayer();
+		InitialiseEnvironment();
 
+		InitialiseLocalPlayer();
+	}
+
+	void InitialiseEnvironment()
+	{
+		InitialiseTextures();
+		InitialiseLights();
 
 		floor = std::make_shared<GameObject>();
 		floor->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
 		gameObjectManager.push_back(floor);
 	}
 
-	std::shared_ptr<GameObject> InitialisePlayer()
+	void InitialiseLocalPlayer()
 	{
-		model = std::make_shared<GameObject>();
-		model->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
-		model->Translate(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
-		model->Scale(0.05f);
-		gameObjectManager.push_back(model);
+		player = std::make_shared<GameObject>();
+		vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
+		InitialisePlayer(player, spawnPosition);
+		gameObjectManager.push_back(player);
 	}
 
+	void InitialisePlayer(std::shared_ptr<GameObject> &player, vec3 &position)
+	{
+		player->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
+		player->Translate(position);
+		player->Scale(0.05f);
 
+		std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<GameObject>());
+		networkView->InitialiseConnectionToServer();
+		player->AddComponent(networkView);
+	}
+
+	void SpawnOpponentPlayer(vec3 position)
+	{
+		std::shared_ptr<GameObject> opponent = std::make_shared<GameObject>();
+		InitialisePlayer(opponent, position);
+		otherPlayers.push_back(opponent);
+	}
+
+	void RemoveOpponentPlayer(unsigned int playerID)
+	{
+		for each (std::shared_ptr<GameObject> opponent in otherPlayers)
+		{
+			if (playerID == opponent->GetID())
+			{
+				
+			}
+		}
+	}
 
 	void InitialiseTextures()
 	{
@@ -115,13 +142,11 @@ public:
 		camera->Update(deltaTime);
 		pointLights[0]->Position = vec3(floorWidth * 0.25f, 1.0f, floorDepth * (cosf(m_scale) + 1.0f) / 2.0f);
 		pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
-
-		//cube->RotateY(deltaTime * 1.0f);
-	}
+ 	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
-		camera->OnKey(key, x, y);	
+		camera->OnKey(key, x, y);
 	}
 
 	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
