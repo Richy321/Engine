@@ -3,6 +3,7 @@
 #include "INetworkService.h"
 #include "ISocket.h"
 #include "SharedNetworkConfiguration.h"
+#include "IConnectionEventHandler.h"
 
 
 namespace networking
@@ -82,6 +83,11 @@ namespace networking
 		bool IsListening() const override { return state == Listening; }
 		bool IsRunning() const { return running; }
 		Mode GetMode() const override { return mode; }
+		void SetConnectionEventHandler(std::shared_ptr<IConnectionEventHandler> handler)
+		{
+			connectionEventHandler = handler;
+		}
+
 
 		virtual void Update(float deltaTime) override
 		{
@@ -170,13 +176,36 @@ namespace networking
 			return HeaderSize;
 		}
 
+
+
 	protected:
 
 		//basic inherited event system functions
-		virtual void OnStart()		{}
-		virtual void OnStop()		{}
-		virtual void OnConnect()    {}
-		virtual void OnDisconnect() {}
+		virtual void OnStart()
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnStart();
+		}
+
+		virtual void OnStop()
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnStop();
+		}
+
+		virtual void OnConnect()
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnConnect();
+		}
+
+		virtual void OnDisconnect()
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnDisconnect();
+		}
+
+		std::shared_ptr<IConnectionEventHandler> connectionEventHandler = nullptr;
 
 		void ClearData()
 		{

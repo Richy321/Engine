@@ -151,7 +151,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -171,7 +171,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -190,7 +190,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -212,7 +212,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -238,7 +238,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
@@ -285,7 +285,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
@@ -308,7 +308,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
@@ -355,7 +355,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
@@ -370,13 +370,15 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClCompile Include="Core\Initialisation\InitialiseGLEW.cpp" />
     <ClCompile Include="Core\Initialisation\InitialiseGLUT.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Math\vec3.cpp" />
     <ClCompile Include="Managers\SceneManager.cpp" />
-    <ClCompile Include="Math\vec2.cpp" />
-    <ClCompile Include="Math\vec4.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NetworkPlayer.h" />
+    <ClInclude Include="Core\Networking\ClientNetworkManager.h" />
+    <ClInclude Include="Core\Networking\NetworkPlayer.h" />
+    <ClInclude Include="Core\Networking\IConnectionEventHandler.h" />
+    <ClInclude Include="Core\Networking\Packing.h" />
+    <ClInclude Include="Core\Networking\MessageStructures.h" />
+    <ClInclude Include="Core\Networking\IClientNetworkManager.h" />
     <ClInclude Include="Scenes\ClientScene.h" />
     <ClInclude Include="Core\Networking\Address.h" />
     <ClInclude Include="Core\Networking\Connection.h" />
@@ -408,10 +410,8 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\ShaderEffects\LitTexturedMeshEffect.h" />
     <ClInclude Include="Core\utils.h" />
     <ClInclude Include="Core\Components\Interfaces\INetworkViewComponent.h" />
-    <ClInclude Include="Math\mat4.h" />
     <ClInclude Include="Core\Components\MeshComponent.h" />
     <ClInclude Include="Managers\ShaderManager.h" />
-    <ClInclude Include="Math\quat.h" />
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\MeshNode.h" />
     <ClInclude Include="Core\VertexFormat.h" />
@@ -419,16 +419,13 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\IListener.h" />
     <ClInclude Include="Core\Initialisation\InitialiseGLEW.h" />
     <ClInclude Include="Core\Initialisation\InitialiseGLUT.h" />
-    <ClInclude Include="Math\vec3.h" />
     <ClInclude Include="Managers\SceneManager.h" />
     <ClInclude Include="Core\Initialisation\WindowInfo.h" />
-    <ClInclude Include="Math\vec2.h" />
-    <ClInclude Include="Math\vec4.h" />
-    <ClInclude Include="Math\Utils.h" />
     <ClInclude Include="Core\Components\NetworkViewComponent.h" />
     <ClInclude Include="Scenes\ServerScene.h" />
     <ClInclude Include="Scenes\TestScene.h" />
     <ClInclude Include="Core\Texture.h" />
+    <ClInclude Include="Core\TickTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />

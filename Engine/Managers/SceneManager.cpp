@@ -34,6 +34,7 @@ void SceneManager::notifyBeginFrame()
 
 	OnPhysicsUpdate();
 
+	/*
 	float nowTime = timer->GetRunningTime();
 	if (nowTime > lastUpdateCommsTime + CommsTickDurationMs * 0.001)
 	{
@@ -43,7 +44,7 @@ void SceneManager::notifyBeginFrame()
 		OnCommsUpdate(nowTime - lastUpdateCommsTime);
 
 		lastUpdateCommsTime = nowTime;
-	}
+	}*/
 
 	for(std::shared_ptr<GameObject>& go : gameObjectManager)
 		go->Update(elapsedTime);

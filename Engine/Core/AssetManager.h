@@ -21,14 +21,6 @@ namespace Core
 		std::vector<MeshComponent> meshComponents;
 		std::map<std::string, GLuint> textureIDs;
 
-		AssetManager()
-		{
-		}
-
-		~AssetManager()
-		{
-		}
-
 		static void CopyaiMat(const aiMatrix4x4 *from, glm::mat4 &to) 
 		{
 			to[0][0] = from->a1; to[1][0] = from->a2;
@@ -505,6 +497,16 @@ namespace Core
 			quadMesh->AddRootMesh(CreateQuadPrimitiveAdv(width, depth));
 			quadMesh->rootMeshNode->meshes[0]->materialID = texture;
 			return quadMesh;
+		}
+
+	protected:
+
+		AssetManager()
+		{
+		}
+
+		~AssetManager()
+		{
 		}
 	};
 }

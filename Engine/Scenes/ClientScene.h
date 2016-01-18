@@ -7,6 +7,8 @@
 #include "../Core/CameraFPS.h"
 #include "../Core/ShaderEffects/LitTexturedMeshEffect.h"
 #include "../Core/Components/NetworkViewComponent.h"
+#include "../Core/Networking/ClientNetworkManager.h"
+
 using namespace Core;
 
 class ClientScene : public Managers::SceneManager
@@ -29,7 +31,7 @@ public:
 	const float floorDepth = 30.0f;
 	float m_scale = 0.0f;
 
-	std::vector<std::shared_ptr<GameObject>> otherPlayers;
+	std::vector<std::shared_ptr<networking::NetworkPlayer>> otherPlayers;
 
 	const std::string defaultCheckeredTexture = "Default Checkered";
 	ClientScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
@@ -53,6 +55,9 @@ public:
 		InitialiseEnvironment();
 
 		InitialiseLocalPlayer();
+
+		networking::ClientNetworkManager::GetInstance().InitialiseConnectionToServer();
+
 	}
 
 	void InitialiseEnvironment()
@@ -71,6 +76,10 @@ public:
 		vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
 		InitialisePlayer(player, spawnPosition);
 		gameObjectManager.push_back(player);
+
+		std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<GameObject>(), networking::ClientNetworkManager::GetInstance());
+		networkView->AddToNetworkingManager();
+		player->AddComponent(networkView);
 	}
 
 	void InitialisePlayer(std::shared_ptr<GameObject> &player, vec3 &position)
@@ -78,28 +87,18 @@ public:
 		player->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
 		player->Translate(position);
 		player->Scale(0.05f);
-
-		std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<GameObject>());
-		networkView->InitialiseConnectionToServer();
-		player->AddComponent(networkView);
 	}
 
 	void SpawnOpponentPlayer(vec3 position)
 	{
 		std::shared_ptr<GameObject> opponent = std::make_shared<GameObject>();
 		InitialisePlayer(opponent, position);
-		otherPlayers.push_back(opponent);
+		//otherPlayers.push_back(opponent);
 	}
 
 	void RemoveOpponentPlayer(unsigned int playerID)
 	{
-		for each (std::shared_ptr<GameObject> opponent in otherPlayers)
-		{
-			if (playerID == opponent->GetID())
-			{
-				
-			}
-		}
+
 	}
 
 	void InitialiseTextures()

@@ -1,4 +1,5 @@
 #pragma once
+#include "../Dependencies/glm/glm.hpp"
 #include "ShaderManager.h"
 #include "../Core/IListener.h"
 #include "../Core/GameObject.h"
@@ -7,6 +8,8 @@
 #include "../Core/Initialisation/WindowInfo.h"
 #include "../Core/Camera.h"
 #include "../Core/Lights.h"
+
+using namespace glm;
 
 namespace Managers
 {

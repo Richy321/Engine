@@ -4,41 +4,40 @@
 #include <chrono>
 #include "Interfaces/INetworkViewComponent.h"
 #include "../Networking/Connection.h"
+#include "../../Dependencies/glm/glm.hpp"
+#include <Objbase.h>
+#include "../Networking/MessageStructures.h"
+#include "../Networking/IClientNetworkManager.h"
 
-
-class NetworkViewComponent : public Core::INetworkViewComponent
+class NetworkViewComponent : public Core::INetworkViewComponent, public std::enable_shared_from_this<Core::INetworkViewComponent>
 {
 public:
+	GUID uniqueID;
+	networking::IClientNetworkManager& networkingManager;
 
-	networking::IConnection* serverConnection;
-	std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-	std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
-	networking::FlowControl flowControl;
-	bool connected = false;
-
-	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent): INetworkViewComponent(parent)
+	enum DeadReckoningType
 	{
+		None,
+		Exact,
+		Linear
+	};
 
+	DeadReckoningType deadReckoning = Exact;
+
+	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, networking::IClientNetworkManager& networkingManager) : INetworkViewComponent(parent), networkingManager(networkingManager)
+	{
+		CoCreateGuid(&uniqueID);
+		
 	}
 
-	void InitialiseConnectionToServer()
+	void AddToNetworkingManager()
 	{
-		if (isUseReliableConnection)
-			serverConnection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
-		else
-			serverConnection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
-
-		if (!serverConnection->Start(ClientPort))
-		{
-			printf("could not start connection on port %d\n", ClientPort);
-			return;
-		}
-
-		serverConnection->Connect(networking::Address(127, 0, 0, 1, ServerPort));
+		networkingManager.AddNetworkViewComponent(shared_from_this());
 	}
 
 	virtual ~NetworkViewComponent()
 	{
+
 	}
 
 	void Update(float deltaTime) override
@@ -46,45 +45,44 @@ public:
 
 	}
 
-	void UpdateComms(float deltaTime) override
+	virtual void UpdateComms(float deltaTime) override
 	{
-		if (!connected && serverConnection->IsConnected())
-		{
-			printf("client connected to server\n");
-			connected = true;
-		}
-
-		if (!connected && serverConnection->ConnectFailed())
-		{
-			printf("connection failed\n");
-		}
-
-		if (serverConnection->IsConnected())
-		{
-			if (isUseReliableConnection)
-				flowControl.Update(deltaTime, ((networking::ReliableConnection*)serverConnection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
-		}
-
-		const float sendRate = flowControl.GetSendRate();
-
-		unsigned char packet[] = "client to server";
-		serverConnection->SendPacket(packet, sizeof(packet));
-
-		while (true)
-		{
-			unsigned char packet[256];
-			int bytes_read = serverConnection->ReceivePacket(packet, sizeof(packet));
-			if (bytes_read == 0)
-				break;
-			printf("received packet from server\n");
-		}
-
-		serverConnection->Update(deltaTime);
+		
 	}
+
+	//max 256
+	virtual int BuildPacket(networking::MessageStructures::BaseMessage& message) override
+	{
+		mat4 transform = GetParentGameObject().lock()->GetWorldTransform();
+
+		message.uniqueID = GetUniqueID();
+		message.messageType = networking::MessageStructures::BasicPosition;
+		message.positionMessage.position = vec3(transform[3].x, transform[3].y, transform[3].z);
+
+		return sizeof(networking::MessageStructures::BaseMessage);
+	}
+
+	virtual void ReadPacket(networking::MessageStructures::BaseMessage& packet) override
+	{
+		if (packet.messageType == networking::MessageStructures::BasicPosition)
+		{
+			if (deadReckoning == Exact)
+			{
+				parentGameObject.lock()->GetWorldTransform()[3].x = packet.positionMessage.position.x;
+				parentGameObject.lock()->GetWorldTransform()[3].y = packet.positionMessage.position.y;
+				parentGameObject.lock()->GetWorldTransform()[3].z = packet.positionMessage.position.z;
+			}
+		}
+	}
+
+	GUID GetUniqueID() override
+	{
+		return uniqueID;
+	}
+
 
 	void Destroy() override
 	{
-		delete serverConnection;
 	}
 };
 

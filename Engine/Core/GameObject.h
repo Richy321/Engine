@@ -25,6 +25,8 @@ namespace Core
 
 		mat4& GetWorldTransform() override { return world; }
 		
+		vec3 GetPosition() const { return vec3(world[3].x, world[3].y, world[3].z); }
+
 		unsigned int GetID() override { return ID; }
 		
 		GameObject()
