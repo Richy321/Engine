@@ -143,6 +143,11 @@ public:
 		pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
  	}
 
+	void OnCommsUpdate(float deltaTime) override
+	{
+		networking::ClientNetworkManager::GetInstance().UpdateComms();
+	}
+
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
 		camera->OnKey(key, x, y);

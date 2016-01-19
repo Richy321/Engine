@@ -181,6 +181,7 @@ namespace networking
 	protected:
 
 		//basic inherited event system functions
+		//todo - change to std::function callbacks
 		virtual void OnStart()
 		{
 			if (connectionEventHandler != nullptr)

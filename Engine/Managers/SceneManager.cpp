@@ -34,7 +34,7 @@ void SceneManager::notifyBeginFrame()
 
 	OnPhysicsUpdate();
 
-	/*
+	
 	float nowTime = timer->GetRunningTime();
 	if (nowTime > lastUpdateCommsTime + CommsTickDurationMs * 0.001)
 	{
@@ -44,7 +44,7 @@ void SceneManager::notifyBeginFrame()
 		OnCommsUpdate(nowTime - lastUpdateCommsTime);
 
 		lastUpdateCommsTime = nowTime;
-	}*/
+	}
 
 	for(std::shared_ptr<GameObject>& go : gameObjectManager)
 		go->Update(elapsedTime);
@@ -56,16 +56,26 @@ void SceneManager::notifyDisplayFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
-
+	
+	for (int i = 0; i < gameObjectManager.size(); i++)
+	{
+		assert(!mainCamera.expired());
+		if (!mainCamera.expired())
+		{
+			std::shared_ptr<Camera> mainCamPtr = mainCamera.lock();
+			gameObjectManager[i]->Render(mainCamPtr);
+		}
+	}
+	/*
 	for(std::shared_ptr<GameObject>& go : gameObjectManager)
 	{
 		assert(!mainCamera.expired());
-		if(!mainCamera.expired())
+		if (!mainCamera.expired())
 		{
 			std::shared_ptr<Camera> mainCamPtr = mainCamera.lock();
 			go->Render(mainCamPtr);
 		}
-	}
+	}*/
 }
 
 void SceneManager::notifyEndFrame()

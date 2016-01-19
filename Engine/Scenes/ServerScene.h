@@ -24,7 +24,7 @@ public:
 	ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
 	{
 		timer->SetTickIntervalMilliseconds(std::chrono::milliseconds(15));
-		timer->AddOnTickCallback(std::bind(&ServerScene::OnCommsUpdate, this));
+		//timer->AddOnTickCallback(std::bind(&ServerScene::OnCommsUpdate, this));
 	}
 
 	~ServerScene() 
@@ -41,7 +41,7 @@ public:
 		camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
 
 		InitialiseEnvironment();
-		InitialiseServerComms();
+		InitialiseServerComms();	
 	}
 
 	void InitialiseServerComms()
@@ -63,7 +63,7 @@ public:
 		timer->Start();
 	}
 
-	void OnCommsUpdate()
+	void OnCommsUpdate(float delta) override
 	{
 		std::chrono::time_point<std::chrono::system_clock> nowTime = std::chrono::system_clock::now();
 		std::chrono::milliseconds deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - lastTime);
@@ -73,16 +73,18 @@ public:
 		//printf("Comms update: %f \n", fromStartTime.count() * 0.001f);
 		
 		//if (connection->IsConnected())
-			ReceiveAndStorePackets();
+		ReceiveAndStorePackets();
 
 		RunSimulation();
 
 		//if (connection->IsConnected())
-			SendUpdatedSnapshots();
+		SendUpdatedSnapshots();
 
 		connection->Update(deltaTimeSecs);
 		if (isUseReliableConnection)
 			flowControl.Update(deltaTimeSecs, static_cast<networking::ReliableConnection*>(connection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
+
+		lastTime = nowTime;
 	}
 
 
@@ -95,13 +97,15 @@ public:
 			{
 				//just use last message received for the moment
 				std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
+				const float delta_x = 0.1;
 
 				value.second->relatedGameObject->GetWorldTransform()[3].x = message->positionMessage.position.x;
 				value.second->relatedGameObject->GetWorldTransform()[3].y = message->positionMessage.position.y;
 				value.second->relatedGameObject->GetWorldTransform()[3].z = message->positionMessage.position.z;
+
+				//value.second->relatedGameObject->GetWorldTransform()[3].x += 0.1f;
 			}
 		}
-
 
 		//TODO collision detection confirmation...
 
@@ -118,7 +122,7 @@ public:
 			if (bytesRead == 0)
 				break;
 			std::shared_ptr<networking::MessageStructures::BaseMessage> message = std::make_shared<networking::MessageStructures::BaseMessage>();
-			memcpy(message.get(), packet, bytesRead);
+			memcpy(message.get(), packet, sizeof(networking::MessageStructures::BaseMessage));
 
 			ReadPacket(message);
 		}
@@ -142,7 +146,15 @@ public:
 		//Add new player if not exists
 		if(message->messageType == networking::MessageStructures::PlayerConnect || connectedPlayerMap.find(message->uniqueID) == connectedPlayerMap.end())
 		{
-			ConnectPlayer(message->uniqueID);
+			vec3 pos;
+			if (message->messageType == networking::MessageStructures::BasicPosition)
+				pos = message->positionMessage.position;
+			else
+				pos = vec3(floorWidth * 0.35f, 5.0f, floorDepth * 0.35f);
+
+
+			vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
+			ConnectPlayer(message->uniqueID, spawnPosition);
 		}
 		else if(message->messageType == networking::MessageStructures::PlayerDisconnect)
 		{
@@ -155,12 +167,6 @@ public:
 	}
 
 
-	std::shared_ptr<GameObject> SpawnPlayer(vec3 position)
-	{
-		std::shared_ptr<GameObject> player = std::make_shared<GameObject>();
-		InitialisePlayer(player, position);
-		return player;
-	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
@@ -172,10 +178,14 @@ public:
 		//disable mousemove
 	}
 
-	void ConnectPlayer(GUID id)
+	void ConnectPlayer(GUID id, vec3 position)
 	{
+		std::shared_ptr<GameObject> newPlayer = std::make_shared<GameObject>();
 		connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
-		connectedPlayerMap[id]->relatedGameObject = SpawnPlayer(vec3(0, 0, 0));
+		connectedPlayerMap[id]->relatedGameObject = newPlayer;
+		InitialisePlayer(newPlayer, position);
+		gameObjectManager.push_back(newPlayer);
+		printf("Connected new player at %f %f %f \n", position.x, position.y, position.z);
 	}
 
 	void DisconnectPlayer(GUID id)
