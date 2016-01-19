@@ -102,16 +102,12 @@ namespace networking
 
 		void SendComponentPackets()
 		{
-			//todo look at grouping into one packet for all components
+			//todo - look at grouping into one packet for all components
 			for (NetworkIDMapType::iterator it = networkIDToComponent.begin(); it != networkIDToComponent.end(); ++it)
 			{
-				unsigned char packet[256];
 				MessageStructures::BaseMessage message;
 				int size = it->second->BuildPacket(message);
-				
-				memcpy(packet, &message, size);
-				//serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), size);
-				serverConnection->SendPacket(packet, size);
+				serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), size);
 			}
 		}
 

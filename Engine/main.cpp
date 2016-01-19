@@ -20,7 +20,9 @@ int main(int argc, char **argv)
 	WindowInfo window(std::string("Engine"),
 		400, 200,//position
 		800, 600, //size
-		true);//resizable
+		true, //resizable
+		false, //gameMode
+		"1920x1200:32@60");
 
 	ContextInfo context(4, 5, true);
 	FramebufferInfo frameBufferInfo(true, true, true, true);

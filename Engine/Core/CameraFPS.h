@@ -24,7 +24,7 @@ namespace Core
 
 		CameraFPS()
 		{
-			OnMouseMove(0, 0);
+			CameraFPS::OnMouseMove(0, 0);
 		}
 
 		~CameraFPS()
@@ -32,6 +32,31 @@ namespace Core
 		}
 
 		void OnMouseMove(int deltaX, int deltaY) override 
+		{
+			Rotate(-deltaX, -deltaY);
+		}
+
+		void OnKey(unsigned char key, int x, int y) override
+		{
+			if (key == 'a')
+				translateDelta -= right * cameraMovementSpeed;
+			if (key == 'd')
+				translateDelta += right * cameraMovementSpeed;
+			if (key == 'w')
+				translateDelta += forward * cameraMovementSpeed;
+			if (key == 's')
+				translateDelta -= forward * cameraMovementSpeed;
+			if (key == 'z')
+				translateDelta += up * cameraMovementSpeed;
+			if (key == 'c')
+				translateDelta -= up * cameraMovementSpeed;
+			if (key == 'q')
+				Rotate(30, 0);
+			if (key == 'e')
+				Rotate(-30, 0);
+		}
+
+		void Rotate(int deltaX, int deltaY)
 		{
 			// Compute new orientation
 			headingAngle += rotationSpeed * float(deltaX);
@@ -49,22 +74,6 @@ namespace Core
 
 			// Up vector
 			up = glm::cross(right, forward);
-		}
-
-		void OnKey(unsigned char key, int x, int y) override
-		{
-			if (key == 'a')
-				translateDelta.x += cameraMovementSpeed;
-			if (key == 'd')
-				translateDelta.x -= cameraMovementSpeed;
-			if (key == 'w')
-				translateDelta.y -= cameraMovementSpeed;
-			if (key == 's')
-				translateDelta.y += cameraMovementSpeed;
-			if (key == 'q')
-				translateDelta.z += cameraMovementSpeed;
-			if (key == 'e')
-				translateDelta.z -= cameraMovementSpeed;
 		}
 
 		void Update(float deltaTime) override

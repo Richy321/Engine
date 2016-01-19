@@ -97,7 +97,7 @@ public:
 			{
 				//just use last message received for the moment
 				std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
-				const float delta_x = 0.1;
+				const float delta_x = 0.1f;
 
 				value.second->relatedGameObject->GetWorldTransform()[3].x = message->positionMessage.position.x;
 				value.second->relatedGameObject->GetWorldTransform()[3].y = message->positionMessage.position.y;
@@ -107,9 +107,9 @@ public:
 			}
 		}
 
-		//TODO collision detection confirmation...
+		//todo - collision detection confirmation...
 
-		//TODO possible physics simulation
+		//todo - possible physics simulation
 	}
 
 	void ReceiveAndStorePackets()

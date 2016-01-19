@@ -41,6 +41,12 @@ void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
 	glutInitWindowPosition(windowInfo.position_x, windowInfo.position_y);
 	glutInitWindowSize(windowInfo.width, windowInfo.height);
 
+	if (windowInfo.useGameMode)
+	{
+		glutGameModeString(windowInfo.gameModeString.c_str());
+		glutEnterGameMode();
+	}
+
 	glutCreateWindow(windowInfo.name.c_str());
 
 	std::cout << "GLUT:initialized" << std::endl;
