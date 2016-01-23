@@ -103,12 +103,15 @@ namespace networking
 
 		void SendComponentPackets()
 		{
-			//todo - look at grouping into one packet for all components
+			//todo - look at grouping into one packet for all components (group into state snapshot)
 			for (NetworkIDMapType::iterator it = networkIDToComponent.begin(); it != networkIDToComponent.end(); ++it)
 			{
-				MessageStructures::BaseMessage message;
-				int size = it->second->BuildPacket(message);
-				serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), size);
+				if (it->second->GetIsSendUpdates())
+				{
+					MessageStructures::BaseMessage message;
+					int size = it->second->BuildPacket(message);
+					serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), size);
+				}
 			}
 		}
 

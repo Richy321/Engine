@@ -21,7 +21,7 @@ namespace Core
 		vec3 up;
 
 	public:
-		bool useQuaternionRotation = false;
+		bool useQuaternionRotation = true;
 
 		CameraFPS()
 		{
@@ -88,10 +88,26 @@ namespace Core
 
 		void RotateQuaternion(int deltaX, int deltaY)
 		{
-			const vec3 Vaxis(0.0f, 1.0f, 0.0f);
+			const vec3 Vaxis(0.0f, 1.0f, 0.0f); //always rotate about a fixed up vector (FPS style)
 			
+			// Compute new orientation
+			headingAngle += rotationSpeed * float(deltaX);
+			pitchAngle += rotationSpeed * float(deltaY);
 
+			//create rotation heading angle about the vertical axis
+			vec3 tmpFwd(0.0f, 0.0f, 1.0f); //default fwd vector
+			quat q = glm::angleAxis(headingAngle, Vaxis);
+			tmpFwd = normalize(q * tmpFwd);
 
+			vec3 Haxis = normalize(cross(tmpFwd, Vaxis)); //get updated horizontal axis
+
+			//create rotation pitch angle about the horizontal axis
+			q = glm::angleAxis(pitchAngle, Haxis);
+			tmpFwd = normalize(q * tmpFwd);
+
+			forward = normalize(tmpFwd);
+			up = normalize(cross(target, Haxis)); //get updated up axis
+			right = Haxis;
 		}
 
 		void Update(float deltaTime) override

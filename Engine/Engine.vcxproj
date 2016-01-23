@@ -379,6 +379,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\Networking\Packing.h" />
     <ClInclude Include="Core\Networking\MessageStructures.h" />
     <ClInclude Include="Core\Networking\IClientNetworkManager.h" />
+    <ClInclude Include="Core\HelperGameObjects\DirectionalGameObject.h" />
     <ClInclude Include="Scenes\MultiplayerArena\GameOptions.h" />
     <ClInclude Include="Scenes\MultiplayerArena\IObjectPool.h" />
     <ClInclude Include="Scenes\MultiplayerArena\ObjectPool.h" />

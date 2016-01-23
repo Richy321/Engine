@@ -14,6 +14,7 @@ class NetworkViewComponent : public Core::INetworkViewComponent, public std::ena
 public:
 	GUID uniqueID;
 	networking::IClientNetworkManager& networkingManager;
+	bool sendUpdates; // should we send updates about this network view to the server
 
 	enum DeadReckoningType
 	{
@@ -27,7 +28,7 @@ public:
 	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, networking::IClientNetworkManager& networkingManager) : INetworkViewComponent(parent), networkingManager(networkingManager)
 	{
 		CoCreateGuid(&uniqueID);
-		
+		sendUpdates = false;
 	}
 
 	void AddToNetworkingManager()
@@ -80,6 +81,10 @@ public:
 		return uniqueID;
 	}
 
+	bool GetIsSendUpdates() override
+	{
+		return sendUpdates;
+	}
 
 	void Destroy() override
 	{

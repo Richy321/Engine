@@ -233,6 +233,9 @@
     <ClInclude Include="Scenes\MultiplayerArena\GameOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\HelperGameObjects\DirectionalGameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">

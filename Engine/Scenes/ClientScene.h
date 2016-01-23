@@ -86,7 +86,6 @@ namespace MultiplayerArena
 			player->GetWorldTransform()[3].x = spawnPosition.x;
 			player->GetWorldTransform()[3].y = spawnPosition.y;
 			player->GetWorldTransform()[3].z = spawnPosition.z;
-			
 			//InitialisePlayer(player, spawnPosition);
 			//gameObjectManager.push_back(player);
 
