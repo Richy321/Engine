@@ -104,11 +104,13 @@ namespace networking
 		virtual void OnStop()
 		{
 			ClearData();
+			Connection::OnStop();
 		}
 
 		virtual void OnDisconnect()
 		{
 			ClearData();
+			Connection::OnDisconnect();
 		}
 
 	private:

@@ -5,6 +5,7 @@
 #include "WindowInfo.h"
 #include "FramebufferInfo.h"
 #include "ContextInfo.h"
+#include <memory>
 
 namespace Core
 {
@@ -13,7 +14,7 @@ namespace Core
 		class InitialiseGLUT
 		{
 		private:
-			static Core::IListener* listener;
+			static std::shared_ptr<IListener> listener;
 			static WindowInfo windowInformation;
 
 		public: 
@@ -22,7 +23,7 @@ namespace Core
 				const Core::Initialisation::FramebufferInfo& framebufferInfo);
 
 		public:
-			static void SetListener(Core::IListener*& iListener);
+			static void SetListener(std::shared_ptr<IListener>& iListener);
 			static void Run();//called from outside
 			static void Close();
 

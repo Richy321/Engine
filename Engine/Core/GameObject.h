@@ -104,6 +104,39 @@ namespace Core
 		{
 			components.erase(std::remove_if(components.begin(), components.end(), [&](const std::shared_ptr<IComponent>& c) {  return c->GetID() == componentID; }));
 		}
+
+		std::shared_ptr<IComponent> GetComponentByType(IComponent::ComponentTypes type)
+		{
+			for (auto const& value : components)
+			{
+				if (value->GetComponentType() == type)
+					return value;
+			}
+			return nullptr;
+		}
+
+		std::shared_ptr<IComponent> GetComponentByID(int id)
+		{
+			for (auto const& value : components)
+			{
+				if (value->GetID() == id)
+					return value;
+			}
+			return nullptr;
+		}
+
+		std::vector<std::shared_ptr<IComponent>> GetComponentsOfType(IComponent::ComponentTypes type)
+		{
+			std::vector<std::shared_ptr<IComponent>> componentsOfType;
+			for (auto const& value : components)
+			{
+				if (value->GetComponentType() == type)
+					componentsOfType.push_back(value);
+			}
+			return componentsOfType;
+		}
+
+
 		#pragma endregion
 
 		#pragma region Transforms
@@ -147,7 +180,7 @@ namespace Core
 			world = glm::scale(world, glm::vec3(x,y,z));
 		}
 
-		void Scale(glm::vec3 scale)
+		void Scale(vec3 scale)
 		{
 			world = glm::scale(world, scale);
 		}

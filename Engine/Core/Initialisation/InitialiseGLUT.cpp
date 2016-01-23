@@ -1,9 +1,10 @@
 #include "InitialiseGLUT.h"
 #include "../../Core/Utils.h"
+#include <memory>
 
 using namespace Core::Initialisation;
 
-Core::IListener* InitialiseGLUT::listener = nullptr;
+std::shared_ptr<Core::IListener> InitialiseGLUT::listener = nullptr;
 WindowInfo InitialiseGLUT::windowInformation;
 
 void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
@@ -212,7 +213,7 @@ void InitialiseGLUT::PrintOpenGLInfo(const WindowInfo& windowInfo,
 	std::cout << "GLUT:\tOpenGl version: " << version << std::endl;
 }
 
-void InitialiseGLUT::SetListener(Core::IListener*& iListener)
+void InitialiseGLUT::SetListener(std::shared_ptr<Core::IListener>& iListener)
 {
 	listener = iListener;
 }

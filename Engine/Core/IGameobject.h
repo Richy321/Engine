@@ -14,6 +14,16 @@ namespace Core
 		virtual glm::mat4& GetWorldTransform() = 0;
 		virtual unsigned int GetID() = 0;
 
+		virtual void Translate(glm::vec3 trans) = 0;
+		virtual void Translate(float x, float y, float z) = 0;
+		virtual void Rotate(float angle, glm::vec3 axis) = 0;
+		virtual void RotateX(float angle) = 0;
+		virtual void RotateY(float angle) = 0;
+		virtual void RotateZ(float angle) = 0;
+		virtual void Scale(float s) = 0;
+		virtual void Scale(float x, float y, float z) = 0;
+		virtual void Scale(vec3 scale) = 0;
+
 		IGameObject()
 		{
 		}

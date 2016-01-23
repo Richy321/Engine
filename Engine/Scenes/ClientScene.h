@@ -12,11 +12,15 @@
 #include "../Scenes/MultiplayerArena/ObjectPool.h"
 #include "MultiplayerArena/GameOptions.h"
 
+#include <memory>
+
 using namespace Core;
 namespace MultiplayerArena
 {
 	class ClientScene : public Managers::SceneManager
 	{
+	private:
+		std::shared_ptr<GameObject> player;
 	public:
 
 		std::shared_ptr<CameraFPS> camera;
@@ -24,7 +28,7 @@ namespace MultiplayerArena
 		GLuint gProjectionUniform;
 		GLuint gWP;
 
-		std::shared_ptr<GameObject> player;
+		
 		std::shared_ptr<GameObject> floor;
 
 		std::shared_ptr<DirectionalLight> directionalLight;
@@ -59,10 +63,9 @@ namespace MultiplayerArena
 			SetMainCamera(camera);
 			camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
 
-			InitialiseEnvironment();
-
 			objectFactoryPool->CreateFactoryObjects(IObjectFactoryPool::Player, GameOptions::MaxPlayers);
 
+			InitialiseEnvironment();
 			InitialiseLocalPlayer();
 
 			networking::ClientNetworkManager::GetInstance().InitialiseConnectionToServer();
@@ -81,37 +84,34 @@ namespace MultiplayerArena
 		void InitialiseLocalPlayer()
 		{
 			vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
-
 			player = objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player);
-			player->GetWorldTransform()[3].x = spawnPosition.x;
-			player->GetWorldTransform()[3].y = spawnPosition.y;
-			player->GetWorldTransform()[3].z = spawnPosition.z;
-			//InitialisePlayer(player, spawnPosition);
-			//gameObjectManager.push_back(player);
-
-			//std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<GameObject>(), networking::ClientNetworkManager::GetInstance());
-			//networkView->AddToNetworkingManager();
-			//player->AddComponent(networkView);
+			InitialisePlayer(player, spawnPosition, true);
 		}
 
-		void InitialisePlayer(std::shared_ptr<GameObject> &player, vec3 &position)
+		void InitialisePlayer(std::shared_ptr<GameObject> &player, vec3 &position, bool isLocal)
 		{
-			player->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
-			player->Translate(position);
-			player->Scale(0.05f);
+			player->GetWorldTransform()[3].x = position.x;
+			player->GetWorldTransform()[3].y = position.y;
+			player->GetWorldTransform()[3].z = position.z;
+
+			if (isLocal)
+			{
+				auto component = player->GetComponentByType(Core::IComponent::NetworkView);
+				if (component != nullptr)
+				{
+					std::shared_ptr<NetworkViewComponent> networkView = std::dynamic_pointer_cast<NetworkViewComponent>(component);
+					networkView->SetIsSendUpdates(true);
+				}
+			}
 		}
 
 		void SpawnOpponentPlayer(vec3 position)
 		{
 			std::shared_ptr<GameObject> opponent = std::make_shared<GameObject>();
-			InitialisePlayer(opponent, position);
+			InitialisePlayer(opponent, position, false);
 			//otherPlayers.push_back(opponent);
 		}
 
-		void RemoveOpponentPlayer(unsigned int playerID)
-		{
-
-		}
 
 		void InitialiseTextures()
 		{

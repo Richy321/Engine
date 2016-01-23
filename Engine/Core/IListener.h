@@ -6,7 +6,7 @@ namespace Core
 	class IListener
 	{
 	public:
-		virtual ~IListener() = 0;
+		virtual ~IListener() {}
 		virtual void Initialise() = 0;
 
 		//drawing functions
@@ -34,8 +34,4 @@ namespace Core
 			const GLchar* message,
 			const void* userParam) = 0;
 	};
-	inline IListener::~IListener() 
-	{
-		//implementation of pure virtual destructor
-	}
 }

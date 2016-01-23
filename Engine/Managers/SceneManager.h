@@ -15,7 +15,7 @@ using namespace glm;
 
 namespace Managers
 {
-	class SceneManager : public Core::IListener
+	class SceneManager : public Core::IListener, public std::enable_shared_from_this<SceneManager>
 	{
 	private:
 		bool captureCursor = false;
@@ -23,7 +23,7 @@ namespace Managers
 	protected:
 		SceneManager(Core::Initialisation::WindowInfo winInfo);
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
-		std::mutex mutexGameObjectManager;
+		
 		std::unique_ptr<Core::Timer> timer;
 		float lastUpdateTime;
 		float lastUpdateCommsTime;
@@ -35,6 +35,7 @@ namespace Managers
 		int mouseDeltaX;
 		int mouseDeltaY;
 
+		std::mutex mutexGameObjectManager;
 	public:
 		~SceneManager();
 

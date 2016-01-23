@@ -13,15 +13,21 @@
 using namespace Core;
 namespace MultiplayerArena
 {
-	class ServerScene : public ClientScene
+	class ServerScene : public ClientScene, public IConnectionEventHandler
 	{
 	public:
-		std::map<GUID, std::shared_ptr<networking::NetworkPlayer>, Utils::GUIDComparer> connectedPlayerMap;
+		typedef std::map<GUID, std::shared_ptr<networking::NetworkPlayer>, Utils::GUIDComparer> PlayerConnectionMap;
+		PlayerConnectionMap connectedPlayerMap;
+		
 		networking::IConnection* connection;
 		std::chrono::time_point<std::chrono::system_clock> startTime;
 		std::chrono::time_point<std::chrono::system_clock> lastTime;
 		networking::FlowControl flowControl;
 		std::unique_ptr<TickTimer> timer;
+
+		std::mutex mutexConnectedPlayerMap;
+
+		GUID lastConnectedPlayer;
 
 		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
 		{
@@ -42,9 +48,10 @@ namespace MultiplayerArena
 			SetMainCamera(camera);
 			camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
 
-			InitialiseEnvironment();
 			objectFactoryPool->CreateFactoryObjects(IObjectFactoryPool::Player, GameOptions::MaxPlayers);
 
+			InitialiseEnvironment();
+			
 			InitialiseServerComms();
 		}
 
@@ -62,6 +69,9 @@ namespace MultiplayerArena
 				printf("could not start connection on port %d\n", ServerPort);
 				return;
 			}
+			std::shared_ptr<SceneManager> ptrToThis = shared_from_this();
+			std::shared_ptr<IConnectionEventHandler> connectionEventHandler = std::dynamic_pointer_cast<IConnectionEventHandler>(ptrToThis);
+			connection->SetConnectionEventHandler(connectionEventHandler);
 			connection->Listen();
 
 			timer->Start();
@@ -94,20 +104,23 @@ namespace MultiplayerArena
 
 		void RunSimulation()
 		{
-			//update server visualisations
-			for (auto const& value : connectedPlayerMap)
 			{
-				if (value.second->messages.size() > 0)
+				std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedPlayerMap);
+				//update server visualisations
+				for (auto const& value : connectedPlayerMap)
 				{
-					//just use last message received for the moment
-					std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
-					const float delta_x = 0.1f;
+					if (value.second->messages.size() > 0)
+					{
+						//just use last message received for the moment
+						std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
+						const float delta_x = 0.1f;
 
-					value.second->relatedGameObject->GetWorldTransform()[3].x = message->positionMessage.position.x;
-					value.second->relatedGameObject->GetWorldTransform()[3].y = message->positionMessage.position.y;
-					value.second->relatedGameObject->GetWorldTransform()[3].z = message->positionMessage.position.z;
+						value.second->relatedGameObject->GetWorldTransform()[3].x = message->positionMessage.position.x;
+						value.second->relatedGameObject->GetWorldTransform()[3].y = message->positionMessage.position.y;
+						value.second->relatedGameObject->GetWorldTransform()[3].z = message->positionMessage.position.z;
 
-					//value.second->relatedGameObject->GetWorldTransform()[3].x += 0.1f;
+						//value.second->relatedGameObject->GetWorldTransform()[3].x += 0.1f;
+					}
 				}
 			}
 
@@ -134,6 +147,7 @@ namespace MultiplayerArena
 
 		void SendUpdatedSnapshots()
 		{
+			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedPlayerMap);
 			for (auto const& value : connectedPlayerMap)
 			{
 				networking::MessageStructures::BaseMessage message;
@@ -148,6 +162,7 @@ namespace MultiplayerArena
 		void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message)
 		{
 			//Add new player if not exists
+			mutexConnectedPlayerMap.lock();
 			if (message->messageType == networking::MessageStructures::PlayerConnect || connectedPlayerMap.find(message->uniqueID) == connectedPlayerMap.end())
 			{
 				vec3 pos;
@@ -160,13 +175,17 @@ namespace MultiplayerArena
 				vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
 				ConnectPlayer(message->uniqueID, spawnPosition);
 			}
-			else if (message->messageType == networking::MessageStructures::PlayerDisconnect)
+			mutexConnectedPlayerMap.unlock();
+
+			if (message->messageType == networking::MessageStructures::PlayerDisconnect)
 			{
 				DisconnectPlayer(message->uniqueID);
 			}
 			else
 			{
+				mutexConnectedPlayerMap.lock();
 				connectedPlayerMap[message->uniqueID]->messages.push_back(message);
+				mutexConnectedPlayerMap.unlock();
 			}
 		}
 
@@ -186,20 +205,38 @@ namespace MultiplayerArena
 		{
 			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
 
-			std::shared_ptr<GameObject> newPlayer = objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player);;
+			std::shared_ptr<GameObject> player = objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player);
+			InitialisePlayer(player, position, false);
+
 			connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
-			connectedPlayerMap[id]->relatedGameObject = newPlayer;
-			
-			connectedPlayerMap[id]->relatedGameObject->GetWorldTransform()[3].x = position.x;
-			connectedPlayerMap[id]->relatedGameObject->GetWorldTransform()[3].y = position.y;
-			connectedPlayerMap[id]->relatedGameObject->GetWorldTransform()[3].z = position.z;
+			connectedPlayerMap[id]->relatedGameObject = player;
 
 			printf("Connected new player at %f %f %f \n", position.x, position.y, position.z);
+			lastConnectedPlayer = id;
 		}
 
 		void DisconnectPlayer(GUID id)
 		{
-			//todo delete objects on disconnect
+			gameObjectManager.erase(std::remove(gameObjectManager.begin(), gameObjectManager.end(), connectedPlayerMap[id]->relatedGameObject), gameObjectManager.end());
+			connectedPlayerMap.erase(id);
+		}
+
+		void OnStart() override
+		{
+		}
+		void OnStop() override
+		{
+		}
+		void OnConnect() override
+		{
+			
+		}
+		void OnDisconnect() override
+		{
+			std::lock_guard<std::mutex> lockGameObjectManager(mutexGameObjectManager);
+			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedPlayerMap);
+
+			DisconnectPlayer(lastConnectedPlayer);
 		}
 	};
 }

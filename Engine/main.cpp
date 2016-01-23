@@ -31,10 +31,9 @@ int main(int argc, char **argv)
 
 
 #if IS_SERVER
-	IListener* scene = new MultiplayerArena::ServerScene(window);
+	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ServerScene>(window);
 #else
-	//IListener* scene = new TestScene(window);
-	IListener* scene = new MultiplayerArena::ClientScene(window);
+	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ClientScene>(window);
 #endif
 	scene->Initialise();
 	InitialiseGLUT::SetListener(scene);
@@ -42,7 +41,6 @@ int main(int argc, char **argv)
 	InitialiseGLUT::Run();
 
 	//cleanup
-	delete scene;
 	return 0;
 }
 

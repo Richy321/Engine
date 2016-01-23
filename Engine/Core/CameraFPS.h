@@ -12,13 +12,57 @@ namespace Core
 		float pitchAngle = 0.0f;
 
 		const float cameraMovementSpeed = 10.1f;
-		const float rotationSpeed = 0.001f;
+		const float rotationSpeed = 0.005f;
 
 		vec3 translateDelta;
 
 		vec3 forward;
 		vec3 right;
 		vec3 up;
+
+		void RotateSpherical(int deltaX, int deltaY)
+		{
+			// Compute new orientation
+			headingAngle += rotationSpeed * float(deltaX);
+			pitchAngle += rotationSpeed * float(deltaY);
+
+			// Forward Spherical coordinates to Cartesian coordinates conversion
+			forward.x = cos(pitchAngle) * sin(headingAngle);
+			forward.y = sin(pitchAngle);
+			forward.z = cos(pitchAngle) * cos(headingAngle);
+
+			// Right vector -90deg from forward
+			right.x = sin(headingAngle - 3.14f / 2.0f);
+			right.y = 0.0f;//always zero due to right being horizontal (on xz plane)
+			right.z = cos(headingAngle - 3.14f / 2.0f);
+
+			// Up vector
+			up = cross(right, forward);
+		}
+
+		void RotateQuaternion(int deltaX, int deltaY)
+		{
+			const vec3 Vaxis(0.0f, 1.0f, 0.0f); //always rotate about a fixed up vector (FPS style)
+
+			// Compute new orientation
+			headingAngle += rotationSpeed * float(deltaX);
+			pitchAngle += rotationSpeed * float(deltaY);
+
+			//create rotation heading angle about the vertical axis
+			vec3 tmpFwd(0.0f, 0.0f, 1.0f); //default fwd vector
+			quat q = glm::angleAxis(headingAngle, Vaxis);
+			tmpFwd = normalize(q * tmpFwd);
+
+			vec3 Haxis = normalize(cross(tmpFwd, Vaxis)); //get updated horizontal axis
+
+			//create rotation pitch angle about the horizontal axis
+			q = glm::angleAxis(pitchAngle, Haxis);
+			tmpFwd = normalize(q * tmpFwd);
+
+			forward = normalize(tmpFwd);
+			up = normalize(cross(Haxis, forward)); //get updated up axis
+			right = Haxis;
+		}
 
 	public:
 		bool useQuaternionRotation = true;
@@ -64,50 +108,6 @@ namespace Core
 				RotateQuaternion(deltaX, deltaY);
 			else
 				RotateSpherical(deltaX, deltaY);
-		}
-
-		void RotateSpherical(int deltaX, int deltaY)
-		{
-			// Compute new orientation
-			headingAngle += rotationSpeed * float(deltaX);
-			pitchAngle += rotationSpeed * float(deltaY);
-
-			// Forward Spherical coordinates to Cartesian coordinates conversion
-			forward.x = cos(pitchAngle) * sin(headingAngle);
-			forward.y = sin(pitchAngle);
-			forward.z = cos(pitchAngle) * cos(headingAngle);
-
-			// Right vector -90deg from forward
-			right.x = sin(headingAngle - 3.14f / 2.0f);
-			right.y = 0.0f;//always zero due to right being horizontal (on xz plane)
-			right.z = cos(headingAngle - 3.14f / 2.0f);
-
-			// Up vector
-			up = glm::cross(right, forward);
-		}
-
-		void RotateQuaternion(int deltaX, int deltaY)
-		{
-			const vec3 Vaxis(0.0f, 1.0f, 0.0f); //always rotate about a fixed up vector (FPS style)
-			
-			// Compute new orientation
-			headingAngle += rotationSpeed * float(deltaX);
-			pitchAngle += rotationSpeed * float(deltaY);
-
-			//create rotation heading angle about the vertical axis
-			vec3 tmpFwd(0.0f, 0.0f, 1.0f); //default fwd vector
-			quat q = glm::angleAxis(headingAngle, Vaxis);
-			tmpFwd = normalize(q * tmpFwd);
-
-			vec3 Haxis = normalize(cross(tmpFwd, Vaxis)); //get updated horizontal axis
-
-			//create rotation pitch angle about the horizontal axis
-			q = glm::angleAxis(pitchAngle, Haxis);
-			tmpFwd = normalize(q * tmpFwd);
-
-			forward = normalize(tmpFwd);
-			up = normalize(cross(target, Haxis)); //get updated up axis
-			right = Haxis;
 		}
 
 		void Update(float deltaTime) override

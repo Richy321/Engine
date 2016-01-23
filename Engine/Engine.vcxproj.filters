@@ -233,7 +233,7 @@
     <ClInclude Include="Scenes\MultiplayerArena\GameOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\HelperGameObjects\DirectionalGameObject.h">
+    <ClInclude Include="Core\Components\DirectionalMovementComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

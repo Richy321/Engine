@@ -86,8 +86,16 @@ public:
 		return sendUpdates;
 	}
 
+	void SetIsSendUpdates(bool value)
+	{
+		sendUpdates = value;
+	}
+
 	void Destroy() override
 	{
 	}
+
+
+	ComponentTypes GetComponentType() const override { return ComponentTypes::NetworkView; }
 };
 

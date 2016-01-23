@@ -12,7 +12,7 @@ namespace MultiplayerArena
 	{
 		struct ObjectPool
 		{
-			std::stack<std::shared_ptr<Core::GameObject>> activeObjects;
+			std::vector<std::shared_ptr<Core::GameObject>> activeObjects;
 			std::stack<std::shared_ptr<Core::GameObject>> inactiveObjects;
 		};
 
@@ -64,7 +64,7 @@ namespace MultiplayerArena
 				assert(objectPool->second->inactiveObjects.size() > 0); //assert to ensure no on the fly Object construction
 				auto gameObj = objectPool->second->inactiveObjects.top();
 				objectPool->second->inactiveObjects.pop();
-				objectPool->second->activeObjects.push(gameObj);
+				objectPool->second->activeObjects.push_back(gameObj);
 
 				return gameObj;
 			}
@@ -93,6 +93,12 @@ namespace MultiplayerArena
 				}
 				objectPoolMap[objectType]->inactiveObjects.push(obj);
 			}
+		}
+
+		void ReleaseFactoryObject(FactoryObjectType objectType, std::shared_ptr<GameObject>& gameObject)
+		{
+			assert(objectPoolMap.find(objectType) == objectPoolMap.end());
+			objectPoolMap[objectType]->activeObjects.erase(std::remove(objectPoolMap[objectType]->activeObjects.begin(), objectPoolMap[objectType]->activeObjects.end(), gameObject), objectPoolMap[objectType]->activeObjects.end());
 		}
 	};
 }

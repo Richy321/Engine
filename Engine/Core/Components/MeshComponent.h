@@ -36,7 +36,7 @@ namespace Core
 		{
 		}
 	
-		size_t AddRootMesh(std::shared_ptr<Mesh> mesh) const
+		size_t AddRootMesh(std::shared_ptr<Core::Mesh> mesh) const
 		{
 			rootMeshNode->AddMesh(mesh);
 			return rootMeshNode->meshes.size() - 1;
@@ -46,5 +46,7 @@ namespace Core
 		{
 			rootMeshNode->meshes.erase(rootMeshNode->meshes.begin() + pos);
 		}
+
+		ComponentTypes GetComponentType() const override { return ComponentTypes::Mesh; }
 	};
 }

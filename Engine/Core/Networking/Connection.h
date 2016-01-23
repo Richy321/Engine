@@ -83,7 +83,7 @@ namespace networking
 		bool IsListening() const override { return state == Listening; }
 		bool IsRunning() const { return running; }
 		Mode GetMode() const override { return mode; }
-		void SetConnectionEventHandler(std::shared_ptr<IConnectionEventHandler> handler)
+		void SetConnectionEventHandler(std::shared_ptr<IConnectionEventHandler>& handler) override
 		{
 			connectionEventHandler = handler;
 		}
