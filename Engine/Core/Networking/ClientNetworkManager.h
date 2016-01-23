@@ -21,7 +21,7 @@ namespace networking
 		ClientNetworkManager(): timer(std::make_unique<TickTimer>())
 		{
 			SetTickRate(std::chrono::milliseconds(5));
-			//timer->AddOnTickCallback(std::bind(&ClientNetworkManager::UpdateComms, this));
+			timer->AddOnTickCallback(std::bind(&ClientNetworkManager::UpdateComms, this));
 		}
 		IConnection* serverConnection;
 		std::chrono::time_point<std::chrono::system_clock> startTime;
@@ -41,6 +41,7 @@ namespace networking
 
 		~ClientNetworkManager()
 		{
+
 		}
 
 		void InitialiseConnectionToServer()

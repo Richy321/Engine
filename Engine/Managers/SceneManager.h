@@ -8,6 +8,8 @@
 #include "../Core/Initialisation/WindowInfo.h"
 #include "../Core/Camera.h"
 #include "../Core/Lights.h"
+#include <mutex>
+
 
 using namespace glm;
 
@@ -21,6 +23,7 @@ namespace Managers
 	protected:
 		SceneManager(Core::Initialisation::WindowInfo winInfo);
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
+		std::mutex mutexGameObjectManager;
 		std::unique_ptr<Core::Timer> timer;
 		float lastUpdateTime;
 		float lastUpdateCommsTime;

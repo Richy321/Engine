@@ -9,169 +9,183 @@
 #include "../Core/Components/NetworkViewComponent.h"
 #include "../Core/Networking/ClientNetworkManager.h"
 
+#include "../Scenes/MultiplayerArena/ObjectPool.h"
+#include "MultiplayerArena/GameOptions.h"
+
 using namespace Core;
-
-class ClientScene : public Managers::SceneManager
+namespace MultiplayerArena
 {
-public:
-
-	std::shared_ptr<CameraFPS> camera;
-	GLuint gViewUniform;
-	GLuint gProjectionUniform;
-	GLuint gWP;
-
-	std::shared_ptr<GameObject> player;
-	std::shared_ptr<GameObject> floor;
-
-	std::shared_ptr<DirectionalLight> directionalLight;
-	std::vector<std::shared_ptr<SpotLight>> spotLights;
-	std::vector<std::shared_ptr<PointLight>> pointLights;
-
-	const float floorWidth = 30.0f;
-	const float floorDepth = 30.0f;
-	float m_scale = 0.0f;
-
-	std::vector<std::shared_ptr<networking::NetworkPlayer>> otherPlayers;
-
-	const std::string defaultCheckeredTexture = "Default Checkered";
-	ClientScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
+	class ClientScene : public Managers::SceneManager
 	{
-		camera = std::make_shared<CameraFPS>();
-	}
+	public:
 
-	~ClientScene()
-	{
-	}
+		std::shared_ptr<CameraFPS> camera;
+		GLuint gViewUniform;
+		GLuint gProjectionUniform;
+		GLuint gWP;
 
-	void Initialise() override
-	{
-		SceneManager::Initialise();
-		//CaptureCursor(true);
+		std::shared_ptr<GameObject> player;
+		std::shared_ptr<GameObject> floor;
 
-		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
-		SetMainCamera(camera);
-		camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
+		std::shared_ptr<DirectionalLight> directionalLight;
+		std::vector<std::shared_ptr<SpotLight>> spotLights;
+		std::vector<std::shared_ptr<PointLight>> pointLights;
 
-		InitialiseEnvironment();
+		const float floorWidth = 30.0f;
+		const float floorDepth = 30.0f;
+		float m_scale = 0.0f;
 
-		InitialiseLocalPlayer();
+		std::vector<std::shared_ptr<networking::NetworkPlayer>> otherPlayers;
 
-		networking::ClientNetworkManager::GetInstance().InitialiseConnectionToServer();
+		std::shared_ptr<ObjectFactoryPool> objectFactoryPool;
 
-	}
+		const std::string defaultCheckeredTexture = "Default Checkered";
+		ClientScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
+		{
+			camera = std::make_shared<CameraFPS>();
+			objectFactoryPool = std::make_shared<ObjectFactoryPool>(gameObjectManager);
+		}
 
-	void InitialiseEnvironment()
-	{
-		InitialiseTextures();
-		InitialiseLights();
+		~ClientScene()
+		{
+		}
 
-		floor = std::make_shared<GameObject>();
-		floor->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
-		gameObjectManager.push_back(floor);
-	}
+		void Initialise() override
+		{
+			SceneManager::Initialise();
+			//CaptureCursor(true);
 
-	void InitialiseLocalPlayer()
-	{
-		player = std::make_shared<GameObject>();
-		vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
-		InitialisePlayer(player, spawnPosition);
-		gameObjectManager.push_back(player);
+			camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
+			SetMainCamera(camera);
+			camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
 
-		std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<GameObject>(), networking::ClientNetworkManager::GetInstance());
-		networkView->AddToNetworkingManager();
-		player->AddComponent(networkView);
-	}
+			InitialiseEnvironment();
 
-	void InitialisePlayer(std::shared_ptr<GameObject> &player, vec3 &position)
-	{
-		player->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
-		player->Translate(position);
-		player->Scale(0.05f);
-	}
+			objectFactoryPool->CreateFactoryObjects(IObjectFactoryPool::Player, GameOptions::MaxPlayers);
 
-	void SpawnOpponentPlayer(vec3 position)
-	{
-		std::shared_ptr<GameObject> opponent = std::make_shared<GameObject>();
-		InitialisePlayer(opponent, position);
-		//otherPlayers.push_back(opponent);
-	}
+			InitialiseLocalPlayer();
 
-	void RemoveOpponentPlayer(unsigned int playerID)
-	{
+			networking::ClientNetworkManager::GetInstance().InitialiseConnectionToServer();
+		}
 
-	}
+		void InitialiseEnvironment()
+		{
+			InitialiseTextures();
+			InitialiseLights();
 
-	void InitialiseTextures()
-	{
-		AssetManager::GetInstance().LoadTextureFromFile("Resources/checkered.jpg", defaultCheckeredTexture, GL_BGRA, GL_RGBA, 0, 0);
-	}
+			floor = std::make_shared<GameObject>();
+			floor->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
+			gameObjectManager.push_back(floor);
+		}
 
-	void InitialiseLights()
-	{
-		directionalLight = std::make_shared<DirectionalLight>();
-		directionalLight->Color = vec3(1.0f, 1.0f, 1.0f);
-		directionalLight->AmbientIntensity = 0.01f;
-		directionalLight->DiffuseIntensity = 0.2f;
-		directionalLight->Direction = vec3(0.0f, 0.0, -1.0);
+		void InitialiseLocalPlayer()
+		{
+			vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
 
-		pointLights.push_back(std::make_shared<PointLight>());
-		pointLights[0]->DiffuseIntensity = 0.75f;
-		pointLights[0]->Color = vec3(1.0f, 0.5f, 0.0f);
-		pointLights[0]->Position = vec3(3.0f, 1.0f, 5.0f);
-		pointLights[0]->Attenuation.Linear = 0.1f;
+			player = objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player);
+			player->GetWorldTransform()[3].x = spawnPosition.x;
+			player->GetWorldTransform()[3].y = spawnPosition.y;
+			player->GetWorldTransform()[3].z = spawnPosition.z;
+			
+			//InitialisePlayer(player, spawnPosition);
+			//gameObjectManager.push_back(player);
 
-		pointLights.push_back(std::make_shared<PointLight>());
-		pointLights[1]->DiffuseIntensity = 0.75f;
-		pointLights[1]->Color = vec3(0.0f, 0.5f, 1.0f);
-		pointLights[0]->Position = vec3(7.0f, 1.0f, 1.0f);
-		pointLights[1]->Attenuation.Linear = 0.1f;
+			//std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<GameObject>(), networking::ClientNetworkManager::GetInstance());
+			//networkView->AddToNetworkingManager();
+			//player->AddComponent(networkView);
+		}
 
-		spotLights.push_back(std::make_shared<SpotLight>());
-		spotLights[0]->DiffuseIntensity = 0.9f;
-		spotLights[0]->Color = vec3(1.0f, 0.0f, 0.0f);
-		spotLights[0]->Position = vec3(floorWidth * 0.5f, 5.0f, floorDepth * 0.5f);
-		spotLights[0]->Direction = vec3(0.0, -1.0f, 0.0f);
-		spotLights[0]->Attenuation.Linear = 0.1f;
-		spotLights[0]->Cutoff = 20.0f;
-	}
+		void InitialisePlayer(std::shared_ptr<GameObject> &player, vec3 &position)
+		{
+			player->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
+			player->Translate(position);
+			player->Scale(0.05f);
+		}
 
-	void OnUpdate(float deltaTime) override
-	{
-		m_scale += 0.0057f;
-		camera->Update(deltaTime);
-		pointLights[0]->Position = vec3(floorWidth * 0.25f, 1.0f, floorDepth * (cosf(m_scale) + 1.0f) / 2.0f);
-		pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
- 	}
+		void SpawnOpponentPlayer(vec3 position)
+		{
+			std::shared_ptr<GameObject> opponent = std::make_shared<GameObject>();
+			InitialisePlayer(opponent, position);
+			//otherPlayers.push_back(opponent);
+		}
 
-	void OnCommsUpdate(float deltaTime) override
-	{
-		networking::ClientNetworkManager::GetInstance().UpdateComms();
-	}
+		void RemoveOpponentPlayer(unsigned int playerID)
+		{
 
-	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
-	{
-		camera->OnKey(key, x, y);
-	}
+		}
 
-	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
-	{
-		camera->OnMouseMove(deltaX, deltaY);
-	}
+		void InitialiseTextures()
+		{
+			AssetManager::GetInstance().LoadTextureFromFile("Resources/checkered.jpg", defaultCheckeredTexture, GL_BGRA, GL_RGBA, 0, 0);
+		}
 
-	virtual void notifyDisplayFrame() override
-	{
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
+		void InitialiseLights()
+		{
+			directionalLight = std::make_shared<DirectionalLight>();
+			directionalLight->Color = vec3(1.0f, 1.0f, 1.0f);
+			directionalLight->AmbientIntensity = 0.01f;
+			directionalLight->DiffuseIntensity = 0.2f;
+			directionalLight->Direction = vec3(0.0f, 0.0, -1.0);
 
-		vec3 cameraPos = vec3(camera->GetWorldTransform()[3]);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
+			pointLights.push_back(std::make_shared<PointLight>());
+			pointLights[0]->DiffuseIntensity = 0.75f;
+			pointLights[0]->Color = vec3(1.0f, 0.5f, 0.0f);
+			pointLights[0]->Position = vec3(3.0f, 1.0f, 5.0f);
+			pointLights[0]->Attenuation.Linear = 0.1f;
 
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
+			pointLights.push_back(std::make_shared<PointLight>());
+			pointLights[1]->DiffuseIntensity = 0.75f;
+			pointLights[1]->Color = vec3(0.0f, 0.5f, 1.0f);
+			pointLights[0]->Position = vec3(7.0f, 1.0f, 1.0f);
+			pointLights[1]->Attenuation.Linear = 0.1f;
 
-		SceneManager::notifyDisplayFrame();
-	}
-};
+			spotLights.push_back(std::make_shared<SpotLight>());
+			spotLights[0]->DiffuseIntensity = 0.9f;
+			spotLights[0]->Color = vec3(1.0f, 0.0f, 0.0f);
+			spotLights[0]->Position = vec3(floorWidth * 0.5f, 5.0f, floorDepth * 0.5f);
+			spotLights[0]->Direction = vec3(0.0, -1.0f, 0.0f);
+			spotLights[0]->Attenuation.Linear = 0.1f;
+			spotLights[0]->Cutoff = 20.0f;
+		}
+
+		void OnUpdate(float deltaTime) override
+		{
+			m_scale += 0.0057f;
+			camera->Update(deltaTime);
+			pointLights[0]->Position = vec3(floorWidth * 0.25f, 1.0f, floorDepth * (cosf(m_scale) + 1.0f) / 2.0f);
+			pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
+		}
+
+		void OnCommsUpdate(float deltaTime) override
+		{
+			networking::ClientNetworkManager::GetInstance().UpdateComms();
+		}
+
+		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
+		{
+			camera->OnKey(key, x, y);
+		}
+
+		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
+		{
+			camera->OnMouseMove(deltaX, deltaY);
+		}
+
+		virtual void notifyDisplayFrame() override
+		{
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
+
+			vec3 cameraPos = vec3(camera->GetWorldTransform()[3]);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
+
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
+
+			SceneManager::notifyDisplayFrame();
+		}
+	};
+}

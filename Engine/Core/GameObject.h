@@ -23,6 +23,8 @@ namespace Core
 		std::vector<std::weak_ptr<IGameObject>>& GetChildren() override { return children; }
 		std::weak_ptr<IGameObject>& GetParent() override { return parent; }
 
+		bool isEnabled;
+
 		mat4& GetWorldTransform() override { return world; }
 		
 		vec3 GetPosition() const { return vec3(world[3].x, world[3].y, world[3].z); }
@@ -33,6 +35,7 @@ namespace Core
 		{
 			static unsigned int IDCounter = 0;
 			ID = IDCounter++;
+			isEnabled = true;
 		}
 
 		virtual ~GameObject()
@@ -45,6 +48,8 @@ namespace Core
 
 		virtual void Update(float deltaTime)
 		{
+			if (!isEnabled)
+				return;
 			for (auto& comp : components)
 			{
 				comp->Update(deltaTime);
@@ -53,11 +58,15 @@ namespace Core
 
 		virtual void UpdatePhysics()
 		{
-			
+			if (!isEnabled)
+				return;
 		}
 
 		virtual void UpdateNetworkComms(float deltaTime)
 		{
+			if (!isEnabled)
+				return;
+
 			for (auto& comp : components)
 			{
 				if (comp->GetComponentFlags() & NetworkSyncable)
@@ -67,6 +76,9 @@ namespace Core
 
 		virtual void Render(std::shared_ptr<Camera> mainCamera)
 		{
+			if (!isEnabled)
+				return;
+
 			for(auto& comp : components)
 			{
 				if (comp->GetComponentFlags() & Renderable)

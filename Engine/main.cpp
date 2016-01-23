@@ -31,10 +31,10 @@ int main(int argc, char **argv)
 
 
 #if IS_SERVER
-	IListener* scene = new ServerScene(window);
+	IListener* scene = new MultiplayerArena::ServerScene(window);
 #else
 	//IListener* scene = new TestScene(window);
-	IListener* scene = new ClientScene(window);
+	IListener* scene = new MultiplayerArena::ClientScene(window);
 #endif
 	scene->Initialise();
 	InitialiseGLUT::SetListener(scene);

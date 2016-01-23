@@ -21,6 +21,7 @@ namespace Core
 		vec3 up;
 
 	public:
+		bool useQuaternionRotation = false;
 
 		CameraFPS()
 		{
@@ -33,6 +34,7 @@ namespace Core
 
 		void OnMouseMove(int deltaX, int deltaY) override 
 		{
+
 			Rotate(-deltaX, -deltaY);
 		}
 
@@ -58,6 +60,14 @@ namespace Core
 
 		void Rotate(int deltaX, int deltaY)
 		{
+			if (useQuaternionRotation)
+				RotateQuaternion(deltaX, deltaY);
+			else
+				RotateSpherical(deltaX, deltaY);
+		}
+
+		void RotateSpherical(int deltaX, int deltaY)
+		{
 			// Compute new orientation
 			headingAngle += rotationSpeed * float(deltaX);
 			pitchAngle += rotationSpeed * float(deltaY);
@@ -76,6 +86,14 @@ namespace Core
 			up = glm::cross(right, forward);
 		}
 
+		void RotateQuaternion(int deltaX, int deltaY)
+		{
+			const vec3 Vaxis(0.0f, 1.0f, 0.0f);
+			
+
+
+		}
+
 		void Update(float deltaTime) override
 		{
 			Translate(translateDelta * deltaTime);
@@ -83,16 +101,57 @@ namespace Core
 			translateDelta.y = 0.0f;
 			translateDelta.z = 0.0f;
 			
+			view = buildViewLookAt();
+				
+			worldToProjection = projection * view;
+			//Camera::Update(deltaTime);
+		}
+
+		mat4 buildViewManual()
+		{
+			mat4 newView;
+			vec3 pos(world[3]);
+
+			vec3 N = forward;
+			glm::normalize(N);
+			vec3 U = up;
+			U = cross(normalize(U), N);
+			vec3 V = cross(N, U);
+
+			newView[0][0] = U.x;
+			newView[1][0] = U.y;
+			newView[2][0] = U.z;
+
+			newView[0][1] = V.x;
+			newView[1][1] = V.y;
+			newView[2][1] = V.z;
+
+			newView[0][2] = -N.x;
+			newView[1][2] = -N.y;
+			newView[2][2] = -N.z;
+			//newView[0][2] = -N.x;
+			//newView[1][2] = -N.y;
+			//newView[2][2] = -N.z;
+			newView[3][0] = -dot(V, pos);
+			newView[3][1] = -dot(U, pos);
+			newView[3][2] = dot(N, pos);
+			//newView[3][0] = pos.x;
+			//newView[3][1] = pos.y;
+			//newView[3][2] = pos.z;
+			newView[3][3] = 1.0f;
+
+
+			return newView;
+		}
+
+		mat4 buildViewLookAt()
+		{
 			vec3 position(world[3]);
-			
-			view = glm::lookAt(
+			return glm::lookAt(
 				position,           // Camera is here
 				position + forward, // and looks here : at the same position, plus "direction"
 				up                  // Head is up (set to 0,-1,0 to look upside-down)
 				);
-				
-			worldToProjection = projection * view;
-			//Camera::Update(deltaTime);
 		}
 	};
 }

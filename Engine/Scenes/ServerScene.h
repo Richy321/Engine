@@ -8,189 +8,198 @@
 #include "../Core/ShaderEffects/LitTexturedMeshEffect.h"
 #include "../Core/Networking/NetworkPlayer.h"
 #include "ClientScene.h"
+#include <mutex>
 
 using namespace Core;
-
-class ServerScene : public ClientScene
+namespace MultiplayerArena
 {
-public:
-	std::map<GUID, std::shared_ptr<networking::NetworkPlayer>, Utils::GUIDComparer> connectedPlayerMap;
-	networking::IConnection* connection;
-	std::chrono::time_point<std::chrono::system_clock> startTime;
-	std::chrono::time_point<std::chrono::system_clock> lastTime;
-	networking::FlowControl flowControl;
-	std::unique_ptr<TickTimer> timer;
-	
-	ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
+	class ServerScene : public ClientScene
 	{
-		timer->SetTickIntervalMilliseconds(std::chrono::milliseconds(15));
-		//timer->AddOnTickCallback(std::bind(&ServerScene::OnCommsUpdate, this));
-	}
+	public:
+		std::map<GUID, std::shared_ptr<networking::NetworkPlayer>, Utils::GUIDComparer> connectedPlayerMap;
+		networking::IConnection* connection;
+		std::chrono::time_point<std::chrono::system_clock> startTime;
+		std::chrono::time_point<std::chrono::system_clock> lastTime;
+		networking::FlowControl flowControl;
+		std::unique_ptr<TickTimer> timer;
 
-	~ServerScene() 
-	{
-	}
-
-	void Initialise() override
-	{
-		SceneManager::Initialise();
-		CaptureCursor(false);
-		
-		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
-		SetMainCamera(camera);
-		camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
-
-		InitialiseEnvironment();
-		InitialiseServerComms();	
-	}
-
-	void InitialiseServerComms()
-	{
-		startTime = std::chrono::system_clock::now();
-		lastTime = startTime;
-		if (isUseReliableConnection)
-			connection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
-		else
-			connection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
-
-		if (!connection->Start(ServerPort))
+		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
 		{
-			printf("could not start connection on port %d\n", ServerPort);
-			return;
+			timer->SetTickIntervalMilliseconds(std::chrono::milliseconds(15));
+			timer->AddOnTickCallback(std::bind(&ServerScene::OnCommsUpdate, this, 0.0f));
 		}
-		connection->Listen();
 
-		timer->Start();
-	}
-
-	void OnCommsUpdate(float delta) override
-	{
-		std::chrono::time_point<std::chrono::system_clock> nowTime = std::chrono::system_clock::now();
-		std::chrono::milliseconds deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - lastTime);
-		float deltaTimeSecs = deltaTime.count() * 0.001f;
-		std::chrono::milliseconds fromStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
-
-		//printf("Comms update: %f \n", fromStartTime.count() * 0.001f);
-		
-		//if (connection->IsConnected())
-		ReceiveAndStorePackets();
-
-		RunSimulation();
-
-		//if (connection->IsConnected())
-		SendUpdatedSnapshots();
-
-		connection->Update(deltaTimeSecs);
-		if (isUseReliableConnection)
-			flowControl.Update(deltaTimeSecs, static_cast<networking::ReliableConnection*>(connection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
-
-		lastTime = nowTime;
-	}
-
-
-	void RunSimulation()
-	{
-		//update server visualisations
-		for(auto const& value : connectedPlayerMap)
+		~ServerScene()
 		{
-			if (value.second->messages.size() > 0)
+		}
+
+		void Initialise() override
+		{
+			SceneManager::Initialise();
+			CaptureCursor(false);
+
+			camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
+			SetMainCamera(camera);
+			camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
+
+			InitialiseEnvironment();
+			objectFactoryPool->CreateFactoryObjects(IObjectFactoryPool::Player, GameOptions::MaxPlayers);
+
+			InitialiseServerComms();
+		}
+
+		void InitialiseServerComms()
+		{
+			startTime = std::chrono::system_clock::now();
+			lastTime = startTime;
+			if (isUseReliableConnection)
+				connection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
+			else
+				connection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
+
+			if (!connection->Start(ServerPort))
 			{
-				//just use last message received for the moment
-				std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
-				const float delta_x = 0.1f;
+				printf("could not start connection on port %d\n", ServerPort);
+				return;
+			}
+			connection->Listen();
 
-				value.second->relatedGameObject->GetWorldTransform()[3].x = message->positionMessage.position.x;
-				value.second->relatedGameObject->GetWorldTransform()[3].y = message->positionMessage.position.y;
-				value.second->relatedGameObject->GetWorldTransform()[3].z = message->positionMessage.position.z;
+			timer->Start();
+		}
 
-				//value.second->relatedGameObject->GetWorldTransform()[3].x += 0.1f;
+		void OnCommsUpdate(float delta) override
+		{
+			std::chrono::time_point<std::chrono::system_clock> nowTime = std::chrono::system_clock::now();
+			std::chrono::milliseconds deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - lastTime);
+			float deltaTimeSecs = deltaTime.count() * 0.001f;
+			std::chrono::milliseconds fromStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
+
+			//printf("Comms update: %f \n", fromStartTime.count() * 0.001f);
+
+			//if (connection->IsConnected())
+			ReceiveAndStorePackets();
+
+			RunSimulation();
+
+			//if (connection->IsConnected())
+			SendUpdatedSnapshots();
+
+			connection->Update(deltaTimeSecs);
+			if (isUseReliableConnection)
+				flowControl.Update(deltaTimeSecs, static_cast<networking::ReliableConnection*>(connection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
+
+			lastTime = nowTime;
+		}
+
+
+		void RunSimulation()
+		{
+			//update server visualisations
+			for (auto const& value : connectedPlayerMap)
+			{
+				if (value.second->messages.size() > 0)
+				{
+					//just use last message received for the moment
+					std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
+					const float delta_x = 0.1f;
+
+					value.second->relatedGameObject->GetWorldTransform()[3].x = message->positionMessage.position.x;
+					value.second->relatedGameObject->GetWorldTransform()[3].y = message->positionMessage.position.y;
+					value.second->relatedGameObject->GetWorldTransform()[3].z = message->positionMessage.position.z;
+
+					//value.second->relatedGameObject->GetWorldTransform()[3].x += 0.1f;
+				}
+			}
+
+			//todo - collision detection confirmation...
+
+			//todo - possible physics simulation
+		}
+
+		void ReceiveAndStorePackets()
+		{
+			//receive until theres no more packets left
+			while (true)
+			{
+				unsigned char packet[256];
+				int bytesRead = connection->ReceivePacket(packet, sizeof(packet));
+				if (bytesRead == 0)
+					break;
+				std::shared_ptr<networking::MessageStructures::BaseMessage> message = std::make_shared<networking::MessageStructures::BaseMessage>();
+				memcpy(message.get(), packet, sizeof(networking::MessageStructures::BaseMessage));
+
+				ReadPacket(message);
 			}
 		}
 
-		//todo - collision detection confirmation...
-
-		//todo - possible physics simulation
-	}
-
-	void ReceiveAndStorePackets()
-	{
-		//receive until theres no more packets left
-		while (true)
+		void SendUpdatedSnapshots()
 		{
-			unsigned char packet[256];
-			int bytesRead = connection->ReceivePacket(packet, sizeof(packet));
-			if (bytesRead == 0)
-				break;
-			std::shared_ptr<networking::MessageStructures::BaseMessage> message = std::make_shared<networking::MessageStructures::BaseMessage>();
-			memcpy(message.get(), packet, sizeof(networking::MessageStructures::BaseMessage));
+			for (auto const& value : connectedPlayerMap)
+			{
+				networking::MessageStructures::BaseMessage message;
+				message.messageType = networking::MessageStructures::BasicPosition;
+				message.uniqueID = value.first;
+				message.positionMessage.position = value.second->relatedGameObject->GetPosition();
 
-			ReadPacket(message);
+				connection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(networking::MessageStructures::BaseMessage));
+			}
 		}
-	}
 
-	void SendUpdatedSnapshots()
-	{
-		for (auto const& value : connectedPlayerMap)
+		void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message)
 		{
-			networking::MessageStructures::BaseMessage message;
-			message.messageType = networking::MessageStructures::BasicPosition;
-			message.uniqueID = value.first;
-			message.positionMessage.position = value.second->relatedGameObject->GetPosition();
+			//Add new player if not exists
+			if (message->messageType == networking::MessageStructures::PlayerConnect || connectedPlayerMap.find(message->uniqueID) == connectedPlayerMap.end())
+			{
+				vec3 pos;
+				if (message->messageType == networking::MessageStructures::BasicPosition)
+					pos = message->positionMessage.position;
+				else
+					pos = vec3(floorWidth * 0.35f, 5.0f, floorDepth * 0.35f);
 
-			connection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(networking::MessageStructures::BaseMessage));
-		}
-	}
 
-	void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message)
-	{
-		//Add new player if not exists
-		if(message->messageType == networking::MessageStructures::PlayerConnect || connectedPlayerMap.find(message->uniqueID) == connectedPlayerMap.end())
-		{
-			vec3 pos;
-			if (message->messageType == networking::MessageStructures::BasicPosition)
-				pos = message->positionMessage.position;
+				vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
+				ConnectPlayer(message->uniqueID, spawnPosition);
+			}
+			else if (message->messageType == networking::MessageStructures::PlayerDisconnect)
+			{
+				DisconnectPlayer(message->uniqueID);
+			}
 			else
-				pos = vec3(floorWidth * 0.35f, 5.0f, floorDepth * 0.35f);
-
-
-			vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
-			ConnectPlayer(message->uniqueID, spawnPosition);
+			{
+				connectedPlayerMap[message->uniqueID]->messages.push_back(message);
+			}
 		}
-		else if(message->messageType == networking::MessageStructures::PlayerDisconnect)
+
+
+
+		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 		{
-			DisconnectPlayer(message->uniqueID);
+			//disable keys
 		}
-		else
+
+		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
 		{
-			connectedPlayerMap[message->uniqueID]->messages.push_back(message);
+			//disable mousemove
 		}
-	}
 
+		void ConnectPlayer(GUID id, vec3 position)
+		{
+			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
 
+			std::shared_ptr<GameObject> newPlayer = objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player);;
+			connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
+			connectedPlayerMap[id]->relatedGameObject = newPlayer;
+			
+			connectedPlayerMap[id]->relatedGameObject->GetWorldTransform()[3].x = position.x;
+			connectedPlayerMap[id]->relatedGameObject->GetWorldTransform()[3].y = position.y;
+			connectedPlayerMap[id]->relatedGameObject->GetWorldTransform()[3].z = position.z;
 
-	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
-	{
-		//disable keys
-	}
+			printf("Connected new player at %f %f %f \n", position.x, position.y, position.z);
+		}
 
-	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
-	{
-		//disable mousemove
-	}
-
-	void ConnectPlayer(GUID id, vec3 position)
-	{
-		std::shared_ptr<GameObject> newPlayer = std::make_shared<GameObject>();
-		connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
-		connectedPlayerMap[id]->relatedGameObject = newPlayer;
-		InitialisePlayer(newPlayer, position);
-		gameObjectManager.push_back(newPlayer);
-		printf("Connected new player at %f %f %f \n", position.x, position.y, position.z);
-	}
-
-	void DisconnectPlayer(GUID id)
-	{
-		//todo delete objects on disconnect
-	}
-};
-
+		void DisconnectPlayer(GUID id)
+		{
+			//todo delete objects on disconnect
+		}
+	};
+}

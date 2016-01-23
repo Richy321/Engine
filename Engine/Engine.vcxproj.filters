@@ -43,6 +43,9 @@
     <Filter Include="Core\Managers">
       <UniqueIdentifier>{12894be7-b772-4f78-a6c4-b9092ce3ebb2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scenes\MultiplayerArena">
+      <UniqueIdentifier>{5047ce93-c0f6-4243-ba5f-330d01373c3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -213,12 +216,21 @@
       <Filter>Core\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Core\Networking\ClientNetworkManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Core\Networking</Filter>
     </ClInclude>
     <ClInclude Include="Core\Networking\IClientNetworkManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\ObjectPool.h">
+      <Filter>Scenes\MultiplayerArena</Filter>
     </ClInclude>
     <ClInclude Include="Core\TickTimer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\IObjectPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\GameOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
