@@ -6,6 +6,9 @@
 #include <stack>
 #include "../../Core/AssetManager.h"
 #include "../../Core/Networking/ClientNetworkManager.h"
+#include "../../Core/Components/DirectionalMovementComponent.h"
+#include "PlayerGameObject.h"
+
 namespace MultiplayerArena
 {
 	class ObjectFactoryPool : public IObjectFactoryPool
@@ -20,11 +23,11 @@ namespace MultiplayerArena
 		std::map <FactoryObjectType, std::shared_ptr<ObjectPool>>  objectPoolMap;
 		std::vector<std::shared_ptr<Core::GameObject>>& gameObjectManager;
 
-		std::shared_ptr<Core::GameObject> CreatePlayerObject() const
+		std::shared_ptr<GameObject> CreatePlayerObject() const
 		{
-			std::shared_ptr<Core::GameObject> player = std::make_shared<Core::GameObject>();
+			std::shared_ptr<PlayerGameObject> player = std::make_shared<PlayerGameObject>();
 
-			player->AddComponent(Core::AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
+			player->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
 			player->Translate(offscreenSpawnPoint);
 			player->Scale(0.05f);
 			gameObjectManager.push_back(player);
@@ -32,6 +35,9 @@ namespace MultiplayerArena
 			std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<Core::GameObject>(), networking::ClientNetworkManager::GetInstance());
 			networkView->AddToNetworkingManager();
 			player->AddComponent(networkView);
+
+			std::shared_ptr<DirectionalMovementComponent> directionalMove = std::make_shared<DirectionalMovementComponent>(std::weak_ptr<Core::GameObject>());
+			player->AddComponent(directionalMove);
 
 			return player;
 		}
@@ -46,7 +52,7 @@ namespace MultiplayerArena
 
 	public:
 
-		ObjectFactoryPool(std::vector<std::shared_ptr<Core::GameObject>>& gameObjectManager) : gameObjectManager(gameObjectManager)
+		ObjectFactoryPool(std::vector<std::shared_ptr<GameObject>>& gameObjectManager) : gameObjectManager(gameObjectManager)
 		{
 		}
 
@@ -54,7 +60,7 @@ namespace MultiplayerArena
 		{
 		}
 
-		std::shared_ptr<Core::GameObject> GetFactoryObject(FactoryObjectType objectType) override
+		std::shared_ptr<GameObject> GetFactoryObject(FactoryObjectType objectType) override
 		{
 			std::lock_guard<std::mutex> lock(mutexObjectPoolMap);
 

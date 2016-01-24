@@ -45,7 +45,7 @@ namespace Core
 		void SetParentGameObject(std::weak_ptr<IGameObject> parent) { parentGameObject = parent; }
 
 		virtual void Update(float deltaTime) = 0;
-		virtual void Destroy() = 0;
+		virtual void Destroy() {}
 
 		virtual ComponentTypes GetComponentType() const = 0;
 	};

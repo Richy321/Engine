@@ -78,27 +78,26 @@ namespace Core
 
 		void OnMouseMove(int deltaX, int deltaY) override 
 		{
-
 			Rotate(-deltaX, -deltaY);
 		}
 
 		void OnKey(unsigned char key, int x, int y) override
 		{
-			if (key == 'a')
+			if (key == 'j')
 				translateDelta -= right * cameraMovementSpeed;
-			if (key == 'd')
+			if (key == 'l')
 				translateDelta += right * cameraMovementSpeed;
-			if (key == 'w')
+			if (key == 'i')
 				translateDelta += forward * cameraMovementSpeed;
-			if (key == 's')
+			if (key == 'k')
 				translateDelta -= forward * cameraMovementSpeed;
-			if (key == 'z')
+			if (key == 'm')
 				translateDelta += up * cameraMovementSpeed;
-			if (key == 'c')
+			if (key == '.')
 				translateDelta -= up * cameraMovementSpeed;
-			if (key == 'q')
+			if (key == 'u')
 				Rotate(30, 0);
-			if (key == 'e')
+			if (key == 'o')
 				Rotate(-30, 0);
 		}
 

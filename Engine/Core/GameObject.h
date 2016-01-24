@@ -89,7 +89,7 @@ namespace Core
 		}
 			
 		#pragma region Component Management
-		void AddComponent(std::shared_ptr<IComponent> component)
+		virtual void AddComponent(std::shared_ptr<IComponent> component)
 		{
 			component->SetParentGameObject(shared_from_this());
 			components.push_back(component);

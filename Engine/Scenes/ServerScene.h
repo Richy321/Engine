@@ -28,11 +28,13 @@ namespace MultiplayerArena
 		std::mutex mutexConnectedPlayerMap;
 
 		GUID lastConnectedPlayer;
+		//std::function<void(int, const ServerScene*)> commsCallWrapper = [](const ServerScene* thisRef, float delta) { if (thisRef != nullptr) { thisRef->OnCommsUpdate(delta); }};
 
 		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
 		{
 			timer->SetTickIntervalMilliseconds(std::chrono::milliseconds(15));
 			timer->AddOnTickCallback(std::bind(&ServerScene::OnCommsUpdate, this, 0.0f));
+			//timer->AddOnTickCallback(std::bind(commsCallWrapper, this, 0.0f));
 		}
 
 		~ServerScene()
@@ -205,7 +207,7 @@ namespace MultiplayerArena
 		{
 			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
 
-			std::shared_ptr<GameObject> player = objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player);
+			std::shared_ptr<PlayerGameObject> player = std::dynamic_pointer_cast<PlayerGameObject>(objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player));
 			InitialisePlayer(player, position, false);
 
 			connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
@@ -224,13 +226,15 @@ namespace MultiplayerArena
 		void OnStart() override
 		{
 		}
+
 		void OnStop() override
 		{
 		}
+
 		void OnConnect() override
-		{
-			
+		{	
 		}
+
 		void OnDisconnect() override
 		{
 			std::lock_guard<std::mutex> lockGameObjectManager(mutexGameObjectManager);

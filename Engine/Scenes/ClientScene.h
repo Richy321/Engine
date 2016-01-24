@@ -20,7 +20,7 @@ namespace MultiplayerArena
 	class ClientScene : public Managers::SceneManager
 	{
 	private:
-		std::shared_ptr<GameObject> player;
+		std::shared_ptr<PlayerGameObject> player;
 	public:
 
 		std::shared_ptr<CameraFPS> camera;
@@ -39,7 +39,7 @@ namespace MultiplayerArena
 		const float floorDepth = 30.0f;
 		float m_scale = 0.0f;
 
-		std::vector<std::shared_ptr<networking::NetworkPlayer>> otherPlayers;
+		//std::vector<std::shared_ptr<networking::NetworkPlayer>> otherPlayers;
 
 		std::shared_ptr<ObjectFactoryPool> objectFactoryPool;
 
@@ -84,11 +84,11 @@ namespace MultiplayerArena
 		void InitialiseLocalPlayer()
 		{
 			vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
-			player = objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player);
+			player = std::dynamic_pointer_cast<PlayerGameObject>(objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player));
 			InitialisePlayer(player, spawnPosition, true);
 		}
 
-		void InitialisePlayer(std::shared_ptr<GameObject> &player, vec3 &position, bool isLocal)
+		void InitialisePlayer(std::shared_ptr<PlayerGameObject> &player, vec3 &position, bool isLocal)
 		{
 			player->GetWorldTransform()[3].x = position.x;
 			player->GetWorldTransform()[3].y = position.y;
@@ -101,19 +101,12 @@ namespace MultiplayerArena
 				{
 					std::shared_ptr<NetworkViewComponent> networkView = std::dynamic_pointer_cast<NetworkViewComponent>(component);
 					networkView->SetIsSendUpdates(true);
+					networkView->deadReckoning = NetworkViewComponent::None;
 				}
 			}
 		}
 
-		void SpawnOpponentPlayer(vec3 position)
-		{
-			std::shared_ptr<GameObject> opponent = std::make_shared<GameObject>();
-			InitialisePlayer(opponent, position, false);
-			//otherPlayers.push_back(opponent);
-		}
-
-
-		void InitialiseTextures()
+		void InitialiseTextures() const
 		{
 			AssetManager::GetInstance().LoadTextureFromFile("Resources/checkered.jpg", defaultCheckeredTexture, GL_BGRA, GL_RGBA, 0, 0);
 		}
@@ -155,7 +148,7 @@ namespace MultiplayerArena
 			pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
 		}
 
-		void OnCommsUpdate(float deltaTime) override
+		void OnCommsUpdate(float deltaTime) const 
 		{
 			networking::ClientNetworkManager::GetInstance().UpdateComms();
 		}
@@ -163,6 +156,7 @@ namespace MultiplayerArena
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 		{
 			camera->OnKey(key, x, y);
+			player->OnKey(key, x, y);
 		}
 
 		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
