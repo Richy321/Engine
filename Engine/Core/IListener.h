@@ -17,6 +17,7 @@ namespace Core
 		
 		//keyboard handling
 		virtual void notifyProcessNormalKeys(unsigned char key, int x, int y) = 0;
+		virtual void notifyProcessNormalKeysUp(unsigned char key, int x, int y) = 0;
 		virtual void notifyProcessSpecialKeys(int key, int x, int y) = 0;
 
 		//mouse handling

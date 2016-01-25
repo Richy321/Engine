@@ -58,6 +58,7 @@ void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
 	glutReshapeFunc(ResizeCallback);
 
 	glutKeyboardFunc(ProcessNormalKeysCallback);
+	glutKeyboardUpFunc(ProcessNormalKeysUpCallback);
 	glutSpecialFunc(ProcessSpecialKeysCallback);
 
 	glutMouseFunc(ProcessMouseStateCallback);
@@ -151,12 +152,14 @@ void InitialiseGLUT::ResizeCallback(int width, int height)
 
 void InitialiseGLUT::ProcessNormalKeysCallback(unsigned char key, int x, int y) 
 {
-	//escape
-	if (key == 27)
-		exit(0);
-
 	if (listener)
 		listener->notifyProcessNormalKeys(key, x, y);
+}
+
+void InitialiseGLUT::ProcessNormalKeysUpCallback(unsigned char key, int x, int y)
+{
+	if (listener)
+		listener->notifyProcessNormalKeysUp(key, x, y);
 }
 
 void InitialiseGLUT::ProcessSpecialKeysCallback(int key, int x, int y)

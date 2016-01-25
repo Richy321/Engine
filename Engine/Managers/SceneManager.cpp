@@ -14,6 +14,8 @@ SceneManager::~SceneManager()
 {
 
 }
+std::map<unsigned char, bool> SceneManager::keyState;
+
 
 void SceneManager::Initialise()
 {

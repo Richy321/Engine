@@ -155,8 +155,8 @@ namespace MultiplayerArena
 
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 		{
+			SceneManager::notifyProcessNormalKeys(key, x, y);
 			camera->OnKey(key, x, y);
-			player->OnKey(key, x, y);
 		}
 
 		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override

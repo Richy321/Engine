@@ -9,8 +9,8 @@ namespace MultiplayerArena
 	{
 		std::weak_ptr<DirectionalMovementComponent> directionalMovement;
 		std::weak_ptr<PlayerNetworkViewComponent> networkView;
-		float movementSpeed = 50.0f;
-		float angularVelocity = 5.0f;
+		float movementSpeed = 2000.0f;
+		float angularVelocity = 50.0f;
 	public:
 
 		void AddComponent(std::shared_ptr<Core::IComponent> component) override
@@ -49,27 +49,34 @@ namespace MultiplayerArena
 			return nullptr;
 		}
 
-		void OnKey(unsigned char key, int x, int y)
+		void HandleKeyMovement(float deltaTime)
 		{
 			if (directionalMovement.expired())
 				return;
 
-			if (key == 'a')
-				directionalMovement.lock()->MoveRight(-movementSpeed);
-			if (key == 'd')
-				directionalMovement.lock()->MoveRight(movementSpeed);
-			if (key == 'w')
-				directionalMovement.lock()->MoveForward(movementSpeed);
-			if (key == 's')
-				directionalMovement.lock()->MoveForward(-movementSpeed);
-			if (key == 'z')
-				directionalMovement.lock()->MoveUp(movementSpeed);
-			if (key == 'c')
-				directionalMovement.lock()->MoveUp(-movementSpeed);
-			if (key == 'q')
-				directionalMovement.lock()->Rotate(angularVelocity, 0.0f);
-			if (key == 'e')
-				directionalMovement.lock()->Rotate(-angularVelocity, 0.0f);
+			if (Managers::SceneManager::keyState['a'])
+				directionalMovement.lock()->MoveRight(movementSpeed * deltaTime);
+			if (Managers::SceneManager::keyState['d'])
+				directionalMovement.lock()->MoveRight(-movementSpeed * deltaTime);
+			if (Managers::SceneManager::keyState['w'])
+				directionalMovement.lock()->MoveForward(movementSpeed * deltaTime);
+			if (Managers::SceneManager::keyState['s'])
+				directionalMovement.lock()->MoveForward(-movementSpeed * deltaTime);
+			if (Managers::SceneManager::keyState['z'])
+				directionalMovement.lock()->MoveUp(movementSpeed * deltaTime);
+			if (Managers::SceneManager::keyState['c'])
+				directionalMovement.lock()->MoveUp(-movementSpeed * deltaTime);
+			if (Managers::SceneManager::keyState['q'])
+				directionalMovement.lock()->Rotate(angularVelocity * deltaTime, 0.0f);
+			if (Managers::SceneManager::keyState['e'])
+				directionalMovement.lock()->Rotate(-angularVelocity * deltaTime, 0.0f);
+		}
+
+		void Update(float deltaTime) override
+		{
+			HandleKeyMovement(deltaTime);
+
+			GameObject::Update(deltaTime);
 		}
 		
 	};

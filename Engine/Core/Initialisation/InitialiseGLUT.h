@@ -40,6 +40,7 @@ namespace Core
 			static void CloseCallback();
 
 			static void ProcessNormalKeysCallback(unsigned char key, int x, int y);
+			static void ProcessNormalKeysUpCallback(unsigned char key, int x, int y);
 			static void ProcessSpecialKeysCallback(int key, int x, int y);
 
 			static void ProcessMouseStateCallback(int button, int state, int x, int y);

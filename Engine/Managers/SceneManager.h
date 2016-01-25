@@ -34,9 +34,14 @@ namespace Managers
 		int mousePosY;
 		int mouseDeltaX;
 		int mouseDeltaY;
+		bool paused = false;
+
+		
 
 		std::mutex mutexGameObjectManager;
 	public:
+		static std::map<unsigned char, bool> keyState;
+
 		~SceneManager();
 
 		virtual void Initialise() override;
@@ -50,7 +55,22 @@ namespace Managers
 		virtual void notifyEndFrame() override;
 		virtual void notifyReshape(int width, int height, int previous_width, int previous_height) override;
 
-		virtual void notifyProcessNormalKeys(unsigned char key, int x, int y) override {}
+		virtual void notifyProcessNormalKeys(unsigned char key, int x, int y) override 
+		{
+			if (key == 27) //escape
+				exit(0);
+
+			if (key == 'p')
+				paused = !paused;
+
+			keyState[key] = true;
+		}
+
+		virtual void notifyProcessNormalKeysUp(unsigned char key, int x, int y) override 
+		{
+			keyState[key] = false;
+		}
+
 		virtual void notifyProcessSpecialKeys(int key, int x, int y) override {}
 
 		virtual void notifyProcessMouseState(int button, int state, int x, int y) override {}
