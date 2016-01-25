@@ -47,17 +47,21 @@ namespace networking
 		void InitialiseConnectionToServer()
 		{
 			if (isUseReliableConnection)
-				serverConnection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
+				serverConnection = NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
 			else
-				serverConnection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
+				serverConnection = NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
 
-			if (!serverConnection->Start(ClientPort))
+			int startClientPort = ClientPort;
+			while(!serverConnection->Start(startClientPort) && startClientPort < startClientPort + 50)
 			{
-				printf("could not start connection on port %d\n", ClientPort);
-				return;
+				printf("could not start connection on port %d\n", startClientPort);
+				startClientPort++;
 			}
 
-			serverConnection->Connect(networking::Address(127, 0, 0, 1, ServerPort));
+			if (startClientPort == ClientPort + 50)
+				return;
+
+			serverConnection->Connect(Address(127, 0, 0, 1, ServerPort));
 
 			timer->Start();
 			startTime = std::chrono::system_clock::now();

@@ -8,7 +8,7 @@ const int CommsTickDurationMs = 250;
 
 const int MaxBufferLength = 512;
 
-const static bool isUseReliableConnection = true;
+const static bool isUseReliableConnection = false;
 
 const static networking::Address ServerAddress(127, 0, 0, 1, ServerPort);
 
