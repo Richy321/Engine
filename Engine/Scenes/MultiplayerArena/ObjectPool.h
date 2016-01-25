@@ -27,12 +27,13 @@ namespace MultiplayerArena
 		{
 			std::shared_ptr<PlayerGameObject> player = std::make_shared<PlayerGameObject>();
 
+			//todo - possibly move into PlayerGameObject constructor. (problem = expensive constructor if accidently copied)
 			player->AddComponent(AssetManager::GetInstance().LoadMeshFromFile(std::string("Resources/Models/Dwarf/dwarf.x")));
 			player->Translate(offscreenSpawnPoint);
 			player->Scale(0.05f);
 			gameObjectManager.push_back(player);
 
-			std::shared_ptr<NetworkViewComponent> networkView = std::make_shared<NetworkViewComponent>(std::weak_ptr<Core::GameObject>(), networking::ClientNetworkManager::GetInstance());
+			std::shared_ptr<PlayerNetworkViewComponent> networkView = std::make_shared<PlayerNetworkViewComponent>(std::weak_ptr<Core::GameObject>(), networking::ClientNetworkManager::GetInstance());
 			networkView->AddToNetworkingManager();
 			player->AddComponent(networkView);
 

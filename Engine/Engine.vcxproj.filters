@@ -239,6 +239,9 @@
     <ClInclude Include="Scenes\MultiplayerArena\PlayerGameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\NetworkViews\PlayerNetworkViewComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">

@@ -3,6 +3,7 @@
 #include <vector>
 #include "../Dependencies/glm/glm.hpp"
 #include "../Dependencies/glm/gtc/matrix_transform.hpp"
+#include "Components/Interfaces/IComponent.h"
 
 namespace Core
 {
@@ -23,6 +24,10 @@ namespace Core
 		virtual void Scale(float s) = 0;
 		virtual void Scale(float x, float y, float z) = 0;
 		virtual void Scale(vec3 scale) = 0;
+
+		virtual std::vector<std::shared_ptr<IComponent>> GetComponentsOfType(IComponent::ComponentTypes type) = 0;
+		virtual std::shared_ptr<IComponent> GetComponentByID(int id) = 0;
+		virtual std::shared_ptr<IComponent> GetComponentByType(IComponent::ComponentTypes type) = 0;
 
 		IGameObject()
 		{

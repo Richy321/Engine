@@ -105,7 +105,7 @@ namespace Core
 			components.erase(std::remove_if(components.begin(), components.end(), [&](const std::shared_ptr<IComponent>& c) {  return c->GetID() == componentID; }));
 		}
 
-		std::shared_ptr<IComponent> GetComponentByType(IComponent::ComponentTypes type)
+		std::shared_ptr<IComponent> GetComponentByType(IComponent::ComponentTypes type) override
 		{
 			for (auto const& value : components)
 			{
@@ -115,7 +115,7 @@ namespace Core
 			return nullptr;
 		}
 
-		std::shared_ptr<IComponent> GetComponentByID(int id)
+		std::shared_ptr<IComponent> GetComponentByID(int id) override
 		{
 			for (auto const& value : components)
 			{
@@ -125,7 +125,7 @@ namespace Core
 			return nullptr;
 		}
 
-		std::vector<std::shared_ptr<IComponent>> GetComponentsOfType(IComponent::ComponentTypes type)
+		std::vector<std::shared_ptr<IComponent>> GetComponentsOfType(IComponent::ComponentTypes type) override
 		{
 			std::vector<std::shared_ptr<IComponent>> componentsOfType;
 			for (auto const& value : components)
@@ -135,8 +135,6 @@ namespace Core
 			}
 			return componentsOfType;
 		}
-
-
 		#pragma endregion
 
 		#pragma region Transforms

@@ -161,7 +161,7 @@ namespace MultiplayerArena
 
 		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
 		{
-			camera->OnMouseMove(deltaX, deltaY);
+			//camera->OnMouseMove(deltaX, deltaY);
 		}
 
 		virtual void notifyDisplayFrame() override

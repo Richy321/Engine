@@ -1,15 +1,16 @@
 #pragma once
 #include "../../Core/GameObject.h"
 #include "../../Core/Components/DirectionalMovementComponent.h"
+#include "NetworkViews/PlayerNetworkViewComponent.h"
 
 namespace MultiplayerArena
 {
 	class PlayerGameObject : public Core::GameObject
 	{
 		std::weak_ptr<DirectionalMovementComponent> directionalMovement;
-		std::weak_ptr<NetworkViewComponent> networkView;
+		std::weak_ptr<PlayerNetworkViewComponent> networkView;
 		float movementSpeed = 50.0f;
-		float angularVelocity = radians(5.0f);
+		float angularVelocity = 5.0f;
 	public:
 
 		void AddComponent(std::shared_ptr<Core::IComponent> component) override
@@ -21,7 +22,7 @@ namespace MultiplayerArena
 				directionalMovement = std::dynamic_pointer_cast<DirectionalMovementComponent>(component);
 
 			if (component->GetComponentType() == Core::IComponent::NetworkView)
-				networkView = std::dynamic_pointer_cast<NetworkViewComponent>(component);
+				networkView = std::dynamic_pointer_cast<PlayerNetworkViewComponent>(component);
 		}
 
 		PlayerGameObject()
@@ -32,11 +33,11 @@ namespace MultiplayerArena
 		{
 		}
 
-		std::shared_ptr<NetworkViewComponent> GetNetworkView()
+		std::shared_ptr<PlayerNetworkViewComponent> GetNetworkView()
 		{
 			auto component = GetComponentByType(Core::IComponent::NetworkView);
 			if (component != nullptr)
-				return std::dynamic_pointer_cast<NetworkViewComponent>(component);
+				return std::dynamic_pointer_cast<PlayerNetworkViewComponent>(component);
 			return nullptr;
 		}
 
@@ -48,7 +49,6 @@ namespace MultiplayerArena
 			return nullptr;
 		}
 
-		
 		void OnKey(unsigned char key, int x, int y)
 		{
 			if (directionalMovement.expired())

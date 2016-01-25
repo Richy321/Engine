@@ -10,15 +10,25 @@ namespace networking
 	public:
 		enum MessageType
 		{
+			ClientInfo,
 			BasicPosition,
+			PositionOrientation,
 			PlayerConnect,
 			PlayerDisconnect
 		};
 
 		struct BasicPositionMessage
 		{
-			glm::vec3 position;
+			vec3 position;
 		};
+
+		struct PositionOrientationMessage
+		{
+			vec3 position;
+			float heading;
+			float pitch;
+		};
+
 
 		struct BaseMessage
 		{
@@ -31,7 +41,10 @@ namespace networking
 			union
 			{
 				BasicPositionMessage positionMessage;
+				PositionOrientationMessage positionOrientationMessage;
 			};
 		};
+
+
 	};
 }

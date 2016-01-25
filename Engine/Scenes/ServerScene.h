@@ -115,13 +115,14 @@ namespace MultiplayerArena
 					{
 						//just use last message received for the moment
 						std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
-						const float delta_x = 0.1f;
 
-						value.second->relatedGameObject->GetWorldTransform()[3].x = message->positionMessage.position.x;
-						value.second->relatedGameObject->GetWorldTransform()[3].y = message->positionMessage.position.y;
-						value.second->relatedGameObject->GetWorldTransform()[3].z = message->positionMessage.position.z;
-
-						//value.second->relatedGameObject->GetWorldTransform()[3].x += 0.1f;
+						std::shared_ptr<Core::IComponent> component = value.second->relatedGameObject->GetComponentByType(Core::IComponent::NetworkView);
+						if (component != nullptr)
+						{
+							std::shared_ptr<INetworkViewComponent> netView = std::dynamic_pointer_cast<INetworkViewComponent>(component);
+							//todo - convert to std::shared_ptr<>
+							netView->ReadPacket(*message.get());
+						}
 					}
 				}
 			}

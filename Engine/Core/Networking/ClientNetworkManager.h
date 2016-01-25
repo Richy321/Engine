@@ -81,7 +81,7 @@ namespace networking
 
 			if (!connected && serverConnection->ConnectFailed())
 			{
-				printf("connection failed\n");
+				//printf("connection failed\n");
 			}
 
 			if (serverConnection->IsConnected())
@@ -96,7 +96,6 @@ namespace networking
 
 			ReceiveAndRoutePackets();
 			
-
 			serverConnection->Update(deltaTimeSecs);
 			lastTime = nowTime;
 		}

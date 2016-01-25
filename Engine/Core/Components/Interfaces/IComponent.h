@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
-#include "../../IGameObject.h"
 
 namespace Core
 {
+	class IGameObject;
 	enum ComponentFlags
 	{
 		None = 1,

@@ -8,6 +8,7 @@
 #include <Objbase.h>
 #include "../Networking/MessageStructures.h"
 #include "../Networking/IClientNetworkManager.h"
+#include "DirectionalMovementComponent.h"
 
 class NetworkViewComponent : public Core::INetworkViewComponent, public std::enable_shared_from_this<Core::INetworkViewComponent>
 {
@@ -58,7 +59,7 @@ public:
 
 		message.uniqueID = GetUniqueID();
 		message.messageType = networking::MessageStructures::BasicPosition;
-		message.positionMessage.position = vec3(transform[3].x, transform[3].y, transform[3].z);
+		message.positionOrientationMessage.position = vec3(transform[3].x, transform[3].y, transform[3].z);
 
 		return sizeof(networking::MessageStructures::BaseMessage);
 	}
