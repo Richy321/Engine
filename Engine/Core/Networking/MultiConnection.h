@@ -105,19 +105,27 @@ namespace networking
 		void Stop() override
 		{
 			ClearData();
+			OnStop();
 		}
 
 		bool Start(int port) override
 		{
-			return false;
+			assert(!running);
+			printf("start connection on port %d\n", port);
+			if (!socket->Open(port))
+				return false;
+			running = true;
+			OnStart();
+			return true;
 		}
 
-		void Connect(const networking::Address address) override
+		void Connect(const Address address) override
 		{
-			
+			//todo - redesign interfaces : shouldn't be empty functions like this.
+			//Not applicable -
 		}
 
-		virtual bool SendPacket(const unsigned char data[], const int size) override
+		bool SendPacket(const unsigned char data[], const int size) override
 		{
 			assert(running);
 			if(connections.size() == 0)
@@ -140,7 +148,7 @@ namespace networking
 			return sendResults;
 		}
 
-		virtual int ReceivePacket(unsigned char data[], int size) override
+		int ReceivePacket(unsigned char data[], int size) override
 		{
 			assert(running);
 			unsigned char* packet;
@@ -159,27 +167,38 @@ namespace networking
 				packet[3] != static_cast<unsigned char>(protocolId & 0xFF))
 				return 0;
 
-			if (mode == Server && !IsListening())
+			if (mode == Server && IsListening())
 			{
 				std::shared_ptr<Address> senderAddress = std::make_shared<Address>(sender);
-				if(connections.find(senderAddress) == connections.end())
+
+				bool found = false;
+				for (std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>>::iterator iter = connections.begin(); iter != connections.end(); ++iter)
+				{
+					if (*iter->first == *senderAddress)
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
 				{
 					connections[senderAddress] = std::make_shared<ConnectionInfo>();
+					connections[senderAddress]->state = ConnectionInfo::Connected;
+					connections[senderAddress]->timeoutAccumulator = 0.0f;
+					connections[senderAddress]->timeout = defaultTimeout;
+					connections[senderAddress]->connectionEventHandler = connectionEventHandler;
+					connections[senderAddress]->OnConnect();
+
 					printf("server accepts connection from client %d.%d.%d.%d:%d\n",
 						sender.GetA(), sender.GetB(), sender.GetC(), sender.GetD(), sender.GetPort());
 				}
-				
-				connections[senderAddress]->state = ConnectionInfo::Connected;
-				connections[senderAddress]->timeoutAccumulator = 0.0f;
-				connections[senderAddress]->connectionEventHandler = connectionEventHandler;
-				connections[senderAddress]->OnConnect();
 
 				memcpy(data, &packet[HeaderSize], size - HeaderSize);
 				return size - HeaderSize;
 			}
 			return 0;
 		}
-
 
 		void ClearData()
 		{
@@ -217,9 +236,21 @@ namespace networking
 		virtual bool IsListening() const { return state == Listening; }
 		virtual Mode GetMode() const { return Server; }
 
-		virtual void SetConnectionEventHandler(std::shared_ptr<IConnectionEventHandler>& handler) override
+		void SetConnectionEventHandler(std::shared_ptr<IConnectionEventHandler>& handler) override
 		{
 			connectionEventHandler = handler;
+		}
+
+		void OnStart() const
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnStart();
+		}
+
+		void OnStop()
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnStop();
 		}
 	};
 }

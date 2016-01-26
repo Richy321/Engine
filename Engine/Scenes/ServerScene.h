@@ -76,16 +76,17 @@ namespace MultiplayerArena
 				break;
 			}
 				
+			std::shared_ptr<SceneManager> ptrToThis = shared_from_this();
+			std::shared_ptr<IConnectionEventHandler> connectionEventHandler = std::dynamic_pointer_cast<IConnectionEventHandler>(ptrToThis);
+			connection->SetConnectionEventHandler(connectionEventHandler);
+
 			if (!connection->Start(ServerPort))
 			{
 				printf("could not start connection on port %d\n", ServerPort);
 				return;
 			}
-			std::shared_ptr<SceneManager> ptrToThis = shared_from_this();
-			std::shared_ptr<IConnectionEventHandler> connectionEventHandler = std::dynamic_pointer_cast<IConnectionEventHandler>(ptrToThis);
-			connection->SetConnectionEventHandler(connectionEventHandler);
-			connection->Listen();
 
+			connection->Listen();
 			timer->Start();
 		}
 
@@ -216,6 +217,7 @@ namespace MultiplayerArena
 		void ConnectPlayer(GUID id, vec3 position)
 		{
 			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
+			//std::lock_guard<std::mutex> connectedMapLock(mutexConnectedPlayerMap);
 
 			std::shared_ptr<PlayerGameObject> player = std::dynamic_pointer_cast<PlayerGameObject>(objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player));
 			InitialisePlayer(player, position, false);
@@ -223,26 +225,42 @@ namespace MultiplayerArena
 			connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
 			connectedPlayerMap[id]->relatedGameObject = player;
 
-			printf("Connected new player at %f %f %f \n", position.x, position.y, position.z);
+			OLECHAR szGuid[40] = { 0 };
+			StringFromGUID2(id, szGuid, 40);
+
+			printf("Connected new player %ls at %f %f %f \n", szGuid, position.x, position.y, position.z);
 			lastConnectedPlayer = id;
 		}
 
 		void DisconnectPlayer(GUID id)
 		{
+			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
+			std::lock_guard<std::mutex> connectedMapLock(mutexConnectedPlayerMap);
+
+			
 			gameObjectManager.erase(std::remove(gameObjectManager.begin(), gameObjectManager.end(), connectedPlayerMap[id]->relatedGameObject), gameObjectManager.end());
 			connectedPlayerMap.erase(id);
+			
+			OLECHAR szGuid[40] = { 0 };
+			StringFromGUID2(id, szGuid, 40);
+			printf("Disconnected player at %ls \n", szGuid);
 		}
+
+		#pragma region IConnectionEventHandler functions
 
 		void OnStart() override
 		{
+			printf("server started...\n");
 		}
 
 		void OnStop() override
 		{
+			printf("server stop...\n");
 		}
 
 		void OnConnect() override
 		{	
+			printf("player connected...\n");
 		}
 
 		void OnDisconnect() override
@@ -252,5 +270,7 @@ namespace MultiplayerArena
 
 			DisconnectPlayer(lastConnectedPlayer);
 		}
+
+		#pragma endregion  
 	};
 }
