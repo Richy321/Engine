@@ -55,6 +55,11 @@ namespace networking
 		{
 			return new ReliableConnection(protocolId, timeout, CreateSocket(SocketType::UDP));
 		}
+
+		MultiConnection* CreateMultiConnection(const int protocolId, const float timeout)
+		{
+			return new MultiConnection(protocolId, timeout, CreateSocket(SocketType::UDP));
+		}
 	};
 }
 

@@ -10,6 +10,7 @@
 #include "ClientScene.h"
 #include <mutex>
 
+
 using namespace Core;
 namespace MultiplayerArena
 {
@@ -61,11 +62,20 @@ namespace MultiplayerArena
 		{
 			startTime = std::chrono::system_clock::now();
 			lastTime = startTime;
-			if (isUseReliableConnection)
-				connection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
-			else
-				connection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
 
+			switch(serverConnectionType)
+			{
+			case Unreliable:
+				connection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
+				break;
+			case Reliable:
+				connection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
+				break;
+			case MultiUnreliable:
+				connection = networking::NetworkServices::GetInstance().CreateMultiConnection(ProtocolId, TimeOut);
+				break;
+			}
+				
 			if (!connection->Start(ServerPort))
 			{
 				printf("could not start connection on port %d\n", ServerPort);
@@ -97,7 +107,8 @@ namespace MultiplayerArena
 			SendUpdatedSnapshots();
 
 			connection->Update(deltaTimeSecs);
-			if (isUseReliableConnection)
+
+			if (serverConnectionType == Reliable)
 				flowControl.Update(deltaTimeSecs, static_cast<networking::ReliableConnection*>(connection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
 
 			lastTime = nowTime;
@@ -191,8 +202,6 @@ namespace MultiplayerArena
 				mutexConnectedPlayerMap.unlock();
 			}
 		}
-
-
 
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 		{

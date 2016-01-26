@@ -380,6 +380,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\Networking\MessageStructures.h" />
     <ClInclude Include="Core\Networking\IClientNetworkManager.h" />
     <ClInclude Include="Core\Components\DirectionalMovementComponent.h" />
+    <ClInclude Include="Core\Networking\MultiConnection.h" />
     <ClInclude Include="Scenes\MultiplayerArena\NetworkViews\PlayerNetworkViewComponent.h" />
     <ClInclude Include="Scenes\MultiplayerArena\PlayerGameObject.h" />
     <ClInclude Include="Scenes\MultiplayerArena\GameOptions.h" />

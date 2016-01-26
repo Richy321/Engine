@@ -2,6 +2,7 @@
 #include "ISocket.h"
 #include "Connection.h"
 #include "ReliableConnection.h"
+#include "MultiConnection.h"
 class Connection;
 
 namespace networking
@@ -17,6 +18,7 @@ namespace networking
 		virtual ISocket* CreateSocket(SocketType sockType = INetworkService::SocketType::UDP) = 0;
 		virtual Connection* CreateConnection(const int protocolId, const float timeout) = 0;
 		virtual ReliableConnection* CreateReliableConnection(const int protocolId, const float timeout) = 0;
+		virtual MultiConnection* CreateMultiConnection(const int protocolId, const float timeout) = 0;
 	};
 }
 

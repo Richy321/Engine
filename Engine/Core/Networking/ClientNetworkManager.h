@@ -46,10 +46,18 @@ namespace networking
 
 		void InitialiseConnectionToServer()
 		{
-			if (isUseReliableConnection)
-				serverConnection = NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
-			else
-				serverConnection = NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
+			switch (clientConnectionType)
+			{
+			case Unreliable:
+				serverConnection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
+				break;
+			case Reliable:
+				serverConnection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
+				break;
+			//case MultiUnreliable:
+			//	serverConnection = networking::NetworkServices::GetInstance().CreateMultiConnection(ProtocolId, TimeOut);
+			//	break;
+			}
 
 			int startClientPort = ClientPort;
 			while(!serverConnection->Start(startClientPort) && startClientPort < startClientPort + 50)
@@ -90,7 +98,7 @@ namespace networking
 
 			if (serverConnection->IsConnected())
 			{
-				if (isUseReliableConnection)
+				if (clientConnectionType == Reliable)
 					flowControl.Update(deltaTimeSecs, static_cast<ReliableConnection*>(serverConnection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
 			}
 
