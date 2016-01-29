@@ -29,13 +29,11 @@ namespace MultiplayerArena
 		std::mutex mutexConnectedPlayerMap;
 
 		GUID lastConnectedPlayer;
-		//std::function<void(int, const ServerScene*)> commsCallWrapper = [](const ServerScene* thisRef, float delta) { if (thisRef != nullptr) { thisRef->OnCommsUpdate(delta); }};
 
 		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
 		{
 			timer->SetTickIntervalMilliseconds(std::chrono::milliseconds(15));
 			timer->AddOnTickCallback(std::bind(&ServerScene::OnCommsUpdate, this, 0.0f));
-			//timer->AddOnTickCallback(std::bind(commsCallWrapper, this, 0.0f));
 		}
 
 		~ServerScene()
@@ -98,14 +96,10 @@ namespace MultiplayerArena
 			float deltaTimeSecs = deltaTime.count() * 0.001f;
 			std::chrono::milliseconds fromStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
 
-			//printf("Comms update: %f \n", fromStartTime.count() * 0.001f);
-
-			//if (connection->IsConnected())
 			ReceiveAndStorePackets();
 
 			RunSimulation();
 
-			//if (connection->IsConnected())
 			SendUpdatedSnapshots();
 
 			connection->Update(deltaTimeSecs);
@@ -167,7 +161,7 @@ namespace MultiplayerArena
 			for (auto const& value : connectedPlayerMap)
 			{
 				networking::MessageStructures::BaseMessage message;
-				message.messageType = networking::MessageStructures::BasicPosition;
+				message.messageType = networking::MessageStructures::PlayerSnapshot;
 				message.uniqueID = value.first;
 				message.positionMessage.position = value.second->relatedGameObject->GetPosition();
 
@@ -179,15 +173,9 @@ namespace MultiplayerArena
 		{
 			//Add new player if not exists
 			mutexConnectedPlayerMap.lock();
-			if (message->messageType == networking::MessageStructures::PlayerConnect || connectedPlayerMap.find(message->uniqueID) == connectedPlayerMap.end())
+			if (message->messageType == networking::MessageStructures::PlayerConnect || 
+				(message->messageType == networking::MessageStructures::PlayerSnapshot && connectedPlayerMap.find(message->uniqueID) == connectedPlayerMap.end()))
 			{
-				vec3 pos;
-				if (message->messageType == networking::MessageStructures::BasicPosition)
-					pos = message->positionMessage.position;
-				else
-					pos = vec3(floorWidth * 0.35f, 5.0f, floorDepth * 0.35f);
-
-
 				vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
 				ConnectPlayer(message->uniqueID, spawnPosition);
 			}
@@ -218,7 +206,6 @@ namespace MultiplayerArena
 		void ConnectPlayer(GUID id, vec3 position)
 		{
 			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
-			//std::lock_guard<std::mutex> connectedMapLock(mutexConnectedPlayerMap);
 
 			std::shared_ptr<PlayerGameObject> player = std::dynamic_pointer_cast<PlayerGameObject>(objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player));
 			InitialisePlayer(player, position, false);

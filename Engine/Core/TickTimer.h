@@ -59,7 +59,8 @@ namespace Core
 		void Stop()
 		{
 			isActive = false;
-			thread.join();
+			if(thread.joinable())
+				thread.join();
 		}
 	};
 }

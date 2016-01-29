@@ -58,7 +58,7 @@ public:
 		mat4 transform = GetParentGameObject().lock()->GetWorldTransform();
 
 		message.uniqueID = GetUniqueID();
-		message.messageType = networking::MessageStructures::BasicPosition;
+		message.messageType = networking::MessageStructures::None;
 		message.positionOrientationMessage.position = vec3(transform[3].x, transform[3].y, transform[3].z);
 
 		return sizeof(networking::MessageStructures::BaseMessage);
@@ -66,7 +66,7 @@ public:
 
 	virtual void ReadPacket(networking::MessageStructures::BaseMessage& packet) override
 	{
-		if (packet.messageType == networking::MessageStructures::BasicPosition)
+		if (packet.messageType == networking::MessageStructures::None)
 		{
 			if (deadReckoning == Exact)
 			{

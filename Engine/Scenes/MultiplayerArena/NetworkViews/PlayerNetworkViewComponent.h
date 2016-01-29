@@ -22,7 +22,7 @@ namespace MultiplayerArena
 			mat4 &transform = GetParentGameObject().lock()->GetWorldTransform();
 			
 			message.uniqueID = GetUniqueID();
-			message.messageType = networking::MessageStructures::PositionOrientation;
+			message.messageType = networking::MessageStructures::PlayerSnapshot;
 			message.positionOrientationMessage.position = vec3(transform[3].x, transform[3].y, transform[3].z);
 
 			std::shared_ptr<IComponent> component = parentGameObject.lock()->GetComponentByType(DirectionalMovement);
@@ -43,7 +43,7 @@ namespace MultiplayerArena
 
 		void ReadPacket(networking::MessageStructures::BaseMessage& packet) override
 		{
-			if (packet.messageType == networking::MessageStructures::PositionOrientation)
+			if (packet.messageType == networking::MessageStructures::PlayerSnapshot)
 			{
 				if (deadReckoning == Exact)
 				{

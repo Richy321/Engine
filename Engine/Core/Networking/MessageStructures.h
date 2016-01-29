@@ -10,9 +10,10 @@ namespace networking
 	public:
 		enum MessageType
 		{
-			ClientInfo,
-			BasicPosition,
-			PositionOrientation,
+			None,
+			PlayerSnapshot,
+			BulletSnapshot,
+			CollectableSnapshot,
 			PlayerConnect,
 			PlayerDisconnect
 		};
@@ -29,10 +30,9 @@ namespace networking
 			float pitch;
 		};
 
-
 		struct BaseMessage
 		{
-			BaseMessage() : messageType(BasicPosition)
+			BaseMessage() : messageType(None)
 			{
 			}
 
