@@ -40,6 +40,7 @@ namespace MultiplayerArena
 
 		~ServerScene()
 		{
+			timer->Stop();
 		}
 
 		void Initialise() override

@@ -41,7 +41,7 @@ namespace networking
 
 		~ClientNetworkManager()
 		{
-
+			timer->Stop();
 		}
 
 		void InitialiseConnectionToServer()
@@ -82,7 +82,7 @@ namespace networking
 			std::chrono::milliseconds deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - lastTime);
 			float deltaTimeSecs = deltaTime.count() * 0.001f;
 			std::chrono::milliseconds fromStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
-
+			 
 			//printf("Comms update: %f \n", fromStartTime.count() * 0.001f);
 
 			if (!connected && serverConnection->IsConnected())
