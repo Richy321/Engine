@@ -150,6 +150,7 @@ namespace MultiplayerArena
 
 		void OnCommsUpdate(float deltaTime) const 
 		{
+			//Not used unless threaded network comms is turned off
 			networking::ClientNetworkManager::GetInstance().UpdateComms();
 		}
 

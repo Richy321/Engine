@@ -1,8 +1,13 @@
 #pragma once
 #include <iostream>
 #include "../Dependencies/glew/glew.h"
+#include <memory>
 
 #define Check_GLError() Utils::CheckGLError(__FILE__,__LINE__)
+
+namespace networking{
+	class Address;
+}
 
 namespace Core
 {
@@ -37,5 +42,13 @@ namespace Core
 				return memcmp(&Left, &Right, sizeof(Right)) < 0;
 			}
 		};
+		/*
+		struct AddressComparer
+		{
+			bool operator()(const std::shared_ptr<networking::Address> left, const std::shared_ptr<networking::Address> right) const
+			{
+				return *left.operator==(*right);
+			}
+		};*/
 	};
 }

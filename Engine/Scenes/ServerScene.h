@@ -9,6 +9,7 @@
 #include "../Core/Networking/NetworkPlayer.h"
 #include "ClientScene.h"
 #include <mutex>
+#include "../Core/Networking/ServerNetworkingManager.h"
 
 
 using namespace Core;
@@ -57,59 +58,16 @@ namespace MultiplayerArena
 			InitialiseServerComms();
 		}
 
-		void InitialiseServerComms()
+		void InitialiseServerComms() const
 		{
-			startTime = std::chrono::system_clock::now();
-			lastTime = startTime;
-
-			switch(serverConnectionType)
-			{
-			case Unreliable:
-				connection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
-				break;
-			case Reliable:
-				connection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
-				break;
-			case MultiUnreliable:
-				connection = networking::NetworkServices::GetInstance().CreateMultiConnection(ProtocolId, TimeOut);
-				break;
-			}
-				
-			std::shared_ptr<SceneManager> ptrToThis = shared_from_this();
-			std::shared_ptr<IConnectionEventHandler> connectionEventHandler = std::dynamic_pointer_cast<IConnectionEventHandler>(ptrToThis);
-			connection->SetConnectionEventHandler(connectionEventHandler);
-
-			if (!connection->Start(ServerPort))
-			{
-				printf("could not start connection on port %d\n", ServerPort);
-				return;
-			}
-
-			connection->Listen();
-			timer->Start();
+			networking::ServerNetworkingManager::GetInstance().InitialiseServerComms();
 		}
 
-		void OnCommsUpdate(float delta) override
+		void OnCommsUpdate(float deltaTime) const
 		{
-			std::chrono::time_point<std::chrono::system_clock> nowTime = std::chrono::system_clock::now();
-			std::chrono::milliseconds deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - lastTime);
-			float deltaTimeSecs = deltaTime.count() * 0.001f;
-			std::chrono::milliseconds fromStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
-
-			ReceiveAndStorePackets();
-
-			RunSimulation();
-
-			SendUpdatedSnapshots();
-
-			connection->Update(deltaTimeSecs);
-
-			if (serverConnectionType == Reliable)
-				flowControl.Update(deltaTimeSecs, static_cast<networking::ReliableConnection*>(connection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
-
-			lastTime = nowTime;
+			//Not used unless threaded network comms is turned off
+			networking::ClientNetworkManager::GetInstance().UpdateComms();
 		}
-
 
 		void RunSimulation()
 		{
@@ -128,7 +86,7 @@ namespace MultiplayerArena
 						{
 							std::shared_ptr<INetworkViewComponent> netView = std::dynamic_pointer_cast<INetworkViewComponent>(component);
 							//todo - convert to std::shared_ptr<>
-							netView->ReadPacket(*message.get());
+							netView->ReadPacket(message);
 						}
 					}
 				}

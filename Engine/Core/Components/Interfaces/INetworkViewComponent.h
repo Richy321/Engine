@@ -17,11 +17,10 @@ namespace Core
 		virtual GUID GetUniqueID() = 0;
 		virtual bool GetIsSendUpdates() = 0;
 
-		virtual void ReadPacket(networking::MessageStructures::BaseMessage& packet) = 0;
-		virtual int BuildPacket(networking::MessageStructures::BaseMessage& message) = 0;
+		virtual void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> packet) = 0;
+		virtual int BuildPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message) = 0;
 
-
-
+		virtual bool IsSendUpdates() = 0;
 	};
 }
 

@@ -15,7 +15,7 @@ using namespace glm;
 
 namespace Managers
 {
-	class SceneManager : public Core::IListener, public std::enable_shared_from_this<SceneManager>
+	class SceneManager : public Core::IListener
 	{
 	private:
 		bool captureCursor = false;

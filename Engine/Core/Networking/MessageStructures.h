@@ -8,14 +8,27 @@ namespace networking
 	class MessageStructures
 	{
 	public:
+		enum SimpleMessageType
+		{
+			NoneSimple,
+			Connect,
+			Disconnect,
+			SnapShot
+		};
 		enum MessageType
 		{
 			None,
 			PlayerSnapshot,
-			BulletSnapshot,
-			CollectableSnapshot,
 			PlayerConnect,
-			PlayerDisconnect
+			PlayerDisconnect,
+
+			BulletSnapshot,
+			BulletConnect,
+			BulletDisconnect,
+
+			CollectableSnapshot,
+			CollectableConnect,
+			CollectableDisconnect
 		};
 
 		struct BasicPositionMessage
@@ -32,11 +45,12 @@ namespace networking
 
 		struct BaseMessage
 		{
-			BaseMessage() : messageType(None)
+			BaseMessage() : simpleType(NoneSimple), messageType(None)
 			{
 			}
 
 			GUID uniqueID;
+			SimpleMessageType simpleType;
 			MessageType messageType;
 			union
 			{

@@ -433,6 +433,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Scenes\TestScene.h" />
     <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Core\TickTimer.h" />
+    <ClInclude Include="Core\Networking\ServerNetworkingManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />

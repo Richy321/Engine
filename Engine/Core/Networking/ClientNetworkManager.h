@@ -15,7 +15,7 @@
 
 namespace networking
 {
-	class ClientNetworkManager : public IClientNetworkManager
+	class ClientNetworkManager : public IClientNetworkManager, public IConnectionEventHandler
 	{
 	private:
 		ClientNetworkManager(): timer(std::make_unique<TickTimer>())
@@ -29,6 +29,19 @@ namespace networking
 		FlowControl flowControl;
 		bool connected = false;
 		std::unique_ptr<TickTimer> timer;
+
+		std::function<void()> onComponentConnectCallback;
+		std::function<void()> onComponentDisconnectCallback;
+
+		void AddOnComponentConnectCallback(std::function<void()> callback)
+		{
+			onComponentConnectCallback = callback;
+		}
+
+		void AddOnComponentDisconnectCallback(std::function<void()> callback)
+		{
+			onComponentDisconnectCallback = callback;
+		}
 
 		typedef std::map<GUID, std::shared_ptr<INetworkViewComponent>, Utils::GUIDComparer> NetworkIDMapType;
 		NetworkIDMapType networkIDToComponent;
@@ -46,6 +59,8 @@ namespace networking
 
 		void InitialiseConnectionToServer()
 		{
+
+			serverConnection->SetConnectionEventHandler(shared_from_this());
 			switch (clientConnectionType)
 			{
 			case Unreliable:
@@ -67,7 +82,7 @@ namespace networking
 			}
 
 			if (startClientPort == ClientPort + 50)
-				return;
+				return; //could not find a free port
 
 			serverConnection->Connect(Address(127, 0, 0, 1, ServerPort));
 
@@ -119,7 +134,7 @@ namespace networking
 			{
 				if (it->second->GetIsSendUpdates())
 				{
-					MessageStructures::BaseMessage message;
+					std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
 					int size = it->second->BuildPacket(message);
 					serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), size);
 				}
@@ -135,21 +150,21 @@ namespace networking
 				if (bytes_read == 0)
 					break;
 
-				MessageStructures::BaseMessage message;
-				memcpy(&message, packet, sizeof(MessageStructures::BaseMessage));
+				std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
+
+				memcpy(message.get(), packet, sizeof(MessageStructures::BaseMessage));
 
 				NetworkIDMapType::iterator it;
 
-				it = networkIDToComponent.find(message.uniqueID);
+				it = networkIDToComponent.find(message->uniqueID);
+				if (it == networkIDToComponent.end())
+				{
+					//New network component, pass back to caller
+					OnComponentConnect();
+				}
+
 				if (it != networkIDToComponent.end())
-				{
 					it->second->ReadPacket(message);
-					//printf("received packet from server\n");
-				}
-				else
-				{
-					printf("packet from server component GUID not found\n");
-				}
 			}
 		}
 
@@ -175,9 +190,36 @@ namespace networking
 			timer->SetTickIntervalMilliseconds(interval);
 		}
 
-		void NetworkCommsCallback()
+		void OnComponentConnect()
+		{
+			if (onComponentConnectCallback != nullptr)
+				onComponentConnectCallback();
+		}
+
+		void OnComponentDisconnect()
+		{
+			if (onComponentDisconnectCallback != nullptr)
+				onComponentDisconnectCallback();
+		}
+
+		void OnStart()
 		{
 			
 		}
+
+		virtual void OnStop()
+		{
+			
+		}
+
+		virtual void OnConnect()
+		{
+			//connected to server
+		}
+		virtual void OnDisconnect()
+		{
+			//timeout from server
+		}
+
 	};
 }
