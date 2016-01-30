@@ -18,8 +18,6 @@ public:
 	std::shared_ptr<networking::INetworkManager> networkingManager;
 	bool sendUpdates; // should we send updates about this network view to the server
 	bool& IsSendUpdates() override { return sendUpdates; }
-	bool clearMessagesOnUpdate;
-	bool& IsClearMessagesOnUpdate() override { return clearMessagesOnUpdate; }
 
 	std::vector<std::shared_ptr<networking::MessageStructures::BaseMessage>> receivedMessages;
 	
@@ -37,7 +35,6 @@ public:
 	{
 		CoCreateGuid(&uniqueID);
 		sendUpdates = false;
-		clearMessagesOnUpdate = true;
 	}
 
 	void AddToNetworkingManager()
@@ -75,13 +72,6 @@ public:
 			break;
 			case Linear:
 				break;
-		}
-
-		{
-			std::lock_guard<std::mutex> lock(mutexReceivedMsg);
-			if (clearMessagesOnUpdate)
-				receivedMessages.clear();
-			
 		}
 	}
 

@@ -11,8 +11,9 @@ namespace MultiplayerArena
 		std::weak_ptr<PlayerNetworkViewComponent> networkView;
 		float movementSpeed = 2000.0f;
 		float angularVelocity = 50.0f;
+		
 	public:
-
+		bool isLocal = true;
 		void AddComponent(std::shared_ptr<Core::IComponent> component) override
 		{
 			GameObject::AddComponent(component);
@@ -74,7 +75,8 @@ namespace MultiplayerArena
 
 		void Update(float deltaTime) override
 		{
-			HandleKeyMovement(deltaTime);
+			if(isLocal)
+				HandleKeyMovement(deltaTime);
 
 			GameObject::Update(deltaTime);
 		}

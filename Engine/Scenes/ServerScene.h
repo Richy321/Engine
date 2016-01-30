@@ -18,26 +18,19 @@ namespace MultiplayerArena
 	class ServerScene : public ClientScene
 	{
 	public:
-		typedef std::map<GUID, std::shared_ptr<networking::NetworkPlayer>, Utils::GUIDComparer> PlayerConnectionMap;
-		PlayerConnectionMap connectedPlayerMap;
-		
 		networking::IConnection* connection;
 		std::chrono::time_point<std::chrono::system_clock> startTime;
 		std::chrono::time_point<std::chrono::system_clock> lastTime;
 		networking::FlowControl flowControl;
-		std::unique_ptr<TickTimer> timer;
 
-		std::mutex mutexConnectedPlayerMap;
+		
 
-		GUID lastConnectedPlayer;
-
-		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
+		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo)
 		{
 		}
 
-		~ServerScene()
+		~ServerScene() override 
 		{
-			timer->Stop();
 		}
 
 		void Initialise() override
@@ -45,7 +38,6 @@ namespace MultiplayerArena
 			SceneManager::Initialise();
 			CaptureCursor(false);
 
-			
 			objectFactoryPool = std::make_shared<ObjectFactoryPool>(gameObjectManager, std::dynamic_pointer_cast<networking::INetworkManager>(networking::ServerNetworkingManager::GetInstance()));
 
 			camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
@@ -72,7 +64,7 @@ namespace MultiplayerArena
 		void OnCommsUpdate(float deltaTime) const
 		{
 			//Not used unless threaded network comms is turned off
-			networking::ClientNetworkManager::GetInstance()->UpdateComms();
+			networking::ServerNetworkingManager::GetInstance()->UpdateComms();
 		}
 
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
@@ -98,7 +90,6 @@ namespace MultiplayerArena
 			StringFromGUID2(id, szGuid, 40);
 
 			printf("Connected new player %ls at %f %f %f \n", szGuid, position.x, position.y, position.z);
-			lastConnectedPlayer = id;
 
 			return netView;
 		}

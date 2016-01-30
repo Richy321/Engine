@@ -46,9 +46,6 @@ namespace MultiplayerArena
 						dirMove->SetOrientation(lastState->positionOrientationMessage.heading, lastState->positionOrientationMessage.pitch);
 					}
 				}
-
-				if (clearMessagesOnUpdate)
-					receivedMessages.clear();
 			}
 		}
 

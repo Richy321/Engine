@@ -13,6 +13,7 @@
 #include "MultiplayerArena/GameOptions.h"
 
 #include <memory>
+#include "../Core/Networking/ServerNetworkingManager.h"
 
 using namespace Core;
 namespace MultiplayerArena
@@ -41,14 +42,19 @@ namespace MultiplayerArena
 
 		std::shared_ptr<ObjectFactoryPool> objectFactoryPool;
 
+		typedef std::map<GUID, std::shared_ptr<networking::NetworkPlayer>, Utils::GUIDComparer> PlayerConnectionMap;
+		PlayerConnectionMap connectedPlayerMap;
+		std::mutex mutexConnectedPlayerMap;
+
 		const std::string defaultCheckeredTexture = "Default Checkered";
 		ClientScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 		{
 			camera = std::make_shared<CameraFPS>();
 		}
 
-		~ClientScene()
+		virtual ~ClientScene()
 		{
+			networking::ClientNetworkManager::GetInstance()->SendClientDisconnect(player->GetNetworkView()->uniqueID);
 		}
 
 		void Initialise() override
@@ -67,7 +73,16 @@ namespace MultiplayerArena
 			InitialiseEnvironment();
 			InitialiseLocalPlayer();
 
+			InitialiseComms();
+		}
+
+
+		void InitialiseComms()
+		{
+			ClientScene* nonCostThis = const_cast<ClientScene*>(this);
 			networking::ClientNetworkManager::GetInstance()->InitialiseConnectionToServer();
+			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ClientScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
 		}
 
 		void InitialiseEnvironment()
@@ -89,6 +104,7 @@ namespace MultiplayerArena
 
 		std::shared_ptr<NetworkViewComponent> InitialisePlayer(std::shared_ptr<PlayerGameObject> &player, vec3 &position, GUID uniqueID, bool isLocal)
 		{
+			player->isLocal = isLocal;
 			player->GetWorldTransform()[3].x = position.x;
 			player->GetWorldTransform()[3].y = position.y;
 			player->GetWorldTransform()[3].z = position.z;
@@ -101,13 +117,11 @@ namespace MultiplayerArena
 				if (isLocal)
 				{
 					networkView->IsSendUpdates() = true;
-					networkView->IsClearMessagesOnUpdate() = true;
 					networkView->deadReckoning = NetworkViewComponent::None;
 				}
 				else
 				{
 					networkView->IsSendUpdates() = false;
-					networkView->IsClearMessagesOnUpdate() = true;
 					networkView->deadReckoning = NetworkViewComponent::DeadReckoningType::None; //linear
 					networkView->SetUniqueID(uniqueID);
 				}
@@ -194,5 +208,96 @@ namespace MultiplayerArena
 
 			SceneManager::notifyDisplayFrame();
 		}
+
+
+		std::shared_ptr<INetworkViewComponent> ConnectPlayer(GUID id, vec3 position)
+		{
+			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
+
+			std::shared_ptr<PlayerGameObject> player = std::dynamic_pointer_cast<PlayerGameObject>(objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player));
+			std::shared_ptr<INetworkViewComponent> netView = InitialisePlayer(player, position, id, false);
+			connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
+			connectedPlayerMap[id]->relatedGameObject = player;
+
+			OLECHAR szGuid[40] = { 0 };
+			StringFromGUID2(id, szGuid, 40);
+
+			printf("Connected new player %ls at %f %f %f \n", szGuid, position.x, position.y, position.z);
+
+			return netView;
+		}
+
+		void DisconnectPlayer(GUID id)
+		{
+			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
+			std::lock_guard<std::mutex> connectedMapLock(mutexConnectedPlayerMap);
+
+
+			gameObjectManager.erase(std::remove(gameObjectManager.begin(), gameObjectManager.end(), connectedPlayerMap[id]->relatedGameObject), gameObjectManager.end());
+			connectedPlayerMap.erase(id);
+
+			OLECHAR szGuid[40] = { 0 };
+			StringFromGUID2(id, szGuid, 40);
+			printf("Disconnected player at %ls \n", szGuid);
+		}
+
+		std::shared_ptr<INetworkViewComponent> ConnectBullet(GUID id, vec3 position)
+		{
+			return nullptr;
+		}
+
+		void DisconnectBullet(GUID id)
+		{
+
+		}
+
+
+		void ConnectCollectable(GUID id, vec3 position)
+		{
+
+		}
+
+		void DisconnectCollectable(GUID id)
+		{
+
+		}
+
+		void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView)
+		{
+			switch (message->messageType)
+			{
+			case networking::MessageStructures::None:
+				break;
+			case networking::MessageStructures::Player:
+				netView = ConnectPlayer(message->uniqueID, message->positionOrientationMessage.position);
+				break;
+			case networking::MessageStructures::Bullet:
+				netView = ConnectBullet(message->uniqueID, message->positionOrientationMessage.position);
+				break;
+			case networking::MessageStructures::Collectable:
+				break;
+			}
+
+		}
+
+		void OnNetworkViewDisconnect(GUID id, networking::MessageStructures::MessageType msgType)
+		{
+			switch (msgType)
+			{
+			case networking::MessageStructures::None:
+				break;
+			case networking::MessageStructures::Player:
+				DisconnectPlayer(id);
+				break;
+			case networking::MessageStructures::Bullet:
+				DisconnectBullet(id);
+				break;
+			case networking::MessageStructures::Collectable:
+				DisconnectCollectable(id);
+				break;
+			}
+		}
+
+
 	};
 }

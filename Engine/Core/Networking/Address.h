@@ -45,6 +45,13 @@ namespace networking
 			return !(*this == other);
 		}
 
+		std::string toString() const
+		{
+			char buffer[50];
+			sprintf_s(buffer, "%d.%d.%d.%d:%d\n",
+				GetA(), GetB(), GetC(), GetD(), GetPort());
+			return std::string(buffer);
+		}
 	};
 }
 

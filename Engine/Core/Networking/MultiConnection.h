@@ -189,10 +189,10 @@ namespace networking
 					connections[senderAddress]->timeoutAccumulator = 0.0f;
 					connections[senderAddress]->timeout = defaultTimeout;
 					connections[senderAddress]->connectionEventHandler = connectionEventHandler;
+					connections[senderAddress]->address = senderAddress;
 					connections[senderAddress]->OnConnect(senderAddress);
 
-					printf("server accepts connection from client %d.%d.%d.%d:%d\n",
-						sender.GetA(), sender.GetB(), sender.GetC(), sender.GetD(), sender.GetPort());
+					printf("server accepts connection from client %s\n",sender.toString().c_str());
 				}
 
 				memcpy(data, &packet[HeaderSize], size - HeaderSize);

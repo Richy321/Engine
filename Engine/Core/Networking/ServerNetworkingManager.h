@@ -96,7 +96,7 @@ namespace networking
 			std::chrono::milliseconds fromStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
 
 			ReceiveAndStorePackets();
-			MessageProcessing();
+			ProcessMessages();
 			SendUpdatedSnapshots();
 
 			connection->Update(deltaTimeSecs);
@@ -107,7 +107,7 @@ namespace networking
 			lastTime = nowTime;
 		}
 
-		void MessageProcessing()
+		void ProcessMessages()
 		{
 			if (doMessageProcessing != nullptr)
 					doMessageProcessing();
@@ -214,11 +214,13 @@ namespace networking
 		void OnConnect(std::shared_ptr<Address> address) override
 		{
 			//client connected to server
+			printf("Client connect: %s \n", address->toString().c_str());
 		}
 
 		void OnDisconnect(std::shared_ptr<Address> address) override
 		{
 			//client timeout from server
+			printf("Client disconnected: %s \n", address->toString().c_str());
 		}
 
 		void DisconnectNetworkView(GUID id, MessageStructures::MessageType msgType)

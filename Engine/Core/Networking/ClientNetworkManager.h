@@ -25,20 +25,10 @@ namespace networking
 		bool connected = false;
 		std::unique_ptr<TickTimer> timer;
 
-		std::function<void()> onComponentConnectCallback;
-		std::function<void()> onComponentDisconnectCallback;
+		std::function<void(std::shared_ptr<MessageStructures::BaseMessage>, std::shared_ptr<INetworkViewComponent>)> onNetworkViewConnectCallback;
+		std::function<void(GUID, MessageStructures::MessageType)> onNetworkViewDisconnectCallback;
 
 		std::mutex mutexConnectedNetViewMap;
-
-		void AddOnComponentConnectCallback(std::function<void()> callback)
-		{
-			onComponentConnectCallback = callback;
-		}
-
-		void AddOnComponentDisconnectCallback(std::function<void()> callback)
-		{
-			onComponentDisconnectCallback = callback;
-		}
 
 		typedef std::map<GUID, std::shared_ptr<INetworkViewComponent>, Utils::GUIDComparer> NetworkIDMapType;
 		NetworkIDMapType networkIDToComponent;
@@ -132,6 +122,7 @@ namespace networking
 
 		void ReceiveAndRoutePackets()
 		{
+			//receive until theres no more packets left
 			while (true)
 			{
 				unsigned char packet[256];
@@ -140,21 +131,39 @@ namespace networking
 					break;
 
 				std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
-
 				memcpy(message.get(), packet, sizeof(MessageStructures::BaseMessage));
 
-				NetworkIDMapType::iterator it;
-
-				it = networkIDToComponent.find(message->uniqueID);
-				if (it == networkIDToComponent.end())
-				{
-					//New network component, pass back to caller
-					OnComponentConnect();
-				}
-
-				if (it != networkIDToComponent.end())
-					it->second->ReadPacket(message);
+				ReadPacket(message);
 			}
+		}
+
+		void ReadPacket(std::shared_ptr<MessageStructures::BaseMessage>& message)
+		{
+			switch (message->simpleType)
+			{
+			case MessageStructures::NoneSimple:
+				break;
+
+			case MessageStructures::Connect:
+				ConnectNetworkView(message);
+				break;
+			case MessageStructures::Disconnect:
+				DisconnectNetworkView(message->uniqueID, message->messageType);
+				break;
+			case MessageStructures::SnapShot:
+
+				//if a snapshot is received before a connect, make the connection best we can
+				if (networkIDToComponent.find(message->uniqueID) == networkIDToComponent.end())
+					ConnectNetworkView(message);
+
+				//route packet to network view
+				mutexConnectedNetViewMap.lock();
+				if (networkIDToComponent.find(message->uniqueID) != networkIDToComponent.end())
+					networkIDToComponent[message->uniqueID]->ReadPacket(message);
+				mutexConnectedNetViewMap.unlock();
+				break;
+			}
+			
 		}
 
 		void ProcessMessages()
@@ -190,12 +199,20 @@ namespace networking
 
 		void AddNetworkViewComponent(std::shared_ptr<INetworkViewComponent> component) override
 		{
+			std::lock_guard<std::mutex> lock(mutexConnectedNetViewMap);
 			networkIDToComponent[component->GetUniqueID()] = component;
 		}
 
 		void RemoveNetworkViewComponent(std::shared_ptr<INetworkViewComponent> component) override
 		{
-			NetworkIDMapType::iterator it = networkIDToComponent.find(component->GetUniqueID());
+			RemoveNetworkViewComponent(component->GetUniqueID());
+		}
+
+		void RemoveNetworkViewComponent(GUID id)
+		{
+			std::lock_guard<std::mutex> lock(mutexConnectedNetViewMap);
+
+			NetworkIDMapType::iterator it = networkIDToComponent.find(id);
 			if (it != networkIDToComponent.end())
 				networkIDToComponent.erase(it);
 		}
@@ -205,16 +222,29 @@ namespace networking
 			timer->SetTickIntervalMilliseconds(interval);
 		}
 
-		void OnComponentConnect()
+		void ConnectNetworkView(std::shared_ptr<MessageStructures::BaseMessage> message)
 		{
-			if (onComponentConnectCallback != nullptr)
-				onComponentConnectCallback();
+			if (onNetworkViewConnectCallback != nullptr)
+			{
+				std::shared_ptr<INetworkViewComponent> netView;
+
+				onNetworkViewConnectCallback(message, std::ref(netView));
+				if (netView != nullptr)
+					AddNetworkViewComponent(netView);
+			}
 		}
 
-		void OnComponentDisconnect()
+		void DisconnectNetworkView(GUID id, MessageStructures::MessageType msgType)
 		{
-			if (onComponentDisconnectCallback != nullptr)
-				onComponentDisconnectCallback();
+			if (onNetworkViewDisconnectCallback != nullptr)
+				onNetworkViewDisconnectCallback(id, msgType);
+
+			mutexConnectedNetViewMap.lock();
+			NetworkIDMapType::iterator it = networkIDToComponent.find(id);
+
+			if (it != networkIDToComponent.end())
+				networkIDToComponent.erase(it);
+			mutexConnectedNetViewMap.unlock();
 		}
 
 		void OnStart()
@@ -234,6 +264,25 @@ namespace networking
 		virtual void OnDisconnect(std::shared_ptr<Address> address)
 		{
 			//timeout from server
+		}
+
+		void SendClientDisconnect(GUID playerNetViewID) const
+		{
+			MessageStructures::BaseMessage message;
+			message.uniqueID = playerNetViewID;
+			message.simpleType = MessageStructures::Disconnect;
+			message.messageType = MessageStructures::Player;
+			serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(MessageStructures::BaseMessage));
+		}
+
+		void SetOnNetworkViewConnectCallback(std::function<void(std::shared_ptr<MessageStructures::BaseMessage>, std::shared_ptr<INetworkViewComponent>)> callback)
+		{
+			onNetworkViewConnectCallback = callback;
+		}
+
+		void SetOnNetworkViewDisconnectCallback(std::function<void(GUID, MessageStructures::MessageType)> callback)
+		{
+			onNetworkViewDisconnectCallback = callback;
 		}
 
 	};
