@@ -5,7 +5,6 @@
 #include <map>
 #include <stack>
 #include "../../Core/AssetManager.h"
-#include "../../Core/Networking/ClientNetworkManager.h"
 #include "../../Core/Components/DirectionalMovementComponent.h"
 #include "PlayerGameObject.h"
 
@@ -23,6 +22,9 @@ namespace MultiplayerArena
 		std::map <FactoryObjectType, std::shared_ptr<ObjectPool>>  objectPoolMap;
 		std::vector<std::shared_ptr<Core::GameObject>>& gameObjectManager;
 
+		std::shared_ptr<networking::INetworkManager> networkManager;
+
+
 		std::shared_ptr<GameObject> CreatePlayerObject() const
 		{
 			std::shared_ptr<PlayerGameObject> player = std::make_shared<PlayerGameObject>();
@@ -33,12 +35,15 @@ namespace MultiplayerArena
 			player->Scale(0.05f);
 			gameObjectManager.push_back(player);
 
-			std::shared_ptr<PlayerNetworkViewComponent> networkView = std::make_shared<PlayerNetworkViewComponent>(std::weak_ptr<Core::GameObject>(), networking::ClientNetworkManager::GetInstance());
-			networkView->AddToNetworkingManager();
+			std::shared_ptr<PlayerNetworkViewComponent> networkView = std::make_shared<PlayerNetworkViewComponent>(std::weak_ptr<Core::GameObject>(), networkManager);
+			//networkView->AddToNetworkingManager();
 			player->AddComponent(networkView);
+
 
 			std::shared_ptr<DirectionalMovementComponent> directionalMove = std::make_shared<DirectionalMovementComponent>(std::weak_ptr<Core::GameObject>());
 			player->AddComponent(directionalMove);
+
+			player->isEnabled = false;
 
 			return player;
 		}
@@ -53,7 +58,7 @@ namespace MultiplayerArena
 
 	public:
 
-		ObjectFactoryPool(std::vector<std::shared_ptr<GameObject>>& gameObjectManager) : gameObjectManager(gameObjectManager)
+		ObjectFactoryPool(std::vector<std::shared_ptr<GameObject>>& gameObjectManager, std::shared_ptr<networking::INetworkManager>& netMan) : gameObjectManager(gameObjectManager), networkManager(netMan)
 		{
 		}
 
@@ -72,6 +77,7 @@ namespace MultiplayerArena
 				auto gameObj = objectPool->second->inactiveObjects.top();
 				objectPool->second->inactiveObjects.pop();
 				objectPool->second->activeObjects.push_back(gameObj);
+				gameObj->isEnabled = true;
 
 				return gameObj;
 			}

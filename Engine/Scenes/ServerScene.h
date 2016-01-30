@@ -15,7 +15,7 @@
 using namespace Core;
 namespace MultiplayerArena
 {
-	class ServerScene : public ClientScene, public IConnectionEventHandler
+	class ServerScene : public ClientScene
 	{
 	public:
 		typedef std::map<GUID, std::shared_ptr<networking::NetworkPlayer>, Utils::GUIDComparer> PlayerConnectionMap;
@@ -33,8 +33,6 @@ namespace MultiplayerArena
 
 		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo), timer(std::make_unique<TickTimer>())
 		{
-			timer->SetTickIntervalMilliseconds(std::chrono::milliseconds(15));
-			timer->AddOnTickCallback(std::bind(&ServerScene::OnCommsUpdate, this, 0.0f));
 		}
 
 		~ServerScene()
@@ -46,6 +44,9 @@ namespace MultiplayerArena
 		{
 			SceneManager::Initialise();
 			CaptureCursor(false);
+
+			
+			objectFactoryPool = std::make_shared<ObjectFactoryPool>(gameObjectManager, std::dynamic_pointer_cast<networking::INetworkManager>(networking::ServerNetworkingManager::GetInstance()));
 
 			camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 			SetMainCamera(camera);
@@ -60,114 +61,36 @@ namespace MultiplayerArena
 
 		void InitialiseServerComms() const
 		{
-			networking::ServerNetworkingManager::GetInstance().InitialiseServerComms();
+			ServerScene* nonCostThis = const_cast<ServerScene*>(this);
+
+			networking::ServerNetworkingManager::GetInstance()->InitialiseServerComms();
+			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ServerScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ServerScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+			networking::ServerNetworkingManager::GetInstance()->SetDoMessageProcessingCallback(std::bind(&ServerScene::DoMessageProcessing, nonCostThis));
 		}
 
 		void OnCommsUpdate(float deltaTime) const
 		{
 			//Not used unless threaded network comms is turned off
-			networking::ClientNetworkManager::GetInstance().UpdateComms();
-		}
-
-		void RunSimulation()
-		{
-			{
-				std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedPlayerMap);
-				//update server visualisations
-				for (auto const& value : connectedPlayerMap)
-				{
-					if (value.second->messages.size() > 0)
-					{
-						//just use last message received for the moment
-						std::shared_ptr<networking::MessageStructures::BaseMessage> message = value.second->messages[value.second->messages.size() - 1];
-
-						std::shared_ptr<Core::IComponent> component = value.second->relatedGameObject->GetComponentByType(Core::IComponent::NetworkView);
-						if (component != nullptr)
-						{
-							std::shared_ptr<INetworkViewComponent> netView = std::dynamic_pointer_cast<INetworkViewComponent>(component);
-							//todo - convert to std::shared_ptr<>
-							netView->ReadPacket(message);
-						}
-					}
-				}
-			}
-
-			//todo - collision detection confirmation...
-
-			//todo - possible physics simulation
-		}
-
-		void ReceiveAndStorePackets()
-		{
-			//receive until theres no more packets left
-			while (true)
-			{
-				unsigned char packet[256];
-				int bytesRead = connection->ReceivePacket(packet, sizeof(packet));
-				if (bytesRead == 0)
-					break;
-				std::shared_ptr<networking::MessageStructures::BaseMessage> message = std::make_shared<networking::MessageStructures::BaseMessage>();
-				memcpy(message.get(), packet, sizeof(networking::MessageStructures::BaseMessage));
-
-				ReadPacket(message);
-			}
-		}
-
-		void SendUpdatedSnapshots()
-		{
-			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedPlayerMap);
-			for (auto const& value : connectedPlayerMap)
-			{
-				networking::MessageStructures::BaseMessage message;
-				message.messageType = networking::MessageStructures::PlayerSnapshot;
-				message.uniqueID = value.first;
-				message.positionMessage.position = value.second->relatedGameObject->GetPosition();
-
-				connection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(networking::MessageStructures::BaseMessage));
-			}
-		}
-
-		void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message)
-		{
-			//Add new player if not exists
-			mutexConnectedPlayerMap.lock();
-			if (message->messageType == networking::MessageStructures::PlayerConnect || 
-				(message->messageType == networking::MessageStructures::PlayerSnapshot && connectedPlayerMap.find(message->uniqueID) == connectedPlayerMap.end()))
-			{
-				vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
-				ConnectPlayer(message->uniqueID, spawnPosition);
-			}
-			mutexConnectedPlayerMap.unlock();
-
-			if (message->messageType == networking::MessageStructures::PlayerDisconnect)
-			{
-				DisconnectPlayer(message->uniqueID);
-			}
-			else
-			{
-				mutexConnectedPlayerMap.lock();
-				connectedPlayerMap[message->uniqueID]->messages.push_back(message);
-				mutexConnectedPlayerMap.unlock();
-			}
+			networking::ClientNetworkManager::GetInstance()->UpdateComms();
 		}
 
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 		{
-			//disable keys
+			//disable keys inherited from client
 		}
 
 		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
-		{
-			//disable mousemove
+		{ 
+			//disable mousemove inherited from client
 		}
 
-		void ConnectPlayer(GUID id, vec3 position)
+		std::shared_ptr<INetworkViewComponent> ConnectPlayer(GUID id, vec3 position)
 		{
 			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
 
 			std::shared_ptr<PlayerGameObject> player = std::dynamic_pointer_cast<PlayerGameObject>(objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player));
-			InitialisePlayer(player, position, false);
-
+			std::shared_ptr<INetworkViewComponent> netView = InitialisePlayer(player, position, id, false);
 			connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
 			connectedPlayerMap[id]->relatedGameObject = player;
 
@@ -176,6 +99,8 @@ namespace MultiplayerArena
 
 			printf("Connected new player %ls at %f %f %f \n", szGuid, position.x, position.y, position.z);
 			lastConnectedPlayer = id;
+
+			return netView;
 		}
 
 		void DisconnectPlayer(GUID id)
@@ -192,31 +117,67 @@ namespace MultiplayerArena
 			printf("Disconnected player at %ls \n", szGuid);
 		}
 
-		#pragma region IConnectionEventHandler functions
-
-		void OnStart() override
+		std::shared_ptr<INetworkViewComponent> ConnectBullet(GUID id, vec3 position)
 		{
-			printf("server started...\n");
+			return nullptr;
 		}
 
-		void OnStop() override
+		void DisconnectBullet(GUID id)
 		{
-			printf("server stop...\n");
+			
 		}
 
-		void OnConnect() override
-		{	
-			printf("player connected...\n");
-		}
 
-		void OnDisconnect() override
+		void ConnectCollectable(GUID id, vec3 position)
 		{
-			std::lock_guard<std::mutex> lockGameObjectManager(mutexGameObjectManager);
-			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedPlayerMap);
-
-			DisconnectPlayer(lastConnectedPlayer);
+			
 		}
 
-		#pragma endregion  
+		void DisconnectCollectable(GUID id)
+		{
+			
+		}
+
+		void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView)
+		{
+			switch(message->messageType)
+			{
+			case networking::MessageStructures::None:
+				break;
+			case networking::MessageStructures::Player:
+				netView = ConnectPlayer(message->uniqueID, message->positionOrientationMessage.position);
+				break;
+			case networking::MessageStructures::Bullet:
+				netView = ConnectBullet(message->uniqueID, message->positionOrientationMessage.position);
+				break;
+			case networking::MessageStructures::Collectable:
+				break;
+			}
+
+		}
+
+		void OnNetworkViewDisconnect(GUID id, networking::MessageStructures::MessageType msgType)
+		{
+			switch (msgType)
+			{
+			case networking::MessageStructures::None:
+				break;
+			case networking::MessageStructures::Player:
+				DisconnectPlayer(id);
+				break;
+			case networking::MessageStructures::Bullet:
+				DisconnectBullet(id);
+				break;
+			case networking::MessageStructures::Collectable:
+				DisconnectCollectable(id);
+				break;
+			}
+		}
+
+		void DoMessageProcessing()
+		{
+			
+		}
+
 	};
 }

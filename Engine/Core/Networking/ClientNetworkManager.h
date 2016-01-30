@@ -15,14 +15,9 @@
 
 namespace networking
 {
-	class ClientNetworkManager : public IClientNetworkManager, public IConnectionEventHandler
+	class ClientNetworkManager : public INetworkManager, public IConnectionEventHandler
 	{
 	private:
-		ClientNetworkManager(): timer(std::make_unique<TickTimer>())
-		{
-			SetTickRate(std::chrono::milliseconds(5));
-			timer->AddOnTickCallback(std::bind(&ClientNetworkManager::UpdateComms, this));
-		}
 		IConnection* serverConnection;
 		std::chrono::time_point<std::chrono::system_clock> startTime;
 		std::chrono::time_point<std::chrono::system_clock> lastTime;
@@ -32,6 +27,8 @@ namespace networking
 
 		std::function<void()> onComponentConnectCallback;
 		std::function<void()> onComponentDisconnectCallback;
+
+		std::mutex mutexConnectedNetViewMap;
 
 		void AddOnComponentConnectCallback(std::function<void()> callback)
 		{
@@ -46,10 +43,16 @@ namespace networking
 		typedef std::map<GUID, std::shared_ptr<INetworkViewComponent>, Utils::GUIDComparer> NetworkIDMapType;
 		NetworkIDMapType networkIDToComponent;
 	public:
-		static ClientNetworkManager& GetInstance()
+		static std::shared_ptr<ClientNetworkManager>& GetInstance()
 		{
-			static ClientNetworkManager instance;
+			static std::shared_ptr<ClientNetworkManager> instance = std::make_shared<ClientNetworkManager>();
 			return instance;
+		}
+
+		ClientNetworkManager() : timer(std::make_unique<TickTimer>())
+		{
+			SetTickRate(std::chrono::milliseconds(5));
+			timer->AddOnTickCallback(std::bind(&ClientNetworkManager::UpdateComms, this));
 		}
 
 		~ClientNetworkManager()
@@ -59,20 +62,20 @@ namespace networking
 
 		void InitialiseConnectionToServer()
 		{
-
-			serverConnection->SetConnectionEventHandler(shared_from_this());
 			switch (clientConnectionType)
 			{
 			case Unreliable:
-				serverConnection = networking::NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
+				serverConnection = NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
 				break;
 			case Reliable:
-				serverConnection = networking::NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
+				serverConnection = NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
 				break;
 			//case MultiUnreliable:
 			//	serverConnection = networking::NetworkServices::GetInstance().CreateMultiConnection(ProtocolId, TimeOut);
 			//	break;
 			}
+
+			serverConnection->SetConnectionEventHandler(shared_from_this());
 
 			int startClientPort = ClientPort;
 			while(!serverConnection->Start(startClientPort) && startClientPort < startClientPort + 50)
@@ -119,26 +122,12 @@ namespace networking
 
 			const float sendRate = flowControl.GetSendRate();
 
+			ReceiveAndRoutePackets();
+			ProcessMessages();
 			SendComponentPackets();
 
-			ReceiveAndRoutePackets();
-			
 			serverConnection->Update(deltaTimeSecs);
 			lastTime = nowTime;
-		}
-
-		void SendComponentPackets()
-		{
-			//todo - look at grouping into one packet for all components (group into state snapshot)
-			for (NetworkIDMapType::iterator it = networkIDToComponent.begin(); it != networkIDToComponent.end(); ++it)
-			{
-				if (it->second->GetIsSendUpdates())
-				{
-					std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
-					int size = it->second->BuildPacket(message);
-					serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), size);
-				}
-			}
 		}
 
 		void ReceiveAndRoutePackets()
@@ -165,6 +154,32 @@ namespace networking
 
 				if (it != networkIDToComponent.end())
 					it->second->ReadPacket(message);
+			}
+		}
+
+		void ProcessMessages()
+		{
+			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedNetViewMap);
+
+			for (NetworkIDMapType::iterator it = networkIDToComponent.begin(); it != networkIDToComponent.end(); ++it)
+			{
+				it->second->ProcessMessages();
+			}
+		}
+
+		void SendComponentPackets()
+		{
+			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedNetViewMap);
+			//todo - look at grouping into one packet for all components (group into state snapshot)
+			for (NetworkIDMapType::iterator it = networkIDToComponent.begin(); it != networkIDToComponent.end(); ++it)
+			{
+				if (it->second->IsSendUpdates())
+				{
+					std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
+					int size = it->second->BuildPacket(message);
+					serverConnection->SendPacket(reinterpret_cast<unsigned char*>(message.get()), size);
+				}
+				it->second->ClearReceivedMessages();
 			}
 		}
 
@@ -212,11 +227,11 @@ namespace networking
 			
 		}
 
-		virtual void OnConnect()
+		virtual void OnConnect(std::shared_ptr<Address> address)
 		{
 			//connected to server
 		}
-		virtual void OnDisconnect()
+		virtual void OnDisconnect(std::shared_ptr<Address> address)
 		{
 			//timeout from server
 		}

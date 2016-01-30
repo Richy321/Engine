@@ -18,6 +18,7 @@ namespace networking
 		State state;
 		float timeoutAccumulator;
 		float timeout;
+		std::shared_ptr<Address> address;
 		std::shared_ptr<IConnectionEventHandler> connectionEventHandler = nullptr;
 		
 		void OnStart() const
@@ -32,16 +33,16 @@ namespace networking
 				connectionEventHandler->OnStop();
 		}
 
-		void OnConnect() const
+		void OnConnect(std::shared_ptr<Address> address) const
 		{
 			if (connectionEventHandler != nullptr)
-				connectionEventHandler->OnConnect();
+				connectionEventHandler->OnConnect(address);
 		}
 
-		void OnDisconnect() const
+		void OnDisconnect(std::shared_ptr<Address> address) const
 		{
 			if (connectionEventHandler != nullptr)
-				connectionEventHandler->OnDisconnect();
+				connectionEventHandler->OnDisconnect(address);
 		}
 		void Update(float deltaTime)
 		{
@@ -53,7 +54,7 @@ namespace networking
 					printf("connect timed out\n");
 					ClearData();
 					state = ConnectFail;
-					OnDisconnect();
+					OnDisconnect(address);
 				}
 				else if (state == Connected)
 				{
@@ -61,7 +62,7 @@ namespace networking
 					ClearData();
 					if (state == Connecting)
 						state = ConnectFail;
-					OnDisconnect();
+					OnDisconnect(address);
 				}
 			}
 		}
@@ -188,7 +189,7 @@ namespace networking
 					connections[senderAddress]->timeoutAccumulator = 0.0f;
 					connections[senderAddress]->timeout = defaultTimeout;
 					connections[senderAddress]->connectionEventHandler = connectionEventHandler;
-					connections[senderAddress]->OnConnect();
+					connections[senderAddress]->OnConnect(senderAddress);
 
 					printf("server accepts connection from client %d.%d.%d.%d:%d\n",
 						sender.GetA(), sender.GetB(), sender.GetC(), sender.GetD(), sender.GetPort());

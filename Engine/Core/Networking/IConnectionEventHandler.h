@@ -4,8 +4,8 @@ class IConnectionEventHandler : public std::enable_shared_from_this<IConnectionE
 public:
 	virtual void OnStart() = 0;
 	virtual void OnStop() = 0;
-	virtual void OnConnect() = 0;
-	virtual void OnDisconnect() = 0;
+	virtual void OnConnect(std::shared_ptr<networking::Address> address) = 0;
+	virtual void OnDisconnect(std::shared_ptr<networking::Address> address) = 0;
 
 	IConnectionEventHandler()
 	{

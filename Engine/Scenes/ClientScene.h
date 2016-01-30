@@ -39,15 +39,12 @@ namespace MultiplayerArena
 		const float floorDepth = 30.0f;
 		float m_scale = 0.0f;
 
-		//std::vector<std::shared_ptr<networking::NetworkPlayer>> otherPlayers;
-
 		std::shared_ptr<ObjectFactoryPool> objectFactoryPool;
 
 		const std::string defaultCheckeredTexture = "Default Checkered";
 		ClientScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 		{
 			camera = std::make_shared<CameraFPS>();
-			objectFactoryPool = std::make_shared<ObjectFactoryPool>(gameObjectManager);
 		}
 
 		~ClientScene()
@@ -59,6 +56,8 @@ namespace MultiplayerArena
 			SceneManager::Initialise();
 			//CaptureCursor(true);
 
+			objectFactoryPool = std::make_shared<ObjectFactoryPool>(gameObjectManager, std::dynamic_pointer_cast<networking::INetworkManager>(networking::ClientNetworkManager::GetInstance()));
+
 			camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 			SetMainCamera(camera);
 			camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
@@ -68,7 +67,7 @@ namespace MultiplayerArena
 			InitialiseEnvironment();
 			InitialiseLocalPlayer();
 
-			networking::ClientNetworkManager::GetInstance().InitialiseConnectionToServer();
+			networking::ClientNetworkManager::GetInstance()->InitialiseConnectionToServer();
 		}
 
 		void InitialiseEnvironment()
@@ -81,29 +80,43 @@ namespace MultiplayerArena
 			gameObjectManager.push_back(floor);
 		}
 
-		void InitialiseLocalPlayer()
+		std::shared_ptr<NetworkViewComponent> InitialiseLocalPlayer()
 		{
 			vec3 spawnPosition(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
 			player = std::dynamic_pointer_cast<PlayerGameObject>(objectFactoryPool->GetFactoryObject(IObjectFactoryPool::Player));
-			InitialisePlayer(player, spawnPosition, true);
+			return InitialisePlayer(player, spawnPosition, GUID_NULL, true);
 		}
 
-		void InitialisePlayer(std::shared_ptr<PlayerGameObject> &player, vec3 &position, bool isLocal)
+		std::shared_ptr<NetworkViewComponent> InitialisePlayer(std::shared_ptr<PlayerGameObject> &player, vec3 &position, GUID uniqueID, bool isLocal)
 		{
 			player->GetWorldTransform()[3].x = position.x;
 			player->GetWorldTransform()[3].y = position.y;
 			player->GetWorldTransform()[3].z = position.z;
 
-			if (isLocal)
+			auto component = player->GetComponentByType(Core::IComponent::NetworkView);
+			if (component != nullptr)
 			{
-				auto component = player->GetComponentByType(Core::IComponent::NetworkView);
-				if (component != nullptr)
+				std::shared_ptr<NetworkViewComponent> networkView = std::dynamic_pointer_cast<NetworkViewComponent>(component);
+					
+				if (isLocal)
 				{
-					std::shared_ptr<NetworkViewComponent> networkView = std::dynamic_pointer_cast<NetworkViewComponent>(component);
-					networkView->SetIsSendUpdates(true);
+					networkView->IsSendUpdates() = true;
+					networkView->IsClearMessagesOnUpdate() = true;
 					networkView->deadReckoning = NetworkViewComponent::None;
 				}
+				else
+				{
+					networkView->IsSendUpdates() = false;
+					networkView->IsClearMessagesOnUpdate() = true;
+					networkView->deadReckoning = NetworkViewComponent::DeadReckoningType::None; //linear
+					networkView->SetUniqueID(uniqueID);
+				}
+
+				networkView->AddToNetworkingManager();
+
+				return networkView;
 			}
+			return nullptr;
 		}
 
 		void InitialiseTextures() const
@@ -151,7 +164,7 @@ namespace MultiplayerArena
 		void OnCommsUpdate(float deltaTime) const 
 		{
 			//Not used unless threaded network comms is turned off
-			networking::ClientNetworkManager::GetInstance().UpdateComms();
+			networking::ClientNetworkManager::GetInstance()->UpdateComms();
 		}
 
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override

@@ -15,12 +15,22 @@ namespace Core
 
 		virtual void UpdateComms(float deltaTime) = 0;
 		virtual GUID GetUniqueID() = 0;
-		virtual bool GetIsSendUpdates() = 0;
+		virtual void SetUniqueID(GUID id)= 0;
 
-		virtual void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> packet) = 0;
-		virtual int BuildPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message) = 0;
+		virtual void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage>& packet) = 0;
+		virtual int BuildPacket(std::shared_ptr<networking::MessageStructures::BaseMessage>& message) = 0;
 
-		virtual bool IsSendUpdates() = 0;
+		virtual bool& IsSendUpdates() = 0;
+		virtual bool& IsClearMessagesOnUpdate() = 0;
+		virtual void ClearReceivedMessages() = 0;
+
+		virtual void SendReceivedMessages(networking::IConnection* connection) = 0;
+
+
+		virtual void ProcessMessages() = 0;
+		
+		
+
 	};
 }
 

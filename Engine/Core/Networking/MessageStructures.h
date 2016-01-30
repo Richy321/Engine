@@ -18,17 +18,9 @@ namespace networking
 		enum MessageType
 		{
 			None,
-			PlayerSnapshot,
-			PlayerConnect,
-			PlayerDisconnect,
-
-			BulletSnapshot,
-			BulletConnect,
-			BulletDisconnect,
-
-			CollectableSnapshot,
-			CollectableConnect,
-			CollectableDisconnect
+			Player,
+			Bullet,
+			Collectable,
 		};
 
 		struct BasicPositionMessage
@@ -47,6 +39,11 @@ namespace networking
 		{
 			BaseMessage() : simpleType(NoneSimple), messageType(None)
 			{
+			}
+
+			BaseMessage(const BaseMessage& other)
+			{
+				memcpy(this, &other, sizeof(BaseMessage));
 			}
 
 			GUID uniqueID;

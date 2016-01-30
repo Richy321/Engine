@@ -9,35 +9,40 @@
 #include "../Networking/MessageStructures.h"
 #include "../Networking/IClientNetworkManager.h"
 #include "DirectionalMovementComponent.h"
+#include <mutex>
 
 class NetworkViewComponent : public Core::INetworkViewComponent, public std::enable_shared_from_this<Core::INetworkViewComponent>
 {
 public:
 	GUID uniqueID;
-	networking::IClientNetworkManager& networkingManager;
+	std::shared_ptr<networking::INetworkManager> networkingManager;
 	bool sendUpdates; // should we send updates about this network view to the server
-	bool IsSendUpdates() override { return sendUpdates; }
+	bool& IsSendUpdates() override { return sendUpdates; }
+	bool clearMessagesOnUpdate;
+	bool& IsClearMessagesOnUpdate() override { return clearMessagesOnUpdate; }
 
-	std::vector < std::shared_ptr<networking::MessageStructures::BaseMessage>> receivedMessages;
+	std::vector<std::shared_ptr<networking::MessageStructures::BaseMessage>> receivedMessages;
+	
+	std::mutex mutexReceivedMsg;
 
 	enum DeadReckoningType
 	{
 		None,
-		Exact,
 		Linear
 	};
 
-	DeadReckoningType deadReckoning = Exact;
+	DeadReckoningType deadReckoning = None;
 
-	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, networking::IClientNetworkManager& networkingManager) : INetworkViewComponent(parent), networkingManager(networkingManager)
+	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : INetworkViewComponent(parent), networkingManager(networkingManager)
 	{
 		CoCreateGuid(&uniqueID);
 		sendUpdates = false;
+		clearMessagesOnUpdate = true;
 	}
 
 	void AddToNetworkingManager()
 	{
-		networkingManager.AddNetworkViewComponent(shared_from_this());
+		networkingManager->AddNetworkViewComponent(shared_from_this());
 	}
 
 	virtual ~NetworkViewComponent()
@@ -45,27 +50,45 @@ public:
 
 	}
 
-	void Update(float deltaTime) override
+	virtual void ProcessMessages() override
 	{
-		std::shared_ptr<networking::MessageStructures::BaseMessage> lastState;
+		std::shared_ptr<networking::MessageStructures::BaseMessage> lastState = nullptr;
 
-		if (deadReckoning == Exact)
+		switch (deadReckoning)
 		{
-			for (auto &i : receivedMessages)
+			case None:
 			{
-				if (i->simpleType == networking::MessageStructures::SnapShot)
+				std::lock_guard<std::mutex> lock(mutexReceivedMsg);
+				for (auto &i : receivedMessages)
 				{
-					lastState = i;
+					if (i->simpleType == networking::MessageStructures::SnapShot)
+						lastState = i;
+				}
+
+				if (lastState != nullptr)
+				{
+					parentGameObject.lock()->GetWorldTransform()[3].x = lastState->positionMessage.position.x;
+					parentGameObject.lock()->GetWorldTransform()[3].y = lastState->positionMessage.position.y;
+					parentGameObject.lock()->GetWorldTransform()[3].z = lastState->positionMessage.position.z;
 				}
 			}
+			break;
+			case Linear:
+				break;
 		}
 
-		if(lastState != nullptr)
 		{
-			parentGameObject.lock()->GetWorldTransform()[3].x = lastState->positionMessage.position.x;
-			parentGameObject.lock()->GetWorldTransform()[3].y = lastState->positionMessage.position.y;
-			parentGameObject.lock()->GetWorldTransform()[3].z = lastState->positionMessage.position.z;
+			std::lock_guard<std::mutex> lock(mutexReceivedMsg);
+			if (clearMessagesOnUpdate)
+				receivedMessages.clear();
+			
 		}
+	}
+
+
+	void Update(float deltaTime) override
+	{
+		
 	}
 
 	virtual void UpdateComms(float deltaTime) override
@@ -74,7 +97,7 @@ public:
 	}
 
 	//max 256
-	virtual int BuildPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message) override
+	virtual int BuildPacket(std::shared_ptr<networking::MessageStructures::BaseMessage>& message) override
 	{
 		mat4 transform = GetParentGameObject().lock()->GetWorldTransform();
 
@@ -85,8 +108,9 @@ public:
 		return sizeof(networking::MessageStructures::BaseMessage);
 	}
 
-	virtual void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> packet) override
+	virtual void ReadPacket(std::shared_ptr<networking::MessageStructures::BaseMessage>& packet) override
 	{
+		std::lock_guard<std::mutex> lock(mutexReceivedMsg);
 		receivedMessages.push_back(packet);
 	}
 
@@ -95,21 +119,35 @@ public:
 		return uniqueID;
 	}
 
-	bool GetIsSendUpdates() override
+	void SetUniqueID(GUID id) override
 	{
-		return sendUpdates;
+		uniqueID = id;
 	}
-
-	void SetIsSendUpdates(bool value)
-	{
-		sendUpdates = value;
-	}
-
+	
 	void Destroy() override
 	{
 	}
 
-
 	ComponentTypes GetComponentType() const override { return NetworkView; }
+
+	void SendReceivedMessages(networking::IConnection* connection) override
+	{
+		if (connection == nullptr)
+			return;
+
+		std::lock_guard<std::mutex> lock(mutexReceivedMsg);
+
+		//fwd all messages on to clients
+		for (auto &message : receivedMessages)
+		{
+			connection->SendPacket(reinterpret_cast<unsigned char*>(message.get()), sizeof(networking::MessageStructures::BaseMessage));
+		}
+	}
+
+	void ClearReceivedMessages()
+	{
+		std::lock_guard<std::mutex> lock(mutexReceivedMsg);
+		receivedMessages.clear();
+	}
 };
 

@@ -45,7 +45,7 @@ namespace networking
 			bool connected = IsConnected();
 			ClearData();
 			if (connected)
-				OnDisconnect();
+				OnDisconnect(address);
 			mode = Server;
 			state = Listening;
 		}
@@ -59,7 +59,7 @@ namespace networking
 			socket->Close();
 			running = false;
 			if (connected)
-				OnDisconnect();
+				OnDisconnect(address);
 			OnStop();
 		}
 
@@ -70,7 +70,7 @@ namespace networking
 			bool connected = IsConnected();
 			ClearData();
 			if (connected)
-				OnDisconnect();
+				OnDisconnect(address);
 			mode = Client;
 			state = Connecting;
 			this->address = address;
@@ -100,7 +100,7 @@ namespace networking
 					printf("connect timed out\n");
 					ClearData();
 					state = ConnectFail;
-					OnDisconnect();
+					OnDisconnect(address);
 				}
 				else if (state == Connected)
 				{
@@ -108,7 +108,7 @@ namespace networking
 					ClearData();
 					if (state == Connecting)
 						state = ConnectFail;
-					OnDisconnect();
+					OnDisconnect(address);
 				}
 			}
 		}
@@ -179,7 +179,7 @@ namespace networking
 
 
 	protected:
-
+		Address address;
 		//basic inherited event system functions
 		//todo - change to std::function callbacks
 		virtual void OnStart()
@@ -197,13 +197,13 @@ namespace networking
 		virtual void OnConnect()
 		{
 			if (connectionEventHandler != nullptr)
-				connectionEventHandler->OnConnect();
+				connectionEventHandler->OnConnect(std::make_shared<Address>(address));
 		}
 
-		virtual void OnDisconnect()
+		virtual void OnDisconnect(Address address)
 		{
 			if (connectionEventHandler != nullptr)
-				connectionEventHandler->OnDisconnect();
+				connectionEventHandler->OnDisconnect(std::make_shared<Address>(address));
 		}
 
 		std::shared_ptr<IConnectionEventHandler> connectionEventHandler = nullptr;
@@ -234,6 +234,6 @@ namespace networking
 		State state;
 		ISocket* socket;
 		float timeoutAccumulator;
-		Address address;
+		
 	};
 }

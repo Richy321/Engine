@@ -110,7 +110,7 @@ namespace networking
 		virtual void OnDisconnect()
 		{
 			ClearData();
-			Connection::OnDisconnect();
+			Connection::OnDisconnect(address);
 		}
 
 	private:

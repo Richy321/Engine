@@ -253,13 +253,13 @@
     <None Include="Shaders\basicColor.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\basicColor.vert">
+      <Filter>Shaders</Filter>
+    </None>
     <None Include="Shaders\basicLighting.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\basicLighting.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\basicColor.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

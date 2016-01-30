@@ -4,9 +4,13 @@
 
 namespace networking
 {
-	class IClientNetworkManager
+	class INetworkManager
 	{
 	public:
+		virtual ~INetworkManager()
+		{
+		}
+
 		virtual void AddNetworkViewComponent(std::shared_ptr<Core::INetworkViewComponent> component) = 0;
 		virtual void RemoveNetworkViewComponent(std::shared_ptr<Core::INetworkViewComponent> component) = 0;
 	};

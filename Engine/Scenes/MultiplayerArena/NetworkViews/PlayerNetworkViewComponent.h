@@ -8,23 +8,26 @@ namespace MultiplayerArena
 	{
 	public:
 
-		PlayerNetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, networking::IClientNetworkManager& networkingManager) : NetworkViewComponent(parent, networkingManager)
+		PlayerNetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : NetworkViewComponent(parent, networkingManager)
 		{
 		}
 
 		~PlayerNetworkViewComponent()
 		{
 		}
-
-		void Update(float deltaTime) override
+		
+		
+		void ProcessMessages() override
 		{
-			std::shared_ptr<networking::MessageStructures::BaseMessage> lastState;
-
-			if (deadReckoning == Exact)
+			std::shared_ptr<networking::MessageStructures::BaseMessage> lastState = nullptr;
+			std::lock_guard<std::mutex> lock(mutexReceivedMsg);
+			//todo - handle corrections from server
+			if (deadReckoning == None)
 			{
 				for (auto &i : receivedMessages)
 				{
-					if (i->simpleType == networking::MessageStructures::SnapShot)
+					//not sending updates means it's controlled by this client (don't update from server...) )
+					if (i->simpleType == networking::MessageStructures::SnapShot && !this->IsSendUpdates())
 					{
 						lastState = i;
 					}
@@ -39,27 +42,30 @@ namespace MultiplayerArena
 					std::shared_ptr<IComponent> component = parentGameObject.lock()->GetComponentByType(DirectionalMovement);
 					if (component != nullptr)
 					{
-						std::shared_ptr<Core::DirectionalMovementComponent> dirMove = std::dynamic_pointer_cast<Core::DirectionalMovementComponent>(component);
+						std::shared_ptr<DirectionalMovementComponent> dirMove = std::dynamic_pointer_cast<Core::DirectionalMovementComponent>(component);
 						dirMove->SetOrientation(lastState->positionOrientationMessage.heading, lastState->positionOrientationMessage.pitch);
 					}
 				}
+
+				if (clearMessagesOnUpdate)
+					receivedMessages.clear();
 			}
 		}
 
 		//max 256
-		int BuildPacket(std::shared_ptr<networking::MessageStructures::BaseMessage> message) override
+		int BuildPacket(std::shared_ptr<networking::MessageStructures::BaseMessage>& message) override
 		{
 			mat4 &transform = GetParentGameObject().lock()->GetWorldTransform();
 			
 			message->uniqueID = GetUniqueID();
 			message->simpleType = networking::MessageStructures::SnapShot;
-			message->messageType = networking::MessageStructures::PlayerSnapshot;
+			message->messageType = networking::MessageStructures::Player;
 			message->positionOrientationMessage.position = vec3(transform[3].x, transform[3].y, transform[3].z);
 
 			std::shared_ptr<IComponent> component = parentGameObject.lock()->GetComponentByType(DirectionalMovement);
 			if (component != nullptr)
 			{
-				std::shared_ptr<Core::DirectionalMovementComponent> dirMove = std::dynamic_pointer_cast<Core::DirectionalMovementComponent>(component);
+				std::shared_ptr<Core::DirectionalMovementComponent> dirMove = std::dynamic_pointer_cast<DirectionalMovementComponent>(component);
 				message->positionOrientationMessage.heading = dirMove->GetHeadingAngle();
 				message->positionOrientationMessage.pitch = dirMove->GetPitchAngle();
 			}
