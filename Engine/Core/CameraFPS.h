@@ -119,7 +119,31 @@ namespace Core
 			view = buildViewLookAt();
 				
 			worldToProjection = projection * view;
-			//Camera::Update(deltaTime);
+		}
+
+		void LookAt(vec3 target)
+		{
+			vec3 position(world[3]);
+			vec3 tmpFwd = normalize(target - position);
+
+			vec3 Vaxis(0.0f, 1.0f, 0.0f); //always rotate about a fixed up vector (FPS style)
+			const float EPSILON = 0.00001f;
+
+			if (fabs(tmpFwd.x) < EPSILON && fabs(tmpFwd.z) < EPSILON)
+			{
+				// forward vector is pointing +Y axis
+				if (tmpFwd.y > 0)
+					Vaxis = vec3(0, 0, -1);
+				// forward vector is pointing -Y axis
+				else
+					Vaxis = vec3(0, 0, 1);
+			}
+
+			vec3 Haxis = normalize(cross(tmpFwd, Vaxis)); //get updated horizontal axis
+
+			forward = tmpFwd;
+			up = normalize(cross(Haxis, forward)); //get updated up axis
+			right = Haxis;
 		}
 
 		mat4 buildViewManual()
