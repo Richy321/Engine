@@ -18,10 +18,7 @@ namespace MultiplayerArena
 	class ServerScene : public ClientScene
 	{
 	public:
-		networking::IConnection* connection;
-		std::chrono::time_point<std::chrono::system_clock> startTime;
-		std::chrono::time_point<std::chrono::system_clock> lastTime;
-		networking::FlowControl flowControl;
+
 
 		ServerScene(Initialisation::WindowInfo windowInfo) : ClientScene(windowInfo)
 		{
@@ -55,8 +52,9 @@ namespace MultiplayerArena
 
 			networking::ServerNetworkingManager::GetInstance()->InitialiseServerComms();
 			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ServerScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
-			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ServerScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ServerScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1));
 			networking::ServerNetworkingManager::GetInstance()->SetDoMessageProcessingCallback(std::bind(&ServerScene::DoMessageProcessing, nonCostThis));
+			networking::ServerNetworkingManager::GetInstance()->SetOnClientDisconnectCallback(std::bind(&ServerScene::OnClientDisconnect, nonCostThis, std::placeholders::_1));
 		}
 
 		void OnCommsUpdate(float deltaTime) const
@@ -83,6 +81,7 @@ namespace MultiplayerArena
 			std::shared_ptr<INetworkViewComponent> netView = InitialisePlayer(player, position, id, false);
 			connectedPlayerMap[id] = std::make_shared<networking::NetworkPlayer>();
 			connectedPlayerMap[id]->relatedGameObject = player;
+			
 
 			OLECHAR szGuid[40] = { 0 };
 			StringFromGUID2(id, szGuid, 40);
@@ -97,8 +96,7 @@ namespace MultiplayerArena
 			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
 			std::lock_guard<std::mutex> connectedMapLock(mutexConnectedPlayerMap);
 
-			
-			gameObjectManager.erase(std::remove(gameObjectManager.begin(), gameObjectManager.end(), connectedPlayerMap[id]->relatedGameObject), gameObjectManager.end());
+			objectFactoryPool->ReleaseFactoryObject(IObjectFactoryPool::Player, connectedPlayerMap[id]->relatedGameObject);
 			connectedPlayerMap.erase(id);
 			
 			OLECHAR szGuid[40] = { 0 };
@@ -127,9 +125,10 @@ namespace MultiplayerArena
 			
 		}
 
-		void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView)
+		void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView) override
 		{
-			switch(message->messageType)
+			networkIDToType[message->uniqueID] = message->messageType;
+			switch (message->messageType)
 			{
 			case networking::MessageStructures::None:
 				break;
@@ -145,22 +144,32 @@ namespace MultiplayerArena
 
 		}
 
-		void OnNetworkViewDisconnect(GUID id, networking::MessageStructures::MessageType msgType)
+		void OnNetworkViewDisconnect(GUID id) override
 		{
-			switch (msgType)
+			NetworkingIdToMessageTypeType::iterator it = networkIDToType.find(id);
+			if (it != networkIDToType.end())
 			{
-			case networking::MessageStructures::None:
-				break;
-			case networking::MessageStructures::Player:
-				DisconnectPlayer(id);
-				break;
-			case networking::MessageStructures::Bullet:
-				DisconnectBullet(id);
-				break;
-			case networking::MessageStructures::Collectable:
-				DisconnectCollectable(id);
-				break;
+				switch (it->second)
+				{
+				case networking::MessageStructures::None:
+					break;
+				case networking::MessageStructures::Player:
+					DisconnectPlayer(id);
+					break;
+				case networking::MessageStructures::Bullet:
+					DisconnectBullet(id);
+					break;
+				case networking::MessageStructures::Collectable:
+					DisconnectCollectable(id);
+					break;
+				}
+				networkIDToType.erase(it);
 			}
+		}
+
+		void OnClientDisconnect(std::shared_ptr<networking::Address>& address)
+		{
+			
 		}
 
 		void DoMessageProcessing()

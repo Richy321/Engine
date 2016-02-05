@@ -26,7 +26,7 @@ namespace networking
 		std::unique_ptr<TickTimer> timer;
 
 		std::function<void(std::shared_ptr<MessageStructures::BaseMessage>, std::shared_ptr<INetworkViewComponent>)> onNetworkViewConnectCallback;
-		std::function<void(GUID, MessageStructures::MessageType)> onNetworkViewDisconnectCallback;
+		std::function<void(GUID)> onNetworkViewDisconnectCallback;
 
 		std::mutex mutexConnectedNetViewMap;
 
@@ -50,7 +50,7 @@ namespace networking
 			timer->Stop();
 		}
 
-		void InitialiseConnectionToServer()
+		void ConnectToServer()
 		{
 			switch (clientConnectionType)
 			{
@@ -77,11 +77,19 @@ namespace networking
 			if (startClientPort == ClientPort + 50)
 				return; //could not find a free port
 
-			serverConnection->Connect(Address(127, 0, 0, 1, ServerPort));
+			serverConnection->Connect(ServerAddress);
 
 			timer->Start();
 			startTime = std::chrono::system_clock::now();
 			lastTime = startTime;
+		}
+
+		void DisconnectFromServer(GUID playerID)
+		{
+			SendClientDisconnect(playerID);
+			serverConnection->Stop();
+			timer->Stop();
+			connected = false;
 		}
 
 		void UpdateComms()
@@ -115,8 +123,8 @@ namespace networking
 			ReceiveAndRoutePackets();
 			ProcessMessages();
 			SendComponentPackets();
-
-			serverConnection->Update(deltaTimeSecs);
+			if(serverConnection->IsConnected())
+				serverConnection->Update(deltaTimeSecs);
 			lastTime = nowTime;
 		}
 
@@ -126,7 +134,11 @@ namespace networking
 			while (true)
 			{
 				unsigned char packet[256];
-				int bytes_read = serverConnection->ReceivePacket(packet, sizeof(packet));
+				std::shared_ptr<Address> sender = std::make_shared<Address>();
+				int bytes_read = 0;
+				if (serverConnection->IsConnected() || serverConnection->IsConnecting())
+					bytes_read = serverConnection->ReceivePacket(packet, sizeof(packet), sender);
+
 				if (bytes_read == 0)
 					break;
 
@@ -148,7 +160,7 @@ namespace networking
 				ConnectNetworkView(message);
 				break;
 			case MessageStructures::Disconnect:
-				DisconnectNetworkView(message->uniqueID, message->messageType);
+				DisconnectNetworkView(message->uniqueID);
 				break;
 			case MessageStructures::SnapShot:
 
@@ -163,7 +175,6 @@ namespace networking
 				mutexConnectedNetViewMap.unlock();
 				break;
 			}
-			
 		}
 
 		void ProcessMessages()
@@ -178,17 +189,20 @@ namespace networking
 
 		void SendComponentPackets()
 		{
-			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedNetViewMap);
-			//todo - look at grouping into one packet for all components (group into state snapshot)
-			for (NetworkIDMapType::iterator it = networkIDToComponent.begin(); it != networkIDToComponent.end(); ++it)
+			if (serverConnection->IsConnected() || serverConnection->IsConnecting())
 			{
-				if (it->second->IsSendUpdates())
+				std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedNetViewMap);
+				//todo - look at grouping into one packet for all components (group into state snapshot)
+				for (NetworkIDMapType::iterator it = networkIDToComponent.begin(); it != networkIDToComponent.end(); ++it)
 				{
-					std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
-					int size = it->second->BuildPacket(message);
-					serverConnection->SendPacket(reinterpret_cast<unsigned char*>(message.get()), size);
+					if (it->second->IsSendUpdates())
+					{
+						std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
+						int size = it->second->BuildPacket(message);
+						serverConnection->SendPacket(reinterpret_cast<unsigned char*>(message.get()), size);
+					}
+					it->second->ClearReceivedMessages();
 				}
-				it->second->ClearReceivedMessages();
 			}
 		}
 
@@ -234,10 +248,10 @@ namespace networking
 			}
 		}
 
-		void DisconnectNetworkView(GUID id, MessageStructures::MessageType msgType)
+		void DisconnectNetworkView(GUID id)
 		{
 			if (onNetworkViewDisconnectCallback != nullptr)
-				onNetworkViewDisconnectCallback(id, msgType);
+				onNetworkViewDisconnectCallback(id);
 
 			mutexConnectedNetViewMap.lock();
 			NetworkIDMapType::iterator it = networkIDToComponent.find(id);
@@ -268,11 +282,14 @@ namespace networking
 
 		void SendClientDisconnect(GUID playerNetViewID) const
 		{
-			MessageStructures::BaseMessage message;
-			message.uniqueID = playerNetViewID;
-			message.simpleType = MessageStructures::Disconnect;
-			message.messageType = MessageStructures::Player;
-			serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(MessageStructures::BaseMessage));
+			if (serverConnection->IsConnected())
+			{
+				MessageStructures::BaseMessage message;
+				message.uniqueID = playerNetViewID;
+				message.simpleType = MessageStructures::Disconnect;
+				message.messageType = MessageStructures::Player;
+				serverConnection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(MessageStructures::BaseMessage));
+			}
 		}
 
 		void SetOnNetworkViewConnectCallback(std::function<void(std::shared_ptr<MessageStructures::BaseMessage>, std::shared_ptr<INetworkViewComponent>)> callback)
@@ -280,10 +297,12 @@ namespace networking
 			onNetworkViewConnectCallback = callback;
 		}
 
-		void SetOnNetworkViewDisconnectCallback(std::function<void(GUID, MessageStructures::MessageType)> callback)
+		void SetOnNetworkViewDisconnectCallback(std::function<void(GUID)> callback)
 		{
 			onNetworkViewDisconnectCallback = callback;
 		}
 
+		bool IsConnected() const
+		{ return connected; }
 	};
 }

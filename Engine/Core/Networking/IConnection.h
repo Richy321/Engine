@@ -36,7 +36,7 @@ namespace networking
 
 		virtual void Update(float deltaTime) = 0;
 		virtual bool SendPacket(const unsigned char data[], const int size) = 0;
-		virtual int ReceivePacket(unsigned char data[], int size) = 0;
+		virtual int ReceivePacket(unsigned char data[], int size, std::shared_ptr<Address>& sender) = 0;
 		virtual void SetConnectionEventHandler(std::shared_ptr<IConnectionEventHandler>& handler) = 0;
 	};
 }

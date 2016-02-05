@@ -110,8 +110,10 @@ namespace MultiplayerArena
 
 		void ReleaseFactoryObject(FactoryObjectType objectType, std::shared_ptr<GameObject>& gameObject)
 		{
-			assert(objectPoolMap.find(objectType) == objectPoolMap.end());
+			assert(objectPoolMap.find(objectType) != objectPoolMap.end());
+			objectPoolMap[objectType]->inactiveObjects.push(gameObject);
 			objectPoolMap[objectType]->activeObjects.erase(std::remove(objectPoolMap[objectType]->activeObjects.begin(), objectPoolMap[objectType]->activeObjects.end(), gameObject), objectPoolMap[objectType]->activeObjects.end());
+			gameObject->isEnabled = false;
 		}
 	};
 }

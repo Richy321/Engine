@@ -23,7 +23,13 @@ namespace networking
 		typedef std::map<GUID, std::shared_ptr<INetworkViewComponent>, Utils::GUIDComparer> NetworkIDMapType;
 		NetworkIDMapType networkIDToComponent;
 
-		IConnection* connection;
+		typedef std::map<std::shared_ptr<Address>, std::vector<std::weak_ptr<INetworkViewComponent>>,Utils::SharedPtrAddressComparer> AddressToNetworkIDVectorMapType;
+		AddressToNetworkIDVectorMapType addressToNetworkIDs;
+
+		typedef std::map<std::shared_ptr<Address>, float, Utils::SharedPtrAddressComparer> AddressToFloatMap;
+		AddressToFloatMap disconnectCooloffTimeouts; //Stores remaining cooloff period before the client can reconnect. (avoids accidental reconnects from rogue packets and connect/disconnect spam.
+
+		IMultiConnection* connection;
 		std::chrono::time_point<std::chrono::system_clock> startTime;
 		std::chrono::time_point<std::chrono::system_clock> lastTime;
 		FlowControl flowControl;
@@ -32,8 +38,12 @@ namespace networking
 		std::mutex mutexConnectedNetViewMap;
 
 		std::function<void(std::shared_ptr<MessageStructures::BaseMessage>, std::shared_ptr<INetworkViewComponent>)> onNetworkViewConnectCallback;
-		std::function<void(GUID, MessageStructures::MessageType)> onNetworkViewDisconnectCallback;
+		std::function<void(GUID)> onNetworkViewDisconnectCallback;
 		std::function<void()> doMessageProcessing;
+		std::function<void(std::shared_ptr<Address> address)> onClientDisconnect;
+
+
+
 
 	public:
 		ServerNetworkingManager() : timer(std::make_unique<TickTimer>())
@@ -65,12 +75,12 @@ namespace networking
 
 			switch (serverConnectionType)
 			{
-			case Unreliable:
+			/*case Unreliable:
 				connection = NetworkServices::GetInstance().CreateConnection(ProtocolId, TimeOut);
 				break;
 			case Reliable:
 				connection = NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
-				break;
+				break;*/
 			case MultiUnreliable:
 				connection = NetworkServices::GetInstance().CreateMultiConnection(ProtocolId, TimeOut);
 				break;
@@ -101,8 +111,21 @@ namespace networking
 
 			connection->Update(deltaTimeSecs);
 
-			if (serverConnectionType == Reliable)
-				flowControl.Update(deltaTimeSecs, static_cast<networking::ReliableConnection*>(connection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
+			for(auto& address : disconnectCooloffTimeouts)
+			{
+				address.second -= deltaTimeSecs;
+			}
+			
+			for (AddressToFloatMap::iterator iter = disconnectCooloffTimeouts.begin(); iter != disconnectCooloffTimeouts.end(); )
+			{
+				if (iter->second < 0.0f)
+					iter = disconnectCooloffTimeouts.erase(iter);
+				else
+					++iter;
+			}
+
+			//if (serverConnectionType == Reliable)
+			//	flowControl.Update(deltaTimeSecs, static_cast<networking::ReliableConnection*>(connection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
 
 			lastTime = nowTime;
 		}
@@ -131,7 +154,8 @@ namespace networking
 			while (true)
 			{
 				unsigned char packet[256];
-				int bytesRead = connection->ReceivePacket(packet, sizeof(packet));
+				std::shared_ptr<Address> sender = std::make_shared<Address>();
+				int bytesRead = connection->ReceivePacket(packet, sizeof(packet), sender);
 				if (bytesRead == 0)
 					break;
 
@@ -139,7 +163,7 @@ namespace networking
 				memcpy(&tmpMsg, packet, sizeof(MessageStructures::BaseMessage));
 				std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>(tmpMsg);
 
-				ReadPacket(message);
+				ReadPacket(message, sender);
 			}
 		}
 
@@ -153,7 +177,7 @@ namespace networking
 			}
 		}
 
-		void ReadPacket(std::shared_ptr<MessageStructures::BaseMessage>& message)
+		void ReadPacket(std::shared_ptr<MessageStructures::BaseMessage>& message, std::shared_ptr<Address>& sender)
 		{
 			switch(message->simpleType)
 			{
@@ -161,16 +185,17 @@ namespace networking
 				break;
 
 			case MessageStructures::Connect:
-				ConnectNetworkView(message);
+				ConnectNetworkView(message, sender);
 				break;
 			case MessageStructures::Disconnect:
-				DisconnectNetworkView(message->uniqueID, message->messageType);
+				disconnectCooloffTimeouts[sender] = ReconnectCooloff;
+				DisconnectNetworkView(message->uniqueID);
 				break;
 			case MessageStructures::SnapShot:
 
 				//if a snapshot is received before a connect, make the connection best we can
 				if(networkIDToComponent.find(message->uniqueID) == networkIDToComponent.end())
-					ConnectNetworkView(message);
+					ConnectNetworkView(message, sender);
 
 				//route packet to network view
 				mutexConnectedNetViewMap.lock();
@@ -183,8 +208,9 @@ namespace networking
 
 		void AddNetworkViewComponent(std::shared_ptr<INetworkViewComponent> component) override
 		{
+			GUID id = component->GetUniqueID();
 			std::lock_guard<std::mutex> lock(mutexConnectedNetViewMap);
-			networkIDToComponent[component->GetUniqueID()] = component;
+			networkIDToComponent[id] = component;
 		}
 
 		void RemoveNetworkViewComponent(std::shared_ptr<INetworkViewComponent> component) override
@@ -221,23 +247,52 @@ namespace networking
 		{
 			//client timeout from server
 			printf("Client disconnected: %s \n", address->toString().c_str());
+
+			AddressToNetworkIDVectorMapType::iterator it = addressToNetworkIDs.find(address);
+
+			if(it != addressToNetworkIDs.end())
+			{
+				disconnectCooloffTimeouts[address] = ReconnectCooloff;
+				for (auto& netView : it->second)
+				{
+					if (!netView.expired())
+					{
+						DisconnectNetworkView(netView.lock()->GetUniqueID());
+					}
+				}
+				addressToNetworkIDs.erase(it);
+			}
+
+			if (onClientDisconnect != nullptr)
+				onClientDisconnect(address);
 		}
 
-		void DisconnectNetworkView(GUID id, MessageStructures::MessageType msgType)
+		void DisconnectNetworkView(GUID id)
 		{
 			if (onNetworkViewDisconnectCallback != nullptr)
-				onNetworkViewDisconnectCallback(id, msgType);
+				onNetworkViewDisconnectCallback(id);
 
 			mutexConnectedNetViewMap.lock();
 				NetworkIDMapType::iterator it = networkIDToComponent.find(id);
 
 				if (it != networkIDToComponent.end())
 					networkIDToComponent.erase(it);
+
+				//todo - clean up destroyed weak pointers
 			mutexConnectedNetViewMap.unlock();
 		}
 
-		void ConnectNetworkView(std::shared_ptr<MessageStructures::BaseMessage> message)
+		void ConnectNetworkView(std::shared_ptr<MessageStructures::BaseMessage> message, std::shared_ptr<Address>& owner)
 		{
+			AddressToFloatMap::iterator iter = disconnectCooloffTimeouts.find(owner);
+			if(iter != disconnectCooloffTimeouts.end() && disconnectCooloffTimeouts[owner] > 0)
+			{
+				connection->ForceDisconnectClient(owner);
+
+				DisconnectNetworkView(message->uniqueID);
+				return;
+			}
+
 			if (onNetworkViewConnectCallback != nullptr)
 			{
 				std::shared_ptr<INetworkViewComponent> netView;
@@ -245,6 +300,8 @@ namespace networking
 				onNetworkViewConnectCallback(message, std::ref(netView));
 				if (netView != nullptr)
 					AddNetworkViewComponent(netView);
+
+				addressToNetworkIDs[owner].push_back(netView);
 			}
 		}
 
@@ -253,7 +310,7 @@ namespace networking
 			onNetworkViewConnectCallback = callback;
 		}
 
-		void SetOnNetworkViewDisconnectCallback(std::function<void(GUID, MessageStructures::MessageType)> callback)
+		void SetOnNetworkViewDisconnectCallback(std::function<void(GUID)> callback)
 		{
 			onNetworkViewDisconnectCallback = callback;
 		}
@@ -261,6 +318,11 @@ namespace networking
 		void SetDoMessageProcessingCallback(std::function<void()> callback)
 		{
 			doMessageProcessing = callback;
+		}
+
+		void SetOnClientDisconnectCallback(std::function<void(std::shared_ptr<Address>& address)> callback)
+		{
+			onClientDisconnect = callback;
 		}
 	};
 }

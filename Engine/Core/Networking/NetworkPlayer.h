@@ -6,7 +6,7 @@ namespace networking
 	{
 	public:
 		std::string name;
+		std::shared_ptr<Address> address;
 		std::shared_ptr<GameObject> relatedGameObject;
-		std::vector<std::shared_ptr<MessageStructures::BaseMessage>> messages;
 	};
 }

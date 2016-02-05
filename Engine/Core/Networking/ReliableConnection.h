@@ -33,13 +33,13 @@ namespace networking
 			return true;
 		}
 
-		int ReceivePacket(unsigned char data[], int size) override
+		int ReceivePacket(unsigned char data[], int size, std::shared_ptr<Address> &sender) override
 		{
 			if (size <= HeaderSize)
 				return false;
 
 			unsigned char* packet = new unsigned char[HeaderSize + size];
-			int receivedBytes = Connection::ReceivePacket(packet, size + HeaderSize);
+			int receivedBytes = Connection::ReceivePacket(packet, size + HeaderSize, sender);
 
 			if (receivedBytes == 0)
 				return false;

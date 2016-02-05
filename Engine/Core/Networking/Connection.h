@@ -91,7 +91,7 @@ namespace networking
 
 		virtual void Update(float deltaTime) override
 		{
-			assert(running);
+			//assert(running);
 			timeoutAccumulator += deltaTime;
 			if (timeoutAccumulator > timeout)
 			{
@@ -129,13 +129,12 @@ namespace networking
 			return socket->Send(address, packet, size + HeaderSize);
 		}
 
-		virtual int ReceivePacket(unsigned char data[], int size) override
+		virtual int ReceivePacket(unsigned char data[], int size, std::shared_ptr<Address> &sender) override
 		{
 			assert(running);
 			unsigned char* packet;
 			packet = new unsigned char[size + HeaderSize];
-			Address sender;
-			int bytesRead = socket->Receive(sender, packet, size + HeaderSize);
+			int bytesRead = socket->Receive(*sender.get(), packet, size + HeaderSize);
 			if (bytesRead == 0)
 				return false;
 			if (bytesRead <= HeaderSize)
@@ -151,12 +150,12 @@ namespace networking
 			if (mode == Server && !IsConnected())
 			{
 				printf("server accepts connection from client %d.%d.%d.%d:%d\n",
-					sender.GetA(), sender.GetB(), sender.GetC(), sender.GetD(), sender.GetPort());
+					sender->GetA(), sender->GetB(), sender->GetC(), sender->GetD(), sender->GetPort());
 				state = Connected;
-				address = sender;
+				address = *sender.get();
 				OnConnect();
 			}
-			if (sender == address)
+			if (*sender.get() == address)
 			{
 				if (mode == Client && state == Connecting)
 				{

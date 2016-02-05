@@ -42,13 +42,13 @@ namespace Core
 				return memcmp(&Left, &Right, sizeof(Right)) < 0;
 			}
 		};
-		/*
-		struct AddressComparer
+		
+		struct SharedPtrAddressComparer
 		{
-			bool operator()(const std::shared_ptr<networking::Address> left, const std::shared_ptr<networking::Address> right) const
+			bool operator()(const std::shared_ptr<networking::Address>& left, const std::shared_ptr<networking::Address>& right) const
 			{
-				return *left.operator==(*right);
+				return left.get() < right.get();
 			}
-		};*/
+		};
 	};
 }

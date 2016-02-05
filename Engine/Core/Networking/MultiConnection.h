@@ -2,6 +2,8 @@
 #include "IConnection.h"
 #include "INetworkService.h"
 #include "ISocket.h"
+#include "../../IMultiConnection.h"
+#include <unordered_map>
 
 namespace networking
 {
@@ -73,11 +75,12 @@ namespace networking
 			timeoutAccumulator = 0.0f;
 		}
 	};
-	class MultiConnection : public IConnection
+	class MultiConnection : public IMultiConnection
 	{
 	public:
+		typedef std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>, Core::Utils::SharedPtrAddressComparer> AddressToConnectionInfoMap;
 
-		MultiConnection(unsigned int protocolId, float timeout, ISocket* socket) : IConnection(protocolId, timeout)
+		MultiConnection(unsigned int protocolId, float timeout, ISocket* socket) : IMultiConnection(protocolId, timeout)
 		{
 			this->protocolId = protocolId;
 			mode = Server;
@@ -87,7 +90,7 @@ namespace networking
 			defaultTimeout = timeout;
 		}
 
-		~MultiConnection()
+		~MultiConnection() override
 		{
 			if (running)
 				Stop();
@@ -141,7 +144,8 @@ namespace networking
 			memcpy(&packet[4], data, size);
 			
 			bool sendResults = true;
-			for (std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>>::iterator iter = connections.begin(); iter != connections.end(); ++iter)
+			
+			for (AddressToConnectionInfoMap::iterator iter = connections.begin(); iter != connections.end(); ++iter)
 			{
 				sendResults &= socket->Send(*(iter->first.get()), packet, size + HeaderSize);
 			}
@@ -149,13 +153,12 @@ namespace networking
 			return sendResults;
 		}
 
-		int ReceivePacket(unsigned char data[], int size) override
+		int ReceivePacket(unsigned char data[], int size, std::shared_ptr<Address>& sender) override
 		{
 			assert(running);
 			unsigned char* packet;
 			packet = new unsigned char[size + HeaderSize];
-			Address sender;
-			int bytesRead = socket->Receive(sender, packet, size + HeaderSize);
+			int bytesRead = socket->Receive(*sender.get(), packet, size + HeaderSize);
 			if (bytesRead == 0)
 				return false;
 			if (bytesRead <= HeaderSize)
@@ -170,35 +173,44 @@ namespace networking
 
 			if (mode == Server && IsListening())
 			{
-				std::shared_ptr<Address> senderAddress = std::make_shared<Address>(sender);
-
 				bool found = false;
-				for (std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>>::iterator iter = connections.begin(); iter != connections.end(); ++iter)
+				for (AddressToConnectionInfoMap::iterator iter = connections.begin(); iter != connections.end(); ++iter)
 				{
-					if (*iter->first == *senderAddress)
+					if (*iter->first == *sender)
 					{
 						found = true;
+						iter->second->timeoutAccumulator = 0.0f;
 						break;
 					}
 				}
 
 				if (!found)
 				{
-					connections[senderAddress] = std::make_shared<ConnectionInfo>();
-					connections[senderAddress]->state = ConnectionInfo::Connected;
-					connections[senderAddress]->timeoutAccumulator = 0.0f;
-					connections[senderAddress]->timeout = defaultTimeout;
-					connections[senderAddress]->connectionEventHandler = connectionEventHandler;
-					connections[senderAddress]->address = senderAddress;
-					connections[senderAddress]->OnConnect(senderAddress);
+					connections[sender] = std::make_shared<ConnectionInfo>();
+					connections[sender]->state = ConnectionInfo::Connected;
+					connections[sender]->timeoutAccumulator = 0.0f;
+					connections[sender]->timeout = defaultTimeout;
+					connections[sender]->connectionEventHandler = connectionEventHandler;
+					connections[sender]->address = sender;
+					connections[sender]->OnConnect(sender);
 
-					printf("server accepts connection from client %s\n",sender.toString().c_str());
+					printf("server accepts connection from client %s\n",sender->toString().c_str());
 				}
 
 				memcpy(data, &packet[HeaderSize], size - HeaderSize);
 				return size - HeaderSize;
 			}
 			return 0;
+		}
+
+		void ForceDisconnectClient(std::shared_ptr<Address> clientAddress) override
+		{
+			AddressToConnectionInfoMap::iterator it = connections.find(clientAddress);
+			if(it != connections.end())
+			{
+				connections.erase(it);
+				printf("Force disconnection of client %s, (disconnect cooloff", clientAddress->toString().c_str());
+			}
 		}
 
 		void ClearData()
@@ -209,7 +221,7 @@ namespace networking
 
 		void Update(float deltaTime) override
 		{
-			for (std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>>::iterator iter = connections.begin(); iter != connections.end(); ++iter)
+			for (AddressToConnectionInfoMap::iterator iter = connections.begin(); iter != connections.end(); ++iter)
 			{
 				iter->second->Update(deltaTime);
 			}
@@ -227,7 +239,8 @@ namespace networking
 		ISocket* socket;
 		Mode mode;
 		bool running;
-		std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>> connections;
+		
+		AddressToConnectionInfoMap connections;
 		State state;
 		std::shared_ptr<IConnectionEventHandler> connectionEventHandler = nullptr;
 

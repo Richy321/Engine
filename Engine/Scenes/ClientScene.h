@@ -46,6 +46,11 @@ namespace MultiplayerArena
 		PlayerConnectionMap connectedPlayerMap;
 		std::mutex mutexConnectedPlayerMap;
 
+		 
+		typedef std::map<GUID, networking::MessageStructures::MessageType, Utils::GUIDComparer> NetworkingIdToMessageTypeType;
+		NetworkingIdToMessageTypeType networkIDToType;
+
+
 		const std::string defaultCheckeredTexture = "Default Checkered";
 		ClientScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 		{
@@ -54,7 +59,7 @@ namespace MultiplayerArena
 
 		virtual ~ClientScene()
 		{
-			networking::ClientNetworkManager::GetInstance()->SendClientDisconnect(player->GetNetworkView()->uniqueID);
+			DisconnectComms();
 		}
 
 		void Initialise() override
@@ -73,16 +78,27 @@ namespace MultiplayerArena
 			InitialiseEnvironment();
 			InitialiseLocalPlayer();
 
-			InitialiseComms();
+			//ConnectComms();
 		}
 
-
-		void InitialiseComms()
+		void ConnectComms()
 		{
-			ClientScene* nonCostThis = const_cast<ClientScene*>(this);
-			networking::ClientNetworkManager::GetInstance()->InitialiseConnectionToServer();
-			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
-			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ClientScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+			if (!networking::ClientNetworkManager::GetInstance()->IsConnected())
+			{
+				ClientScene* nonCostThis = const_cast<ClientScene*>(this);
+				networking::ClientNetworkManager::GetInstance()->ConnectToServer();
+				networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+				networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ClientScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1));
+			}
+		}
+
+		void DisconnectComms()
+		{
+			if (networking::ClientNetworkManager::GetInstance()->IsConnected())
+			{
+				if (player != nullptr)
+					networking::ClientNetworkManager::GetInstance()->DisconnectFromServer(player->GetNetworkView()->GetUniqueID());
+			}
 		}
 
 		void InitialiseEnvironment()
@@ -185,6 +201,11 @@ namespace MultiplayerArena
 		{
 			SceneManager::notifyProcessNormalKeys(key, x, y);
 			camera->OnKey(key, x, y);
+
+			if (key == '=')
+				ConnectComms();
+			if (key == '-')
+				DisconnectComms();
 		}
 
 		virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
@@ -262,8 +283,9 @@ namespace MultiplayerArena
 
 		}
 
-		void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView)
+		virtual void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView)
 		{
+			networkIDToType[message->uniqueID] = message->messageType;
 			switch (message->messageType)
 			{
 			case networking::MessageStructures::None:
@@ -280,24 +302,28 @@ namespace MultiplayerArena
 
 		}
 
-		void OnNetworkViewDisconnect(GUID id, networking::MessageStructures::MessageType msgType)
+		virtual void OnNetworkViewDisconnect(GUID id)
 		{
-			switch (msgType)
+			NetworkingIdToMessageTypeType::iterator it = networkIDToType.find(id);
+			if (it != networkIDToType.end())
 			{
-			case networking::MessageStructures::None:
-				break;
-			case networking::MessageStructures::Player:
-				DisconnectPlayer(id);
-				break;
-			case networking::MessageStructures::Bullet:
-				DisconnectBullet(id);
-				break;
-			case networking::MessageStructures::Collectable:
-				DisconnectCollectable(id);
-				break;
+				switch (it->second)
+				{
+				case networking::MessageStructures::None:
+					break;
+				case networking::MessageStructures::Player:
+					DisconnectPlayer(id);
+					break;
+				case networking::MessageStructures::Bullet:
+					DisconnectBullet(id);
+					break;
+				case networking::MessageStructures::Collectable:
+					DisconnectCollectable(id);
+					break;
+				}
+
+				networkIDToType.erase(it);
 			}
 		}
-
-
 	};
 }
