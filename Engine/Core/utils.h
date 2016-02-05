@@ -2,12 +2,9 @@
 #include <iostream>
 #include "../Dependencies/glew/glew.h"
 #include <memory>
+#include "Networking/Address.h"
 
 #define Check_GLError() Utils::CheckGLError(__FILE__,__LINE__)
-
-namespace networking{
-	class Address;
-}
 
 namespace Core
 {
@@ -43,11 +40,12 @@ namespace Core
 			}
 		};
 		
+
 		struct SharedPtrAddressComparer
 		{
 			bool operator()(const std::shared_ptr<networking::Address>& left, const std::shared_ptr<networking::Address>& right) const
 			{
-				return left.get() < right.get();
+				return left->toString() < right->toString();
 			}
 		};
 	};

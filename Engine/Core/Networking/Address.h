@@ -45,11 +45,6 @@ namespace networking
 			return !(*this == other);
 		}
 
-		bool operator < (const Address& other) const
-		{
-			return address + port < other.address + other.port;
-		}
-
 		std::string toString() const
 		{
 			char buffer[50];
