@@ -56,9 +56,9 @@ namespace networking
 			return new ReliableConnection(protocolId, timeout, CreateSocket(SocketType::UDP));
 		}
 
-		MultiConnection* CreateMultiConnection(const int protocolId, const float timeout)
+		std::shared_ptr<MultiConnection> CreateMultiConnection(const int protocolId, const float timeout)
 		{
-			return new MultiConnection(protocolId, timeout, CreateSocket(SocketType::UDP));
+			return std::make_shared<MultiConnection>(protocolId, timeout, CreateSocket(SocketType::UDP));
 		}
 	};
 }

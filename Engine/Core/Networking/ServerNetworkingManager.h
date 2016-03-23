@@ -29,7 +29,7 @@ namespace networking
 		typedef std::map<std::shared_ptr<Address>, float, Utils::SharedPtrAddressComparer> AddressToFloatMap;
 		AddressToFloatMap disconnectCooloffTimeouts; //Stores remaining cooloff period before the client can reconnect. (avoids accidental reconnects from rogue packets and connect/disconnect spam.
 
-		IMultiConnection* connection;
+		std::shared_ptr<IMultiConnection> connection;
 		std::chrono::time_point<std::chrono::system_clock> startTime;
 		std::chrono::time_point<std::chrono::system_clock> lastTime;
 		FlowControl flowControl;
@@ -37,7 +37,7 @@ namespace networking
 
 		std::mutex mutexConnectedNetViewMap;
 
-		std::function<void(std::shared_ptr<MessageStructures::BaseMessage>, std::shared_ptr<INetworkViewComponent>)> onNetworkViewConnectCallback;
+		std::function<std::shared_ptr<INetworkViewComponent>(std::shared_ptr<MessageStructures::BaseMessage>)> onNetworkViewConnectCallback;
 		std::function<void(GUID)> onNetworkViewDisconnectCallback;
 		std::function<void()> doMessageProcessing;
 		std::function<void(std::shared_ptr<Address> address)> onClientDisconnect;
@@ -82,7 +82,7 @@ namespace networking
 				connection = NetworkServices::GetInstance().CreateReliableConnection(ProtocolId, TimeOut);
 				break;*/
 			case MultiUnreliable:
-				connection = NetworkServices::GetInstance().CreateMultiConnection(ProtocolId, TimeOut);
+				connection =  NetworkServices::GetInstance().CreateMultiConnection(ProtocolId, TimeOut);
 				break;
 			}
 
@@ -172,7 +172,7 @@ namespace networking
 			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedNetViewMap);
 			for (auto const& value : networkIDToComponent)
 			{
-				value.second->SendReceivedMessages(connection);
+				value.second->SendReceivedMessages(connection.get());
 				value.second->ClearReceivedMessages();
 			}
 		}
@@ -297,7 +297,7 @@ namespace networking
 			{
 				std::shared_ptr<INetworkViewComponent> netView;
 
-				onNetworkViewConnectCallback(message, std::ref(netView));
+				netView = onNetworkViewConnectCallback(message);
 				if (netView != nullptr)
 					AddNetworkViewComponent(netView);
 
@@ -305,7 +305,7 @@ namespace networking
 			}
 		}
 
-		void SetOnNetworkViewConnectCallback(std::function<void(std::shared_ptr<MessageStructures::BaseMessage>, std::shared_ptr<INetworkViewComponent>)> callback)
+		void SetOnNetworkViewConnectCallback(std::function<std::shared_ptr<INetworkViewComponent>(std::shared_ptr<MessageStructures::BaseMessage>)> callback)
 		{
 			onNetworkViewConnectCallback = callback;
 		}

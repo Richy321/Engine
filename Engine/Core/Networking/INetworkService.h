@@ -18,7 +18,7 @@ namespace networking
 		virtual ISocket* CreateSocket(SocketType sockType = INetworkService::SocketType::UDP) = 0;
 		virtual Connection* CreateConnection(const int protocolId, const float timeout) = 0;
 		virtual ReliableConnection* CreateReliableConnection(const int protocolId, const float timeout) = 0;
-		virtual MultiConnection* CreateMultiConnection(const int protocolId, const float timeout) = 0;
+		virtual std::shared_ptr<MultiConnection> CreateMultiConnection(const int protocolId, const float timeout) = 0;
 	};
 }
 

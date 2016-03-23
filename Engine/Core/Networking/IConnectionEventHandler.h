@@ -1,4 +1,5 @@
 #pragma once
+
 class IConnectionEventHandler : public std::enable_shared_from_this<IConnectionEventHandler>
 {
 public:

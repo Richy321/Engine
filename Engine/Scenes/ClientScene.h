@@ -87,7 +87,7 @@ namespace MultiplayerArena
 			{
 				ClientScene* nonCostThis = const_cast<ClientScene*>(this);
 				networking::ClientNetworkManager::GetInstance()->ConnectToServer();
-				networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+				networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1));
 				networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ClientScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1));
 			}
 		}
@@ -283,8 +283,9 @@ namespace MultiplayerArena
 
 		}
 
-		virtual void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView)
+		virtual std::shared_ptr<INetworkViewComponent> OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message)
 		{
+			std::shared_ptr<INetworkViewComponent> netView = nullptr;
 			networkIDToType[message->uniqueID] = message->messageType;
 			switch (message->messageType)
 			{
@@ -299,7 +300,7 @@ namespace MultiplayerArena
 			case networking::MessageStructures::Collectable:
 				break;
 			}
-
+			return netView;
 		}
 
 		virtual void OnNetworkViewDisconnect(GUID id)

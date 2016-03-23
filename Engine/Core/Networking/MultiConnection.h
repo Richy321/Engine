@@ -4,6 +4,7 @@
 #include "ISocket.h"
 #include "../../IMultiConnection.h"
 #include <unordered_map>
+#include <mutex>
 
 namespace networking
 {
@@ -45,8 +46,10 @@ namespace networking
 		{
 			if (connectionEventHandler != nullptr)
 				connectionEventHandler->OnDisconnect(address);
+
 		}
-		void Update(float deltaTime)
+		/// Returns false if not active (requires deleting)
+		bool Update(float deltaTime)
 		{
 			timeoutAccumulator += deltaTime;
 			if (timeoutAccumulator > timeout)
@@ -57,16 +60,20 @@ namespace networking
 					ClearData();
 					state = ConnectFail;
 					OnDisconnect(address);
+					return false;
 				}
-				else if (state == Connected)
+				
+				if (state == Connected)
 				{
 					printf("connection timed out\n");
 					ClearData();
 					if (state == Connecting)
 						state = ConnectFail;
 					OnDisconnect(address);
+					return false;
 				}
 			}
+			return true;
 		}
 
 		void ClearData()
@@ -75,9 +82,10 @@ namespace networking
 			timeoutAccumulator = 0.0f;
 		}
 	};
-	class MultiConnection : public IMultiConnection
+	class MultiConnection : public IConnectionEventHandler, public IMultiConnection
 	{
 	public:
+
 		typedef std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>, Core::Utils::SharedPtrAddressComparer> AddressToConnectionInfoMap;
 
 		MultiConnection(unsigned int protocolId, float timeout, ISocket* socket) : IMultiConnection(protocolId, timeout)
@@ -127,6 +135,31 @@ namespace networking
 		{
 			//todo - redesign interfaces : shouldn't be empty functions like this.
 			//Not applicable -
+		}
+
+		void OnStart() override
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnStart();
+		}
+
+		void OnStop() override
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnStop();
+		}
+		void OnConnect(std::shared_ptr<Address> address) override
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnConnect(address);
+		}
+		void OnDisconnect(std::shared_ptr<Address> address) override
+		{
+			if (connectionEventHandler != nullptr)
+				connectionEventHandler->OnDisconnect(address);
+
+			//connections[address] = nullptr;
+			//ForceDisconnectClient(address);
 		}
 
 		bool SendPacket(const unsigned char data[], const int size) override
@@ -190,7 +223,7 @@ namespace networking
 					connections[sender]->state = ConnectionInfo::Connected;
 					connections[sender]->timeoutAccumulator = 0.0f;
 					connections[sender]->timeout = defaultTimeout;
-					connections[sender]->connectionEventHandler = connectionEventHandler;
+					connections[sender]->connectionEventHandler = shared_from_this();
 					connections[sender]->address = sender;
 					connections[sender]->OnConnect(sender);
 
@@ -221,9 +254,13 @@ namespace networking
 
 		void Update(float deltaTime) override
 		{
-			for (AddressToConnectionInfoMap::iterator iter = connections.begin(); iter != connections.end(); ++iter)
+			AddressToConnectionInfoMap::iterator i = connections.begin();
+			while(i != connections.end())
 			{
-				iter->second->Update(deltaTime);
+				if (!i->second->Update(deltaTime))
+					connections.erase(i++);
+				else
+					++i;
 			}
 		}
 
@@ -243,6 +280,8 @@ namespace networking
 		AddressToConnectionInfoMap connections;
 		State state;
 		std::shared_ptr<IConnectionEventHandler> connectionEventHandler = nullptr;
+		
+		std::mutex mutexConnections;
 
 		virtual bool IsConnecting() const { return false; }
 		virtual bool ConnectFailed() const { return false; }
@@ -253,18 +292,6 @@ namespace networking
 		void SetConnectionEventHandler(std::shared_ptr<IConnectionEventHandler>& handler) override
 		{
 			connectionEventHandler = handler;
-		}
-
-		void OnStart() const
-		{
-			if (connectionEventHandler != nullptr)
-				connectionEventHandler->OnStart();
-		}
-
-		void OnStop()
-		{
-			if (connectionEventHandler != nullptr)
-				connectionEventHandler->OnStop();
 		}
 	};
 }

@@ -51,7 +51,7 @@ namespace MultiplayerArena
 			ServerScene* nonCostThis = const_cast<ServerScene*>(this);
 
 			networking::ServerNetworkingManager::GetInstance()->InitialiseServerComms();
-			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ServerScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1, std::placeholders::_2));
+			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ServerScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1));
 			networking::ServerNetworkingManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ServerScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1));
 			networking::ServerNetworkingManager::GetInstance()->SetDoMessageProcessingCallback(std::bind(&ServerScene::DoMessageProcessing, nonCostThis));
 			networking::ServerNetworkingManager::GetInstance()->SetOnClientDisconnectCallback(std::bind(&ServerScene::OnClientDisconnect, nonCostThis, std::placeholders::_1));
@@ -125,8 +125,9 @@ namespace MultiplayerArena
 			
 		}
 
-		void OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message, std::shared_ptr<INetworkViewComponent> netView) override
+		std::shared_ptr<INetworkViewComponent> OnNetworkViewConnect(std::shared_ptr<networking::MessageStructures::BaseMessage> message) override
 		{
+			std::shared_ptr<INetworkViewComponent> netView = nullptr;
 			networkIDToType[message->uniqueID] = message->messageType;
 			switch (message->messageType)
 			{
@@ -142,6 +143,7 @@ namespace MultiplayerArena
 				break;
 			}
 
+			return netView;
 		}
 
 		void OnNetworkViewDisconnect(GUID id) override
@@ -169,7 +171,8 @@ namespace MultiplayerArena
 
 		void OnClientDisconnect(std::shared_ptr<networking::Address>& address)
 		{
-			
+			static int i = 0;
+			i++;
 		}
 
 		void DoMessageProcessing()
