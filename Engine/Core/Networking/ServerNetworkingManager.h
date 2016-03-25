@@ -266,7 +266,7 @@ namespace networking
 		///Called when timeout occurs
 		void OnDisconnect(std::shared_ptr<Address> address) override
 		{
-			mutexConnectedNetViewMap.lock();
+			//mutexConnectedNetViewMap.lock();
 			//client timeout from server
 			printf("Client disconnected: %s \n", address->toString().c_str());
 
@@ -281,12 +281,12 @@ namespace networking
 					{
 						GUID netViewID = netView.lock()->GetUniqueID();
 						SendClientDisconnect(netViewID);
-						DisconnectNetworkView(netViewID, true);
+						DisconnectNetworkView(netViewID, false);
 					}
 				}
 				addressToNetworkIDs.erase(it);
 			}
-			mutexConnectedNetViewMap.unlock();
+			//mutexConnectedNetViewMap.unlock();
 
 			if (onClientDisconnect != nullptr)
 				onClientDisconnect(address);
