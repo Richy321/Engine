@@ -21,6 +21,12 @@ namespace MultiplayerArena
 		{
 			std::shared_ptr<networking::MessageStructures::BaseMessage> lastState = nullptr;
 			std::lock_guard<std::mutex> lock(mutexReceivedMsg);
+			for (auto &i : receivedMessages)
+			{
+				if (i->simpleType == networking::MessageStructures::Disconnect)
+					isFlaggedForDeletion = true;
+			}
+
 			//todo - handle corrections from server
 			if (deadReckoning == None)
 			{
@@ -73,6 +79,11 @@ namespace MultiplayerArena
 			}
 			
 			return sizeof(networking::MessageStructures::BaseMessage);
+		}
+
+		bool IsPrimaryPlayerView() override
+		{
+			return true;
 		}
 	};
 }

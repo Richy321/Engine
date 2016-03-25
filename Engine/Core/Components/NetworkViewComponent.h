@@ -23,6 +23,7 @@ public:
 	
 	std::mutex mutexReceivedMsg;
 
+	bool isFlaggedForDeletion;
 	enum DeadReckoningType
 	{
 		None,
@@ -31,7 +32,7 @@ public:
 
 	DeadReckoningType deadReckoning = None;
 
-	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : INetworkViewComponent(parent), networkingManager(networkingManager)
+	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : INetworkViewComponent(parent), networkingManager(networkingManager), isFlaggedForDeletion(false)
 	{
 		CoCreateGuid(&uniqueID);
 		sendUpdates = false;
@@ -50,6 +51,12 @@ public:
 	virtual void ProcessMessages() override
 	{
 		std::shared_ptr<networking::MessageStructures::BaseMessage> lastState = nullptr;
+		
+		for (auto &i : receivedMessages)
+		{
+			if (i->simpleType == networking::MessageStructures::Disconnect)
+				isFlaggedForDeletion = true;
+		}
 
 		switch (deadReckoning)
 		{
@@ -138,6 +145,16 @@ public:
 	{
 		std::lock_guard<std::mutex> lock(mutexReceivedMsg);
 		receivedMessages.clear();
+	}
+
+	bool IsFlaggedForDeletion() override
+	{
+		return isFlaggedForDeletion;
+	}
+
+	bool IsPrimaryPlayerView() override
+	{
+		return false;
 	}
 };
 

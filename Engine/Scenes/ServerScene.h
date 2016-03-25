@@ -37,8 +37,10 @@ namespace MultiplayerArena
 
 			camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
 			SetMainCamera(camera);
+			
 			camera->Translate(floorWidth * 0.5f, 20.0f, floorDepth * 0.5f);
 			camera->LookAt(vec3(floorWidth * 0.5f, 0.0f, floorDepth * 0.5f));
+			camera->RotateZ(180.0f);
 			objectFactoryPool->CreateFactoryObjects(IObjectFactoryPool::Player, GameOptions::MaxPlayers);
 
 			InitialiseEnvironment();

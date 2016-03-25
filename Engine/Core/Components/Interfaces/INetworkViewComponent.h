@@ -26,7 +26,8 @@ namespace Core
 		virtual void SendReceivedMessages(networking::IConnection* connection) = 0;
 		virtual void ProcessMessages() = 0;
 		
-		
+		virtual bool IsFlaggedForDeletion() = 0;
+		virtual bool IsPrimaryPlayerView() = 0;
 
 	};
 }

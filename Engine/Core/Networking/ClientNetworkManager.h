@@ -87,6 +87,9 @@ namespace networking
 		void DisconnectFromServer(GUID playerID)
 		{
 			SendClientDisconnect(playerID);
+			
+			std::this_thread::sleep_for(std::chrono::milliseconds(500)); //give time to send disconnect message
+
 			serverConnection->Stop();
 			timer->Stop();
 			connected = false;
@@ -166,8 +169,13 @@ namespace networking
 
 				//if a snapshot is received before a connect, make the connection best we can
 				if (networkIDToComponent.find(message->uniqueID) == networkIDToComponent.end())
+				{
+					OLECHAR szGuid[40] = { 0 };
+					StringFromGUID2(message->uniqueID, szGuid, 40);
+					printf("Force Connection: %ls \n", szGuid);
 					ConnectNetworkView(message);
-
+					
+				}
 				//route packet to network view
 				mutexConnectedNetViewMap.lock();
 				if (networkIDToComponent.find(message->uniqueID) != networkIDToComponent.end())

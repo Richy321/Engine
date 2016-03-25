@@ -42,9 +42,6 @@ namespace networking
 		std::function<void()> doMessageProcessing;
 		std::function<void(std::shared_ptr<Address> address)> onClientDisconnect;
 
-
-
-
 	public:
 		ServerNetworkingManager() : timer(std::make_unique<TickTimer>())
 		{
@@ -109,6 +106,21 @@ namespace networking
 			ProcessMessages();
 			SendUpdatedSnapshots();
 
+			//clean-up disconnections
+			std::lock_guard<std::mutex> lockConnectedPlayerMap(mutexConnectedNetViewMap);
+			
+			std::vector<std::pair<GUID, bool>> toDelete;
+
+
+			for (auto const& value : networkIDToComponent)
+			{
+				if (value.second->IsFlaggedForDeletion())
+					toDelete.push_back(std::pair<GUID, bool>(value.second->GetUniqueID(), value.second->IsPrimaryPlayerView()));
+			}
+
+			for (auto const& value : toDelete)
+				DisconnectNetworkView(value.first, value.second);
+
 			connection->Update(deltaTimeSecs);
 
 			for(auto& address : disconnectCooloffTimeouts)
@@ -141,6 +153,8 @@ namespace networking
 			{
 				it->second->ProcessMessages();
 			}
+
+
 
 			//todo - collision detection confirmation...
 
@@ -179,31 +193,24 @@ namespace networking
 
 		void ReadPacket(std::shared_ptr<MessageStructures::BaseMessage>& message, std::shared_ptr<Address>& sender)
 		{
-			switch(message->simpleType)
+			if(message->simpleType == MessageStructures::Disconnect)
 			{
-			case MessageStructures::NoneSimple:
-				break;
-
-			case MessageStructures::Connect:
-				ConnectNetworkView(message, sender);
-				break;
-			case MessageStructures::Disconnect:
 				disconnectCooloffTimeouts[sender] = ReconnectCooloff;
-				DisconnectNetworkView(message->uniqueID);
-				break;
-			case MessageStructures::SnapShot:
-
-				//if a snapshot is received before a connect, make the connection best we can
-				if(networkIDToComponent.find(message->uniqueID) == networkIDToComponent.end())
-					ConnectNetworkView(message, sender);
-
-				//route packet to network view
-				mutexConnectedNetViewMap.lock();
-				if (networkIDToComponent.find(message->uniqueID) != networkIDToComponent.end())
-					networkIDToComponent[message->uniqueID]->ReadPacket(message);
-				mutexConnectedNetViewMap.unlock();
-				break;
 			}
+
+			//if new connection or a snapshot is received before a connect, make a new connection
+			if(message->simpleType == MessageStructures::Connect ||
+				message->simpleType == MessageStructures::SnapShot && 
+				networkIDToComponent.find(message->uniqueID) == networkIDToComponent.end())
+			{
+				ConnectNetworkView(message, sender);
+			}
+
+			//route packet to network view 
+			mutexConnectedNetViewMap.lock();
+			if (networkIDToComponent.find(message->uniqueID) != networkIDToComponent.end())
+				networkIDToComponent[message->uniqueID]->ReadPacket(message);
+			mutexConnectedNetViewMap.unlock();
 		}
 
 		void AddNetworkViewComponent(std::shared_ptr<INetworkViewComponent> component) override
@@ -243,8 +250,23 @@ namespace networking
 			printf("Client connect: %s \n", address->toString().c_str());
 		}
 
+
+		void SendClientDisconnect(GUID playerNetViewID) const
+		{
+			if (connection->IsConnected())
+			{
+				MessageStructures::BaseMessage message;
+				message.uniqueID = playerNetViewID;
+				message.simpleType = MessageStructures::Disconnect;
+				message.messageType = MessageStructures::Player;
+				connection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(MessageStructures::BaseMessage));
+			}
+		}
+
+		///Called when timeout occurs
 		void OnDisconnect(std::shared_ptr<Address> address) override
 		{
+			mutexConnectedNetViewMap.lock();
 			//client timeout from server
 			printf("Client disconnected: %s \n", address->toString().c_str());
 
@@ -257,29 +279,54 @@ namespace networking
 				{
 					if (!netView.expired())
 					{
-						DisconnectNetworkView(netView.lock()->GetUniqueID());
+						GUID netViewID = netView.lock()->GetUniqueID();
+						SendClientDisconnect(netViewID);
+						DisconnectNetworkView(netViewID, true);
 					}
 				}
 				addressToNetworkIDs.erase(it);
 			}
+			mutexConnectedNetViewMap.unlock();
 
 			if (onClientDisconnect != nullptr)
 				onClientDisconnect(address);
 		}
 
-		void DisconnectNetworkView(GUID id)
+		void DisconnectNetworkView(GUID id, bool disconnect)
 		{
 			if (onNetworkViewDisconnectCallback != nullptr)
 				onNetworkViewDisconnectCallback(id);
 
-			mutexConnectedNetViewMap.lock();
-				NetworkIDMapType::iterator it = networkIDToComponent.find(id);
 
-				if (it != networkIDToComponent.end())
-					networkIDToComponent.erase(it);
+			if (disconnect)
+			{
+				std::shared_ptr<Address> owner = nullptr;
+				for (auto& kvp : addressToNetworkIDs)
+				{
+					for (auto& networkID : kvp.second)
+					{
+						if (networkID.lock()->GetUniqueID() == id)
+						{
+							owner = kvp.first;
+							break;
+						}
+					}
+					if (owner != nullptr)
+						break;
+				}
 
-				//todo - clean up destroyed weak pointers
-			mutexConnectedNetViewMap.unlock();
+				if (owner != nullptr)
+				{
+					connection->ForceDisconnectClient(owner);
+				}
+			}
+
+			NetworkIDMapType::iterator it = networkIDToComponent.find(id);
+
+			if (it != networkIDToComponent.end())
+				networkIDToComponent.erase(it);
+
+			//todo - clean up destroyed weak pointers
 		}
 
 		void ConnectNetworkView(std::shared_ptr<MessageStructures::BaseMessage> message, std::shared_ptr<Address>& owner)
@@ -289,7 +336,7 @@ namespace networking
 			{
 				connection->ForceDisconnectClient(owner);
 
-				DisconnectNetworkView(message->uniqueID);
+				DisconnectNetworkView(message->uniqueID, true);
 				return;
 			}
 

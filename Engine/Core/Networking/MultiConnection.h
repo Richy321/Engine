@@ -157,9 +157,6 @@ namespace networking
 		{
 			if (connectionEventHandler != nullptr)
 				connectionEventHandler->OnDisconnect(address);
-
-			//connections[address] = nullptr;
-			//ForceDisconnectClient(address);
 		}
 
 		bool SendPacket(const unsigned char data[], const int size) override
