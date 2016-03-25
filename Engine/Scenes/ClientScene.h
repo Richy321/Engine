@@ -81,6 +81,7 @@ namespace MultiplayerArena
 			ClientScene* nonCostThis = const_cast<ClientScene*>(this);
 			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1));
 			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ClientScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1));
+			networking::ClientNetworkManager::GetInstance()->SetPlayerNetworkView(player->GetNetworkView()->GetUniqueID());
 
 			//ConnectComms();
 		}

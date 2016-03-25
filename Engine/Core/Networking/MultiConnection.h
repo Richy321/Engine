@@ -239,7 +239,7 @@ namespace networking
 			if(it != connections.end())
 			{
 				connections.erase(it);
-				printf("Force disconnection of client %s, (disconnect cooloff", clientAddress->toString().c_str());
+				printf("disconnection of client %s\n", clientAddress->toString().c_str());
 			}
 		}
 

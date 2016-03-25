@@ -32,6 +32,8 @@ namespace networking
 
 		typedef std::map<GUID, std::shared_ptr<INetworkViewComponent>, Utils::GUIDComparer> NetworkIDMapType;
 		NetworkIDMapType networkIDToComponent;
+
+		GUID playerNetworkView;
 	public:
 		static std::shared_ptr<ClientNetworkManager>& GetInstance()
 		{
@@ -169,7 +171,8 @@ namespace networking
 				ConnectNetworkView(message);
 				break;
 			case MessageStructures::Disconnect:
-				DisconnectNetworkView(message->uniqueID);
+				if(message->uniqueID != playerNetworkView)
+					DisconnectNetworkView(message->uniqueID);
 				break;
 			case MessageStructures::SnapShot:
 
@@ -314,6 +317,11 @@ namespace networking
 		void SetOnNetworkViewDisconnectCallback(std::function<void(GUID)> callback)
 		{
 			onNetworkViewDisconnectCallback = callback;
+		}
+
+		void SetPlayerNetworkView(GUID player)
+		{
+			playerNetworkView = player;
 		}
 
 		bool IsConnected() const
