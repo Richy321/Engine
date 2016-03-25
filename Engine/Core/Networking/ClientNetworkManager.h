@@ -33,6 +33,10 @@ namespace networking
 		typedef std::map<GUID, std::shared_ptr<INetworkViewComponent>, Utils::GUIDComparer> NetworkIDMapType;
 		NetworkIDMapType networkIDToComponent;
 
+		typedef std::map<std::shared_ptr<Address>, float, Utils::SharedPtrAddressComparer> AddressToFloatMap;
+		AddressToFloatMap disconnectCooloffTimeouts; //Stores remaining cooloff period before the client can reconnect. (avoids accidental reconnects from rogue packets and connect/disconnect spam.
+
+
 		GUID playerNetworkView;
 	public:
 		static std::shared_ptr<ClientNetworkManager>& GetInstance()
@@ -98,7 +102,8 @@ namespace networking
 			
 			std::this_thread::sleep_for(std::chrono::milliseconds(500)); //give time to send disconnect message
 
-			serverConnection->Stop();
+			if(serverConnection != nullptr)
+				serverConnection->Stop();
 			timer->Stop();
 			connected = false;
 		}
@@ -137,6 +142,19 @@ namespace networking
 			if(serverConnection->IsConnected())
 				serverConnection->Update(deltaTimeSecs);
 			lastTime = nowTime;
+
+			for (auto& address : disconnectCooloffTimeouts)
+			{
+				address.second -= deltaTimeSecs;
+			}
+
+			for (AddressToFloatMap::iterator iter = disconnectCooloffTimeouts.begin(); iter != disconnectCooloffTimeouts.end(); )
+			{
+				if (iter->second < 0.0f)
+					iter = disconnectCooloffTimeouts.erase(iter);
+				else
+					++iter;
+			}
 		}
 
 		void ReceiveAndRoutePackets()
@@ -156,11 +174,11 @@ namespace networking
 				std::shared_ptr<MessageStructures::BaseMessage> message = std::make_shared<MessageStructures::BaseMessage>();
 				memcpy(message.get(), packet, sizeof(MessageStructures::BaseMessage));
 
-				ReadPacket(message);
+				ReadPacket(message, sender);
 			}
 		}
 
-		void ReadPacket(std::shared_ptr<MessageStructures::BaseMessage>& message)
+		void ReadPacket(std::shared_ptr<MessageStructures::BaseMessage>& message, std::shared_ptr<Address>& sender)
 		{
 			switch (message->simpleType)
 			{
@@ -168,23 +186,39 @@ namespace networking
 				break;
 
 			case MessageStructures::Connect:
-				ConnectNetworkView(message);
+				if (message->uniqueID != playerNetworkView)
+				{
+					//ignore messages after receiving a disconnect messages from this sender for timeout period
+					AddressToFloatMap::iterator iter = disconnectCooloffTimeouts.find(sender);
+					if (iter != disconnectCooloffTimeouts.end() && disconnectCooloffTimeouts[sender] > 0)
+						return;
+					ConnectNetworkView(message);
+				}
+					
 				break;
 			case MessageStructures::Disconnect:
-				if(message->uniqueID != playerNetworkView)
+				if (message->uniqueID != playerNetworkView)
+				{
 					DisconnectNetworkView(message->uniqueID);
+					disconnectCooloffTimeouts[sender] = ReconnectCooloff;
+				}
 				break;
 			case MessageStructures::SnapShot:
 
 				//if a snapshot is received before a connect, make the connection best we can
 				if (networkIDToComponent.find(message->uniqueID) == networkIDToComponent.end())
 				{
+					//ignore messages after receiving a disconnect messages from this sender for timeout period
+					AddressToFloatMap::iterator iter = disconnectCooloffTimeouts.find(sender);
+					if (iter != disconnectCooloffTimeouts.end() && disconnectCooloffTimeouts[sender] > 0)
+						return;
+
 					OLECHAR szGuid[40] = { 0 };
 					StringFromGUID2(message->uniqueID, szGuid, 40);
 					printf("Force Connection: %ls \n", szGuid);
 					ConnectNetworkView(message);
-					
 				}
+
 				//route packet to network view
 				mutexConnectedNetViewMap.lock();
 				if (networkIDToComponent.find(message->uniqueID) != networkIDToComponent.end())
@@ -299,7 +333,7 @@ namespace networking
 
 		void SendClientDisconnect(GUID playerNetViewID) const
 		{
-			if (serverConnection->IsConnected())
+			if (serverConnection != nullptr && serverConnection->IsConnected())
 			{
 				MessageStructures::BaseMessage message;
 				message.uniqueID = playerNetViewID;

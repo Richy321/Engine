@@ -204,6 +204,7 @@ namespace networking
 				networkIDToComponent.find(message->uniqueID) == networkIDToComponent.end())
 			{
 				ConnectNetworkView(message, sender);
+				SendClientConnect(message->uniqueID);
 			}
 
 			//route packet to network view 
@@ -250,6 +251,17 @@ namespace networking
 			printf("Client connect: %s \n", address->toString().c_str());
 		}
 
+		void SendClientConnect(GUID playerNetViewID) const
+		{
+			if (connection->IsConnected())
+			{
+				MessageStructures::BaseMessage message;
+				message.uniqueID = playerNetViewID;
+				message.simpleType = MessageStructures::Connect;
+				message.messageType = MessageStructures::Player;
+				connection->SendPacket(reinterpret_cast<unsigned char*>(&message), sizeof(MessageStructures::BaseMessage));
+			}
+		}
 
 		void SendClientDisconnect(GUID playerNetViewID) const
 		{
@@ -348,14 +360,10 @@ namespace networking
 
 		void ConnectNetworkView(std::shared_ptr<MessageStructures::BaseMessage> message, std::shared_ptr<Address>& owner)
 		{
+			//ignore messages after receiving a disconnect messages from this sender for timeout period
 			AddressToFloatMap::iterator iter = disconnectCooloffTimeouts.find(owner);
 			if(iter != disconnectCooloffTimeouts.end() && disconnectCooloffTimeouts[owner] > 0)
-			{
-				//connection->ForceDisconnectClient(owner);
-
-				//DisconnectNetworkView(message->uniqueID, true);
 				return;
-			}
 
 			if (onNetworkViewConnectCallback != nullptr)
 			{

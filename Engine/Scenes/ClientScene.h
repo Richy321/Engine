@@ -98,6 +98,8 @@ namespace MultiplayerArena
 		{
 			if (player != nullptr)
 				networking::ClientNetworkManager::GetInstance()->DisconnectFromServer(player->GetNetworkView()->GetUniqueID());
+
+
 		}
 
 		void InitialiseEnvironment()
@@ -253,8 +255,8 @@ namespace MultiplayerArena
 			std::lock_guard<std::mutex> lock(mutexGameObjectManager);
 			std::lock_guard<std::mutex> connectedMapLock(mutexConnectedPlayerMap);
 
-
-			gameObjectManager.erase(std::remove(gameObjectManager.begin(), gameObjectManager.end(), connectedPlayerMap[id]->relatedGameObject), gameObjectManager.end());
+			objectFactoryPool->ReleaseFactoryObject(IObjectFactoryPool::Player, connectedPlayerMap[id]->relatedGameObject);
+			//gameObjectManager.erase(std::remove(gameObjectManager.begin(), gameObjectManager.end(), connectedPlayerMap[id]->relatedGameObject), gameObjectManager.end());
 			connectedPlayerMap.erase(id);
 
 			OLECHAR szGuid[40] = { 0 };
