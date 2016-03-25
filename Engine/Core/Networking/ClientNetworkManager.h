@@ -79,6 +79,7 @@ namespace networking
 
 			serverConnection->Connect(ServerAddress);
 
+			timer->Stop();
 			timer->Start();
 			startTime = std::chrono::system_clock::now();
 			lastTime = startTime;

@@ -24,6 +24,8 @@ public:
 	std::mutex mutexReceivedMsg;
 
 	bool isFlaggedForDeletion;
+	bool& IsFlaggedForDeletion() override { return isFlaggedForDeletion;}
+	
 	enum DeadReckoningType
 	{
 		None,
@@ -147,10 +149,6 @@ public:
 		receivedMessages.clear();
 	}
 
-	bool IsFlaggedForDeletion() override
-	{
-		return isFlaggedForDeletion;
-	}
 
 	bool IsPrimaryPlayerView() override
 	{

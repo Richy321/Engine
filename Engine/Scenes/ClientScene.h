@@ -78,6 +78,10 @@ namespace MultiplayerArena
 			InitialiseEnvironment();
 			InitialiseLocalPlayer();
 
+			ClientScene* nonCostThis = const_cast<ClientScene*>(this);
+			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1));
+			networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ClientScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1));
+
 			//ConnectComms();
 		}
 
@@ -85,10 +89,7 @@ namespace MultiplayerArena
 		{
 			if (!networking::ClientNetworkManager::GetInstance()->IsConnected())
 			{
-				ClientScene* nonCostThis = const_cast<ClientScene*>(this);
 				networking::ClientNetworkManager::GetInstance()->ConnectToServer();
-				networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewConnectCallback(std::bind(&ClientScene::OnNetworkViewConnect, nonCostThis, std::placeholders::_1));
-				networking::ClientNetworkManager::GetInstance()->SetOnNetworkViewDisconnectCallback(std::bind(&ClientScene::OnNetworkViewDisconnect, nonCostThis, std::placeholders::_1));
 			}
 		}
 
@@ -129,7 +130,8 @@ namespace MultiplayerArena
 			if (component != nullptr)
 			{
 				std::shared_ptr<NetworkViewComponent> networkView = std::dynamic_pointer_cast<NetworkViewComponent>(component);
-					
+				
+				networkView->IsFlaggedForDeletion() = false;
 				if (isLocal)
 				{
 					networkView->IsSendUpdates() = true;

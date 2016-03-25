@@ -303,14 +303,15 @@ namespace networking
 				std::shared_ptr<Address> owner = nullptr;
 				for (auto& kvp : addressToNetworkIDs)
 				{
-					for (auto& networkID : kvp.second)
+					for (int i = 0; i < kvp.second.size(); i++)
 					{
-						if (networkID.lock()->GetUniqueID() == id)
+						if (kvp.second[i].lock()->GetUniqueID() == id)
 						{
 							owner = kvp.first;
 							break;
 						}
 					}
+
 					if (owner != nullptr)
 						break;
 				}
@@ -318,6 +319,23 @@ namespace networking
 				if (owner != nullptr)
 				{
 					connection->ForceDisconnectClient(owner);
+
+					AddressToNetworkIDVectorMapType::iterator it = addressToNetworkIDs.find(owner);
+					addressToNetworkIDs.erase(it);
+				}
+			}
+			else
+			{
+				for (auto& kvp : addressToNetworkIDs)
+				{
+					for (int i = kvp.second.size()-1; i > 0; i--)
+					{
+						if (kvp.second[i].lock()->GetUniqueID() == id)
+						{
+							kvp.second.erase(kvp.second.begin()+i);
+							break;
+						}
+					}
 				}
 			}
 
@@ -334,9 +352,9 @@ namespace networking
 			AddressToFloatMap::iterator iter = disconnectCooloffTimeouts.find(owner);
 			if(iter != disconnectCooloffTimeouts.end() && disconnectCooloffTimeouts[owner] > 0)
 			{
-				connection->ForceDisconnectClient(owner);
+				//connection->ForceDisconnectClient(owner);
 
-				DisconnectNetworkView(message->uniqueID, true);
+				//DisconnectNetworkView(message->uniqueID, true);
 				return;
 			}
 
