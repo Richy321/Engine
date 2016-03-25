@@ -52,7 +52,7 @@ namespace networking
 
 		void Stop() override
 		{
-			assert(running);
+			//assert(running);
 			printf("stop connection\n");
 			bool connected = IsConnected();
 			ClearData();

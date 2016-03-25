@@ -95,11 +95,8 @@ namespace MultiplayerArena
 
 		void DisconnectComms()
 		{
-			if (networking::ClientNetworkManager::GetInstance()->IsConnected())
-			{
-				if (player != nullptr)
-					networking::ClientNetworkManager::GetInstance()->DisconnectFromServer(player->GetNetworkView()->GetUniqueID());
-			}
+			if (player != nullptr)
+				networking::ClientNetworkManager::GetInstance()->DisconnectFromServer(player->GetNetworkView()->GetUniqueID());
 		}
 
 		void InitialiseEnvironment()
