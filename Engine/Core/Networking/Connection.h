@@ -12,7 +12,7 @@ namespace networking
 	class Connection : public IConnection
 	{
 	public:
-		Connection(unsigned int protocolId, float timeout, ISocket* socket) : IConnection(protocolId, timeout)
+		Connection(unsigned int protocolId, float timeout, std::shared_ptr<ISocket> socket) : IConnection(protocolId, timeout)
 		{
 			this->protocolId = protocolId;
 			this->timeout = timeout;
@@ -231,7 +231,7 @@ namespace networking
 		bool running;
 		Mode mode;
 		State state;
-		ISocket* socket;
+		std::shared_ptr<ISocket> socket;
 		float timeoutAccumulator;
 		
 	};

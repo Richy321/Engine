@@ -7,7 +7,7 @@ namespace networking
 	class ReliableConnection : public Connection
 	{
 	public:
-		ReliableConnection(unsigned int protocolId, float timeout, ISocket* socket, unsigned int max_sequence = 0xFFFFFFFF)
+		ReliableConnection(unsigned int protocolId, float timeout, std::shared_ptr<ISocket> socket, unsigned int max_sequence = 0xFFFFFFFF)
 			: Connection(protocolId, timeout, socket)
 		{
 			ClearData();

@@ -88,7 +88,7 @@ namespace networking
 
 		typedef std::map<std::shared_ptr<Address>, std::shared_ptr<ConnectionInfo>, Core::Utils::SharedPtrAddressComparer> AddressToConnectionInfoMap;
 
-		MultiConnection(unsigned int protocolId, float timeout, ISocket* socket) : IMultiConnection(protocolId, timeout)
+		MultiConnection(unsigned int protocolId, float timeout, std::shared_ptr<ISocket> socket) : IMultiConnection(protocolId, timeout)
 		{
 			this->protocolId = protocolId;
 			mode = Server;
@@ -270,7 +270,7 @@ namespace networking
 		unsigned int protocolId;
 		float defaultTimeout;
 		static const int HeaderSize = 4;
-		ISocket* socket;
+		std::shared_ptr<ISocket> socket;
 		Mode mode;
 		bool running;
 		

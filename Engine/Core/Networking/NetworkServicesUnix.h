@@ -21,19 +21,19 @@ namespace networking
 		{
 		}
 
-		ISocket* CreateSocket(SocketType sockType)
+		std::shared_ptr<ISocket> CreateSocket(SocketType sockType) override
 		{
-			return new WinSocket();
+			return std::make_shared<WinSocket>();
 		}
 
-		Connection* CreateConnection(const int protocolId, const float timeout)
+		std::shared_ptr<Connection> CreateConnection(const int protocolId, const float timeout) override
 		{
-			return new Connection(protocolId, timeout, CreateSocket(SocketType::UDP));
+			return std::make_shared<Connection>(protocolId, timeout, CreateSocket(SocketType::UDP));
 		}
 
-		ReliableConnection* CreateReliableConnection(const int protocolId, const float timeout)
+		std::shared_ptr<ReliableConnection> CreateReliableConnection(const int protocolId, const float timeout) override
 		{
-			return new ReliableConnection(protocolId, timeout, CreateSocket(SocketType::UDP));
+			return std::make_shared<ReliableConnection>(protocolId, timeout, CreateSocket(SocketType::UDP));
 		}
 	};
 }

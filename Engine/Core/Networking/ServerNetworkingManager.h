@@ -297,13 +297,12 @@ namespace networking
 			if (onNetworkViewDisconnectCallback != nullptr)
 				onNetworkViewDisconnectCallback(id);
 
-
 			if (disconnect)
 			{
 				std::shared_ptr<Address> owner = nullptr;
 				for (auto& kvp : addressToNetworkIDs)
 				{
-					for (int i = 0; i < kvp.second.size(); i++)
+					for (size_t i = 0; i < kvp.second.size(); i++)
 					{
 						if (kvp.second[i].lock()->GetUniqueID() == id)
 						{

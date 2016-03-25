@@ -18,7 +18,7 @@ namespace networking
 	class ClientNetworkManager : public INetworkManager, public IConnectionEventHandler
 	{
 	private:
-		IConnection* serverConnection;
+		std::shared_ptr<IConnection> serverConnection = nullptr;
 		std::chrono::time_point<std::chrono::system_clock> startTime;
 		std::chrono::time_point<std::chrono::system_clock> lastTime;
 		FlowControl flowControl;
@@ -52,6 +52,11 @@ namespace networking
 
 		void ConnectToServer()
 		{
+			if(serverConnection != nullptr)
+			{
+				serverConnection.reset();
+			}
+
 			switch (clientConnectionType)
 			{
 			case Unreliable:
@@ -119,7 +124,7 @@ namespace networking
 			if (serverConnection->IsConnected())
 			{
 				if (clientConnectionType == Reliable)
-					flowControl.Update(deltaTimeSecs, static_cast<ReliableConnection*>(serverConnection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
+					flowControl.Update(deltaTimeSecs, std::static_pointer_cast<ReliableConnection>(serverConnection)->GetReliabilitySystem().GetRoundTripTime() * 1000.0f);
 			}
 
 			const float sendRate = flowControl.GetSendRate();
@@ -217,7 +222,7 @@ namespace networking
 
 		void Destroy()
 		{
-			delete serverConnection;
+			serverConnection.reset();
 		}
 
 		void AddNetworkViewComponent(std::shared_ptr<INetworkViewComponent> component) override
