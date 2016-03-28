@@ -4,6 +4,7 @@
 #include "../../Core/Components/Interfaces/IRenderableComponent.h"
 #include "../PhysicsManager.h"
 #include "../../Core/Components/Interfaces/IPhysicsComponent.h"
+#include "../IPhysicsManager.h"
 
 using namespace glm;
 
@@ -45,18 +46,21 @@ public:
 	{
 		for (auto i = 0; i < particleCount; i++)
 		{
-
+			//todo render something
 		}
-	}
-
-	vec3 ComputeForces(std::shared_ptr<Particle> particle)
-	{
-		return vec3(0, particle->mass * PhysicsManager::gravity, 0);
 	}
 
 	void UpdatePhysics(float deltaTime) override
 	{
+		std::vector<vec3> forces
+		{
+			vec3(0.0f, IPhysicsManager::gravity, 0.0f)
+		};
 
+		for (auto i = 0; i < particles.size(); i++)
+		{
+			particles[i]->ApplyForces(forces, deltaTime);
+		}
 	}
 };
 
