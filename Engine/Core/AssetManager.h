@@ -470,6 +470,11 @@ namespace Core
 			return cubeMesh;
 		}
 
+		std::shared_ptr<Mesh> CreateSpherePrimitive(float radius = 1.0f)
+		{
+			
+		}
+
 		std::unique_ptr<MeshComponent> CreateTrianglePrimitiveMeshComponent()
 		{
 			std::unique_ptr<MeshComponent> triangleMesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());

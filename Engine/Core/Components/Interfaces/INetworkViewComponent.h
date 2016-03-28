@@ -4,7 +4,7 @@
 
 namespace Core
 {
-	class INetworkViewComponent : public IComponent
+	class INetworkViewComponent : public virtual IComponent
 	{
 	public:
 

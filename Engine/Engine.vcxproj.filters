@@ -46,6 +46,12 @@
     <Filter Include="Scenes\MultiplayerArena">
       <UniqueIdentifier>{5047ce93-c0f6-4243-ba5f-330d01373c3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Physics">
+      <UniqueIdentifier>{f1854671-4015-45ff-bd8e-e69063bd5429}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Physics\ParticleSystem">
+      <UniqueIdentifier>{a8e51832-10f0-4947-8235-50728e6d88aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -227,29 +233,44 @@
     <ClInclude Include="Core\TickTimer.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Scenes\MultiplayerArena\IObjectPool.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Physics\ParticleSystem\Particle.h">
+      <Filter>Physics\ParticleSystem</Filter>
     </ClInclude>
-    <ClInclude Include="Scenes\MultiplayerArena\GameOptions.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Core\Components\Interfaces\IPhysicsComponent.h">
+      <Filter>Core\Components\Interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Components\DirectionalMovementComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenes\MultiplayerArena\PlayerGameObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenes\MultiplayerArena\NetworkViews\PlayerNetworkViewComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Core\Networking\IMultiConnection.h">
+      <Filter>Core\Networking</Filter>
     </ClInclude>
     <ClInclude Include="Core\Networking\MultiConnection.h">
-      <Filter>Header Files</Filter>
+      <Filter>Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\PhysicsManager.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\IPhysicsManager.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\DirectionalMovementComponent.h">
+      <Filter>Core\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\IObjectPool.h">
+      <Filter>Scenes\MultiplayerArena</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\PlayerGameObject.h">
+      <Filter>Scenes\MultiplayerArena</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\GameOptions.h">
+      <Filter>Scenes\MultiplayerArena</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MultiplayerArena\NetworkViews\PlayerNetworkViewComponent.h">
+      <Filter>Scenes\MultiplayerArena</Filter>
     </ClInclude>
     <ClInclude Include="Core\Networking\ServerNetworkingManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Core\Networking</Filter>
     </ClInclude>
-    <ClInclude Include="IMultiConnection.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Physics\ParticleSystem\ParticleSystemComponent.h">
+      <Filter>Physics\ParticleSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

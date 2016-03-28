@@ -34,9 +34,11 @@ void SceneManager::notifyBeginFrame()
 
 	float elapsedTime = timer->GetElapsedTime();
 
+	for (std::shared_ptr<GameObject>& go : gameObjectManager)
+		go->UpdatePhysics(elapsedTime);
 	OnPhysicsUpdate();
 
-	/*
+	/* Network Manager updates registered network components on seperate thread
 	float nowTime = timer->GetRunningTime();
 	if (nowTime > lastUpdateCommsTime + CommsTickDurationMs * 0.001)
 	{
@@ -50,7 +52,6 @@ void SceneManager::notifyBeginFrame()
 
 	for(std::shared_ptr<GameObject>& go : gameObjectManager)
 		go->Update(elapsedTime);
-
 	OnUpdate(elapsedTime);
 }
 

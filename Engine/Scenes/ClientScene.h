@@ -98,8 +98,6 @@ namespace MultiplayerArena
 		{
 			if (player != nullptr)
 				networking::ClientNetworkManager::GetInstance()->DisconnectFromServer(player->GetNetworkView()->GetUniqueID());
-
-
 		}
 
 		void InitialiseEnvironment()
@@ -199,6 +197,12 @@ namespace MultiplayerArena
 			networking::ClientNetworkManager::GetInstance()->UpdateComms();
 		}
 
+
+		virtual void OnPhysicsUpdate() override
+		{
+		
+		}
+
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 		{
 			SceneManager::notifyProcessNormalKeys(key, x, y);
@@ -231,7 +235,6 @@ namespace MultiplayerArena
 
 			SceneManager::notifyDisplayFrame();
 		}
-
 
 		std::shared_ptr<INetworkViewComponent> ConnectPlayer(GUID id, vec3 position)
 		{
@@ -273,7 +276,6 @@ namespace MultiplayerArena
 		{
 
 		}
-
 
 		void ConnectCollectable(GUID id, vec3 position)
 		{

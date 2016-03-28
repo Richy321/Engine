@@ -5,7 +5,7 @@ namespace Core
 {
 	class Camera;
 
-	class IRenderableComponent : public IComponent
+	class IRenderableComponent : public virtual IComponent
 	{
 	public:
 

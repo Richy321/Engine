@@ -34,7 +34,7 @@ public:
 
 	DeadReckoningType deadReckoning = None;
 
-	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : INetworkViewComponent(parent), networkingManager(networkingManager), isFlaggedForDeletion(false)
+	NetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : IComponent(parent), INetworkViewComponent(parent), networkingManager(networkingManager), isFlaggedForDeletion(false)
 	{
 		CoCreateGuid(&uniqueID);
 		sendUpdates = false;

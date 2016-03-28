@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "Components/Interfaces/IComponent.h"
 #include "Components/NetworkViewComponent.h"
+#include "Components/Interfaces/IPhysicsComponent.h"
 
 class IComponent;
 
@@ -56,10 +57,16 @@ namespace Core
 			}
 		}
 
-		virtual void UpdatePhysics()
+		virtual void UpdatePhysics(float deltaTime)
 		{
 			if (!isEnabled)
 				return;
+
+			for (auto& comp : components)
+			{
+				if (comp->GetComponentFlags() & Physics)
+					std::dynamic_pointer_cast<IPhysicsComponent>(comp)->UpdatePhysics(deltaTime);
+			}
 		}
 
 		virtual void UpdateNetworkComms(float deltaTime)
@@ -83,7 +90,7 @@ namespace Core
 			{
 				if (comp->GetComponentFlags() & Renderable)
 				{
-					static_cast<IRenderableComponent&>(*comp.get()).Render(mainCamera);
+					std::dynamic_pointer_cast<IRenderableComponent>(comp)->Render(mainCamera);
 				}
 			}
 		}

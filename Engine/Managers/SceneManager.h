@@ -36,8 +36,6 @@ namespace Managers
 		int mouseDeltaY;
 		bool paused = false;
 
-		
-
 		std::mutex mutexGameObjectManager;
 	public:
 		static std::map<unsigned char, bool> keyState;

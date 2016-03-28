@@ -2,9 +2,9 @@
 #include "IConnection.h"
 #include "INetworkService.h"
 #include "ISocket.h"
-#include "../../IMultiConnection.h"
 #include <unordered_map>
 #include <mutex>
+#include "IMultiConnection.h"
 
 namespace networking
 {

@@ -12,7 +12,7 @@ namespace Core
 
 		std::shared_ptr<MeshNode> rootMeshNode;
 
-		MeshComponent(std::weak_ptr<IGameObject> parent) : IRenderableComponent(parent)
+		MeshComponent(std::weak_ptr<IGameObject> parent) : IComponent(parent), IRenderableComponent(parent)
 		{
 			rootMeshNode = std::make_shared<MeshNode>();
 		}

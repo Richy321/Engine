@@ -8,7 +8,8 @@ namespace Core
 	{
 		None = 1,
 		Renderable = 2,
-		NetworkSyncable = 4 
+		NetworkSyncable = 4,
+		Physics = 8
 	};
 
 	template<class T> T operator~ (T a) { return (T)~(int)a; }
@@ -30,7 +31,8 @@ namespace Core
 		{
 			Mesh,
 			NetworkView,
-			DirectionalMovement
+			DirectionalMovement,
+			ParticleSystem
 		};
 
 		int GetID() const { return id; }

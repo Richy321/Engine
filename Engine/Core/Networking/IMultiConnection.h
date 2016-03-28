@@ -1,7 +1,5 @@
 #pragma once
 #include <memory>
-#include "Core/Networking/Address.h"
-#include "Core/Networking/IConnection.h"
 
 namespace networking
 {

@@ -8,7 +8,7 @@ namespace MultiplayerArena
 	{
 	public:
 
-		PlayerNetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : NetworkViewComponent(parent, networkingManager)
+		PlayerNetworkViewComponent(std::weak_ptr<Core::IGameObject> parent, std::shared_ptr<networking::INetworkManager> networkingManager) : IComponent(parent), NetworkViewComponent(parent, networkingManager)
 		{
 		}
 
