@@ -6,6 +6,7 @@
 #include "../Dependencies/freeImage/FreeImage.h"
 #include "IAssetManager.h"
 #include "Components/MeshComponent.h"
+#include "IcoSphereCreator.h"
 using namespace glm;
 
 namespace Core
@@ -295,7 +296,7 @@ namespace Core
 			triangleMesh->colours.push_back(vec4(0, 0, 1, 1));
 
 			triangleMesh->BuildAndBindVertexPositionColorBuffer();
-			triangleMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
+			triangleMesh->renderType = Mesh::Coloured;
 
 			return triangleMesh;
 		}
@@ -316,6 +317,7 @@ namespace Core
 			quadMesh->BuildAndBindVertexPositionColorBuffer();
 			quadMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
 			quadMesh->mode = GL_TRIANGLE_STRIP;
+			quadMesh->renderType = Mesh::Coloured;
 
 			return quadMesh;
 		}
@@ -352,6 +354,7 @@ namespace Core
 
 			quadMesh->BuildAndBindVertexPositionNormalTexturedBuffer();
 			quadMesh->mode = GL_TRIANGLES;
+			quadMesh->renderType = Mesh::LitTextured;
 
 			return quadMesh;
 		}
@@ -364,12 +367,6 @@ namespace Core
 		std::shared_ptr<Mesh> CreateBoxPrimitive(float width, float height, float depth) const
 		{
 			std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>(&GetInstance());
-
-			GLuint vao;
-			GLuint vbo;
-
-			glGenVertexArrays(1, &vao);
-			glBindVertexArray(vao);
 
 			//front face of the cube
 			cubeMesh->positions.push_back(vec3(-width, -height, depth));
@@ -461,18 +458,24 @@ namespace Core
 			cubeMesh->positions.push_back(vec3(width, -height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 1.0, 1.0));
 
-
 			cubeMesh->BuildAndBindVertexPositionColorBuffer();
-			cubeMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
 			cubeMesh->mode = GL_TRIANGLE_STRIP;
-			cubeMesh->vbos.push_back(vbo);
+			cubeMesh->renderType = Mesh::Coloured;
 
 			return cubeMesh;
 		}
 
-		std::shared_ptr<Mesh> CreateSpherePrimitive(float radius = 1.0f)
+		std::shared_ptr<Mesh> CreateIcospherePrimitive(int recursionLevel)
 		{
-			
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
+
+			IcoSphereCreator::Create(mesh, recursionLevel);
+			mesh->BuildAndBindVertexPositionColorBuffer();
+			mesh->mode = GL_TRIANGLES;
+			mesh->renderType = Mesh::Coloured;
+
+
+			return mesh;
 		}
 
 		std::unique_ptr<MeshComponent> CreateTrianglePrimitiveMeshComponent()
@@ -502,6 +505,13 @@ namespace Core
 			quadMesh->AddRootMesh(CreateQuadPrimitiveAdv(width, depth));
 			quadMesh->rootMeshNode->meshes[0]->materialID = texture;
 			return quadMesh;
+		}
+
+		std::unique_ptr<MeshComponent> CreateIcospherePrimitiveMeshComponent(int recursionLevel = 1)
+		{
+			std::unique_ptr<MeshComponent> mesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());
+			mesh->AddRootMesh(CreateIcospherePrimitive(recursionLevel));
+			return mesh;
 		}
 
 	protected:

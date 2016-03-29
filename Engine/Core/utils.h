@@ -39,7 +39,6 @@ namespace Core
 				return memcmp(&Left, &Right, sizeof(Right)) < 0;
 			}
 		};
-		
 
 		struct SharedPtrAddressComparer
 		{

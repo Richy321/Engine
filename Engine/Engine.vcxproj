@@ -33,6 +33,14 @@
       <Configuration>Server Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Test Debug|Win32">
+      <Configuration>Test Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Test Debug|x64">
+      <Configuration>Test Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C86F79F0-020F-416C-9585-09037196DFA6}</ProjectGuid>
@@ -41,6 +49,12 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
@@ -74,6 +88,12 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
@@ -114,6 +134,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Server Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -127,6 +150,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Server Debug|x64'" Label="PropertySheets">
@@ -148,6 +174,26 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\assimp\$(PlatformTarget)\assimp-vc140-mt.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "$(OutDir)"</Command>
+      <Message>Copy dependancy dlls</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>IS_TEST;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -187,6 +233,28 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;assimp-vc140-mt.lib;FreeImage.lib;ole32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Dependencies\freeglut\$(PlatformTarget);Dependencies\glew\$(PlatformTarget);Dependencies\assimp\$(PlatformTarget);Dependencies\freeImage\$(PlatformTarget)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y "$(ProjectDir)Dependencies\glew\$(PlatformTarget)\glew32.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeglut\$(PlatformTarget)\freeglut.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\assimp\$(PlatformTarget)\assimp-vc140-mt.dll" "$(OutDir)"
+xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy dependancy dlls</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>IS_TEST;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -373,6 +441,8 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClCompile Include="Managers\SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\ShaderEffects\ColouredMeshEffect.h" />
+    <ClInclude Include="Core\Colours.h" />
     <ClInclude Include="Core\Networking\ClientNetworkManager.h" />
     <ClInclude Include="Core\Networking\NetworkPlayer.h" />
     <ClInclude Include="Core\Networking\IConnectionEventHandler.h" />
@@ -383,6 +453,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\Networking\MultiConnection.h" />
     <ClInclude Include="Core\Networking\IMultiConnection.h" />
     <ClInclude Include="Core\Components\Interfaces\IPhysicsComponent.h" />
+    <ClInclude Include="Core\IcoSphereCreator.h" />
     <ClInclude Include="Physics\IPhysicsManager.h" />
     <ClInclude Include="Physics\PhysicsManager.h" />
     <ClInclude Include="Physics\ParticleSystem\Particle.h" />

@@ -16,9 +16,12 @@ public:
 	GLuint gViewUniform;
 	GLuint gProjectionUniform;
 	GLuint gWP;
-	//std::shared_ptr<GameObject> cube;
+	std::shared_ptr<GameObject> cube;
 	std::shared_ptr<GameObject> model;
 	std::shared_ptr<GameObject> floor;
+	std::shared_ptr<GameObject> sphere;
+
+	std::shared_ptr<GameObject> particles;
 
 	std::shared_ptr<DirectionalLight> directionalLight;
 	std::vector<std::shared_ptr<SpotLight>> spotLights;
@@ -43,7 +46,7 @@ public:
 	void Initialise() override
 	{
 		SceneManager::Initialise();
-		CaptureCursor(true);
+		//CaptureCursor(true);
 	
 		InitialiseTextures();
 		InitialiseLights();
@@ -52,16 +55,37 @@ public:
 		SetMainCamera(camera);
 		camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
 
-		//cube = std::make_shared<GameObject>();
-		//cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
-		//cube->Translate(0.0f, 0.0f, 0.0f);
+		cube = std::make_shared<GameObject>();
+		cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
+		cube->Scale(2.0f);
+		cube->Translate(0.0f, 0.0f, 0.0f);
 		//gameObjectManager.push_back(cube);
-		model = InitialisePlayer();
+
+
+		//model = InitialisePlayer();
+
+		InitialiseParticles(particles);
+
+		//sphere = std::make_shared<GameObject>();
+		//sphere->AddComponent(AssetManager::GetInstance().CreateIcospherePrimitiveMeshComponent());
+		//sphere->Scale(2.0f);
+		//sphere->Translate(5.0f, 0.0f, 5.0f);
+		//gameObjectManager.push_back(sphere);
 
 
 		floor = std::make_shared<GameObject>();
 		floor->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
-		gameObjectManager.push_back(floor);
+		
+		//gameObjectManager.push_back(floor);
+	}
+
+	void InitialiseParticles(std::shared_ptr<GameObject> particles)
+	{
+		particles = std::make_shared<GameObject>();
+		particles->AddComponent(AssetManager::GetInstance().CreateIcospherePrimitiveMeshComponent(0));
+		particles->Scale(2.0f);
+		particles->Translate(5.0f, 0.0f, 5.0f);
+		gameObjectManager.push_back(particles);
 	}
 
 	std::shared_ptr<GameObject> InitialisePlayer()
@@ -71,9 +95,8 @@ public:
 		model->Translate(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
 		model->Scale(0.05f);
 		gameObjectManager.push_back(model);
+		return model;
 	}
-
-
 
 	void InitialiseTextures()
 	{
@@ -121,6 +144,7 @@ public:
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
+		SceneManager::notifyProcessNormalKeys(key, x, y);
 		camera->OnKey(key, x, y);	
 	}
 
@@ -131,9 +155,8 @@ public:
 
 	virtual void notifyDisplayFrame() override
 	{
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
-
+		Check_GLError();
+		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->Enable();
 		vec3 cameraPos = vec3(camera->GetWorldTransform()[3]);
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
@@ -142,7 +165,8 @@ public:
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
 		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
-
+		Check_GLError();
 		SceneManager::notifyDisplayFrame();
+		Check_GLError();
 	}
 };

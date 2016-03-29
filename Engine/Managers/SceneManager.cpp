@@ -23,8 +23,8 @@ void SceneManager::Initialise()
 		printf("Failed to Initialise Shader Manager");
 
 	glEnable(GL_DEPTH_TEST);
-	//ShaderManager::GetInstance().CreateProgram("basicColor", "Shaders\\basicColor.vert", "Shaders\\basicColor.frag");
-	//ShaderManager::GetInstance().CreateProgram("basicLighting", "Shaders\\basicLighting.vert", "Shaders\\basicLighting.frag");
+	ShaderManager::GetInstance().CreateProgram("basicColor", "Shaders\\basicColor.vert", "Shaders\\basicColor.frag");
+	ShaderManager::GetInstance().CreateProgram("basicLighting", "Shaders\\basicLighting.vert", "Shaders\\basicLighting.frag");
 	timer->Start();
 }
 
@@ -57,9 +57,9 @@ void SceneManager::notifyBeginFrame()
 
 void SceneManager::notifyDisplayFrame()
 {
+	Check_GLError();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
-	
 
 	for (size_t i = 0; i < gameObjectManager.size(); i++)
 	{

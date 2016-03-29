@@ -30,11 +30,14 @@ int main(int argc, char **argv)
 	InitialiseGLUT::Initialise(window, context, frameBufferInfo);
 
 
-#if IS_SERVER
+#if IS_TEST
+	std::shared_ptr<IListener> scene = std::make_shared<TestScene>(window);
+#elif IS_SERVER
 	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ServerScene>(window);
 #else
 	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ClientScene>(window);
 #endif
+
 	scene->Initialise();
 	InitialiseGLUT::SetListener(scene);
 

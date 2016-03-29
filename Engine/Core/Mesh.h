@@ -8,12 +8,21 @@
 #include <memory>
 #include "Camera.h"
 #include "IAssetManager.h"
+#include "Colours.h"
 
 namespace Core
 {
 	class Mesh
 	{
 	public:
+
+		enum RenderType
+		{
+			Coloured,
+			LitTextured
+			
+		} renderType = LitTextured;
+
 		GLuint vao;
 		GLuint ebo;
 		GLuint program;
@@ -54,19 +63,34 @@ namespace Core
 		void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld) const
 		{
 			//todo - investigate moving view/prj into common
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetWorldMatrix(toWorld);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(mainCamera->view);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(mainCamera->projection);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetTextureUnit(0);
-			
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->Enable();
+			switch(renderType)
+			{
+			case Coloured:
+				Check_GLError();
+				Managers::ShaderManager::GetInstance().colouredMeshEffect->Enable();
+				Managers::ShaderManager::GetInstance().colouredMeshEffect->SetWorldMatrix(toWorld);
+				Managers::ShaderManager::GetInstance().colouredMeshEffect->SetViewMatrix(mainCamera->view);
+				Managers::ShaderManager::GetInstance().colouredMeshEffect->SetProjectionMatrix(mainCamera->projection);
+				break;
+			case LitTextured: 
+				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->Enable();
+				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetWorldMatrix(toWorld);
+				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(mainCamera->view);
+				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(mainCamera->projection);
+				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetTextureUnit(0);
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				break;
+			default: break;
+			}
+
 			glBindVertexArray(vao);
-			
+			Check_GLError();
+
 			if(!materialID.empty())
 				assetManager->BindTexture(materialID, GL_TEXTURE0);
 
@@ -79,6 +103,8 @@ namespace Core
 					);
 			else
 				glDrawArrays(mode, 0, positions.size());
+
+			glBindVertexArray(0);
 		}
 
 		void SetProgram(GLuint program) { this->program = program; }
@@ -154,7 +180,9 @@ namespace Core
 			std::vector<VertexPositionColour> vertices;
 			for (size_t i = 0; i < positions.size(); i++)
 			{
-				vertices.push_back(VertexPositionColour(positions[i], colours[i]));
+				vec4 colour = i < colours.size() ? colours[i] : Colours_RGBA::HotPink;
+
+				vertices.push_back(VertexPositionColour(positions[i], colour));
 			}
 
 			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionColour) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
@@ -164,6 +192,28 @@ namespace Core
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexPositionColour), (void*)(offsetof(VertexPositionColour, VertexPositionColour::color)));
 			glBindVertexArray(0);
+
+			vbos.push_back(vbo);
+		}
+
+		void BuildAndBindVertexPositionBuffer()
+		{
+			glGenVertexArrays(1, &vao);
+			glBindVertexArray(vao);
+
+			GLuint vbo;
+			glGenBuffers(1, &vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+			std::vector<VertexPosition> vertices;
+			for (size_t i = 0; i < positions.size(); i++)
+			{
+				vertices.push_back(VertexPosition(positions[i]));
+			}
+
+			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionColour) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPositionColour), (void*)0);
 
 			vbos.push_back(vbo);
 		}

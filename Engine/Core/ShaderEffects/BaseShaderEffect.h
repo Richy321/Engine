@@ -4,6 +4,7 @@
 #include <list>
 #include <fstream>
 #include <vector>
+#include "../Utils.h"
 
 #define GLCheckError() (glGetError() == GL_NO_ERROR)
 #define INVALID_UNIFORM_LOCATION 0xffffffff
@@ -78,7 +79,6 @@ namespace Core
 
 			glAttachShader(shaderProgram, shader);
 			return true;
-
 		}
 
 		bool Finalise()
@@ -122,6 +122,7 @@ namespace Core
 		void Enable() const
 		{
 			glUseProgram(shaderProgram);
+			Check_GLError();
 		}
 
 		GLint GetUniformLocation(const char* pUniformName)

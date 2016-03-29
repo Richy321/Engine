@@ -1,5 +1,16 @@
 #pragma once
 
+struct VertexPosition
+{
+	vec3 position;
+
+	VertexPosition(const vec3 &pos)
+	{
+		position = pos;
+	}
+};
+
+
 struct VertexPositionColour
 {
 	vec3 position;
