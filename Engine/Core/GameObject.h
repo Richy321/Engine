@@ -90,7 +90,8 @@ namespace Core
 			{
 				if (comp->GetComponentFlags() & Renderable)
 				{
-					std::dynamic_pointer_cast<IRenderableComponent>(comp)->Render(mainCamera);
+					std::shared_ptr<IRenderableComponent> ptr = std::dynamic_pointer_cast<IRenderableComponent>(comp);
+					ptr->Render(mainCamera);
 				}
 			}
 		}

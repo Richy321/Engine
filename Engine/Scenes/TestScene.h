@@ -55,10 +55,10 @@ public:
 		SetMainCamera(camera);
 		camera->Translate(floorWidth * 0.5f, 3.0f, floorDepth * 1.3f);
 
-		cube = std::make_shared<GameObject>();
-		cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
-		cube->Scale(2.0f);
-		cube->Translate(0.0f, 0.0f, 0.0f);
+		//cube = std::make_shared<GameObject>();
+		//cube->AddComponent(AssetManager::GetInstance().CreateCubePrimitiveMeshComponent());
+		//cube->Scale(2.0f);
+		//cube->Translate(0.0f, 0.0f, 0.0f);
 		//gameObjectManager.push_back(cube);
 
 
@@ -75,16 +75,15 @@ public:
 
 		floor = std::make_shared<GameObject>();
 		floor->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
-		
-		//gameObjectManager.push_back(floor);
+		gameObjectManager.push_back(floor);
 	}
 
 	void InitialiseParticles(std::shared_ptr<GameObject> particles)
 	{
 		particles = std::make_shared<GameObject>();
 		particles->AddComponent(AssetManager::GetInstance().CreateIcospherePrimitiveMeshComponent(0));
-		particles->Scale(2.0f);
-		particles->Translate(5.0f, 0.0f, 5.0f);
+		//particles->Scale(2.0f);
+		particles->Translate(floorWidth / 2.0f, 0.0f, floorDepth / 2.0f);
 		gameObjectManager.push_back(particles);
 	}
 

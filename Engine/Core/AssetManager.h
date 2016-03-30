@@ -7,6 +7,7 @@
 #include "IAssetManager.h"
 #include "Components/MeshComponent.h"
 #include "IcoSphereCreator.h"
+
 using namespace glm;
 
 namespace Core
@@ -469,14 +470,21 @@ namespace Core
 		{
 			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
 
-			IcoSphereCreator::Create(mesh, recursionLevel);
-			mesh->BuildAndBindVertexPositionColorBuffer();
-			mesh->mode = GL_TRIANGLES;
-			mesh->renderType = Mesh::Coloured;
+			//IcoSphereCreator::Create(mesh, recursionLevel);
+			IcoSphereCreator::CreateSimple(mesh);
 
+			mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
+			//mesh->BuildAndBindVertexPositionColorBuffer();
+			//mesh->BuildAndBindIndexBuffer();
+
+			mesh->mode = GL_TRIANGLES;
+			mesh->renderType = Mesh::LitTextured;
 
 			return mesh;
 		}
+
+
+		
 
 		std::unique_ptr<MeshComponent> CreateTrianglePrimitiveMeshComponent()
 		{
@@ -507,9 +515,9 @@ namespace Core
 			return quadMesh;
 		}
 
-		std::unique_ptr<MeshComponent> CreateIcospherePrimitiveMeshComponent(int recursionLevel = 1)
+		std::shared_ptr<MeshComponent> CreateIcospherePrimitiveMeshComponent(int recursionLevel = 1)
 		{
-			std::unique_ptr<MeshComponent> mesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());
+			std::shared_ptr<MeshComponent> mesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
 			mesh->AddRootMesh(CreateIcospherePrimitive(recursionLevel));
 			return mesh;
 		}

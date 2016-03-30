@@ -196,3 +196,4 @@ FakesAssemblies/
 /Engine/Server Release
 /Engine/x64/Server Release
 /Engine/x64/Server Debug
+/Engine/Test Debug

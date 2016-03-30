@@ -454,6 +454,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\Networking\IMultiConnection.h" />
     <ClInclude Include="Core\Components\Interfaces\IPhysicsComponent.h" />
     <ClInclude Include="Core\IcoSphereCreator.h" />
+    <ClInclude Include="Core\Icosphere.h" />
     <ClInclude Include="Physics\IPhysicsManager.h" />
     <ClInclude Include="Physics\PhysicsManager.h" />
     <ClInclude Include="Physics\ParticleSystem\Particle.h" />
