@@ -22,7 +22,7 @@ namespace Core
 		virtual void UnloadAllTextures() = 0;
 
 		virtual std::shared_ptr<Mesh> CreateTrianglePrimitive() = 0;
-		virtual std::shared_ptr<Mesh> CreateQuadPrimitive() = 0;
+		virtual std::shared_ptr<Mesh> CreateQuadPrimitive(float width, float depth) const = 0;
 		virtual std::shared_ptr<Mesh> CreateCubePrimitive(float size) = 0;
 	};
 }

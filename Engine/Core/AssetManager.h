@@ -302,17 +302,20 @@ namespace Core
 			return triangleMesh;
 		}
 
-		std::shared_ptr<Mesh> CreateQuadPrimitive() override
+		std::shared_ptr<Mesh> CreateQuadPrimitive(float width, float height) const override
 		{
 			std::shared_ptr<Mesh> quadMesh = std::make_shared<Mesh>(&GetInstance());
 
-			quadMesh->positions.push_back(vec3(-0.25, 0.5, 0.0));
+			float halfWidth = width / 2;
+			float halfHeight = height / 2;
+
+			quadMesh->positions.push_back(vec3(-halfWidth, -halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(1, 0, 0, 1));
-			quadMesh->positions.push_back(vec3(-0.25, 0.75, 0.0));
+			quadMesh->positions.push_back(vec3(-halfWidth, halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 0, 0, 1));
-			quadMesh->positions.push_back(vec3(0.25, 0.5, 0.0));
+			quadMesh->positions.push_back(vec3(halfWidth, -halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 1, 0, 1));
-			quadMesh->positions.push_back(vec3(0.25, 0.75, 0.0));
+			quadMesh->positions.push_back(vec3(halfWidth, halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 0, 1, 1));
 
 			quadMesh->BuildAndBindVertexPositionColorBuffer();
@@ -321,6 +324,39 @@ namespace Core
 			quadMesh->renderType = Mesh::Coloured;
 
 			return quadMesh;
+		}
+
+		std::shared_ptr<Mesh> CreateCirclePrimitive(float radius, int fragments) const
+		{
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
+			const float PI = 3.1415926f;
+
+			float increment = 2.0f * PI / fragments;
+
+			mesh->positions.push_back(vec3(0.0f, 0.0f, 0.0f));
+			mesh->colours.push_back(Colours_RGBA::Green);
+
+			for (float currAngle = 0.0f; currAngle < 2.0f * PI; currAngle += increment)
+			{
+				mesh->positions.push_back(vec3(radius * cos(currAngle), radius * sin(currAngle), 0));
+				if (currAngle == 0.0f || currAngle == 2.0f * PI)
+					mesh->colours.push_back(Colours_RGBA::HotPink);
+				else
+					mesh->colours.push_back(Colours_RGBA::Green);
+			}
+			float lastAngle = 2.0f * PI + increment;
+			mesh->positions.push_back(vec3(radius * cos(lastAngle), radius * sin(lastAngle), 0));
+			mesh->colours.push_back(Colours_RGBA::HotPink);
+
+			mesh->positions.push_back(vec3(0.0f, 0.0f, 0.0f));
+			mesh->colours.push_back(Colours_RGBA::HotPink);
+
+			mesh->BuildAndBindVertexPositionColorBuffer();
+			mesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
+			mesh->mode = GL_TRIANGLE_FAN;
+			mesh->renderType = Mesh::Coloured;
+
+			return mesh;
 		}
 
 		std::shared_ptr<Mesh> CreateQuadPrimitiveAdv(float width, float depth) const
@@ -358,27 +394,6 @@ namespace Core
 			quadMesh->renderType = Mesh::LitTextured;
 
 			return quadMesh;
-		}
-
-		std::shared_ptr<Mesh> CreateCirclePrimitive(float radius, int fragments)
-		{
-			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
-			const float PI = 3.1415926f;
-
-			float increment = 2.0f * PI / fragments;
-
-			for (float currAngle = 0.0f; currAngle <= 2.0f * PI; currAngle += increment)
-			{
-				mesh->positions.push_back(glm::vec3(radius * cos(currAngle), radius * sin(currAngle), 0));
-				mesh->colours.push_back(Colours_RGBA::Green);
-			}
-
-			mesh->BuildAndBindVertexPositionColorBuffer();
-			mesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
-			mesh->mode = GL_LINE_LOOP;
-			mesh->renderType = Mesh::Coloured;
-
-			return mesh;
 		}
 
 		std::shared_ptr<Mesh> CreateCubePrimitive(float size = 1.0f) override
@@ -538,6 +553,13 @@ namespace Core
 			std::shared_ptr<MeshComponent> quadMesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
 			quadMesh->AddRootMesh(CreateQuadPrimitiveAdv(width, depth));
 			quadMesh->rootMeshNode->meshes[0]->materialID = texture;
+			return quadMesh;
+		}
+
+		std::shared_ptr<MeshComponent> CreateSimpleQuadPrimitiveMeshComponent(float width, float depth) const
+		{
+			std::shared_ptr<MeshComponent> quadMesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
+			quadMesh->AddRootMesh(CreateQuadPrimitive(width, depth));
 			return quadMesh;
 		}
 

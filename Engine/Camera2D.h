@@ -8,7 +8,7 @@ namespace Core
 	class Camera2D : public Camera
 	{
 		const float cameraMovementSpeed = 10.1f;
-		const float zoomSpeed = 0.01;
+		const float zoomSpeed = 0.01f;
 		vec3 translateDelta;
 		float zoom = 1.0f;
 		float zoomDelta = 0.0f;
@@ -51,7 +51,6 @@ namespace Core
 				zoomDelta += zoomSpeed;
 			if (key == 'o')
 				zoomDelta -= zoomSpeed;
-
 		}
 
 		void Update(float deltaTime) override
@@ -69,7 +68,6 @@ namespace Core
 
 			Camera::Update(deltaTime);
 		}
-
 
 		void SetZoom(float newZoom)
 		{

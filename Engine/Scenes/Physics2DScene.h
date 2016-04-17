@@ -27,8 +27,6 @@ public:
 
 	float m_scale = 0.0f;
 
-	std::shared_ptr<GameObject> floor;
-
 
 	Physics2DScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
@@ -87,6 +85,7 @@ public:
 		else
 		{
 			camera2D->SetOrthographicProjection(-static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.width), -static_cast<float>(windowInfo.height), static_cast<float>(windowInfo.height), 5, 1000);
+			camera2D->SetZoom(0.03f);
 			SetMainCamera(camera2D);
 			camera2D->Translate(floorWidth * 0.5f, 0.0f, floorDepth * 1.3f);
 		}
@@ -100,16 +99,30 @@ public:
 		InitialiseTextures();
 		InitialiseCamera();
 
-		floor = std::make_shared<GameObject>();
-		floor->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
-		gameObjectManager.push_back(floor);
-
 		std::shared_ptr<GameObject> floor2 = std::make_shared<GameObject>();
 		floor2->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
-		
-		floor2->Translate(0, floorWidth*0.5, floorWidth*0.5);
+		floor2->Translate(0, floorWidth*0.5f, -floorWidth*0.5f);
 		floor2->RotateX(glm::radians(90.0f));
 		gameObjectManager.push_back(floor2);
+
+
+
+		std::shared_ptr<GameObject> square = std::make_shared<GameObject>();
+		square->AddComponent(AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(5.0f, 5.0f));
+		gameObjectManager.push_back(square);
+
+		std::shared_ptr<GameObject> square2 = std::make_shared<GameObject>();
+		square2->AddComponent(AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(5.0f, 5.0f));
+		square2->Translate(10.0f, 0.0f, 0.0f);
+		gameObjectManager.push_back(square2);
+
+
+		std::shared_ptr<GameObject> circle = std::make_shared<GameObject>();
+		circle->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5f, 32));
+		circle->Translate(20.0f, 0.0f, 0.0f);
+		gameObjectManager.push_back(circle);
+
+
 
 		for (int i = 0; i < 1; i++)
 		{
@@ -139,29 +152,30 @@ public:
 
 	virtual void notifyDisplayFrame() override
 	{
+		Check_GLError();
 		vec3 cameraPos;
 		if (isUseCamera3D)
 		{
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
+			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
+			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
 			cameraPos = vec3(camera->GetWorldTransform()[3]);
 		}
 		else
 		{
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera2D->view);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera2D->projection);
+			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera2D->view);
+			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera2D->projection);
 			cameraPos = vec3(camera2D->GetWorldTransform()[3]);
+
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->Enable();
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
+			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
 		}
 		
-		
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
-
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
-		Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
-
+		Check_GLError();
+		Check_GLError();
 		SceneManager::notifyDisplayFrame();
 	}
 

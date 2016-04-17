@@ -63,6 +63,7 @@ namespace Core
 		void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld) const
 		{
 			//todo - investigate moving view/prj into common
+			vec3 cameraPos = vec3(mainCamera->GetWorldTransform()[3]);
 
 			switch(renderType)
 			{
@@ -79,6 +80,9 @@ namespace Core
 				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(mainCamera->view);
 				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(mainCamera->projection);
 				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetTextureUnit(0);
+
+				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
+
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -196,9 +200,12 @@ namespace Core
 				vertices.push_back(VertexPositionColour(positions[i], colour));
 			}
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-			
+			if (indices.size() > 0)
+			{
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+			}
+
 			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionColour) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 			
 			
