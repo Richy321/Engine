@@ -281,8 +281,14 @@
     <ClInclude Include="Core\IcoSphereCreator.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Camera2D.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\Physics2DScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
     <ClInclude Include="Core\Icosphere.h">
-      <Filter>Header Files</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

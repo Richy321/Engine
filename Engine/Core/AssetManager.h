@@ -360,6 +360,27 @@ namespace Core
 			return quadMesh;
 		}
 
+		std::shared_ptr<Mesh> CreateCirclePrimitive(float radius, int fragments)
+		{
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
+			const float PI = 3.1415926f;
+
+			float increment = 2.0f * PI / fragments;
+
+			for (float currAngle = 0.0f; currAngle <= 2.0f * PI; currAngle += increment)
+			{
+				mesh->positions.push_back(glm::vec3(radius * cos(currAngle), radius * sin(currAngle), 0));
+				mesh->colours.push_back(Colours_RGBA::Green);
+			}
+
+			mesh->BuildAndBindVertexPositionColorBuffer();
+			mesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
+			mesh->mode = GL_LINE_LOOP;
+			mesh->renderType = Mesh::Coloured;
+
+			return mesh;
+		}
+
 		std::shared_ptr<Mesh> CreateCubePrimitive(float size = 1.0f) override
 		{
 			return CreateBoxPrimitive(size, size, size);
@@ -484,7 +505,12 @@ namespace Core
 		}
 
 
-		
+		std::unique_ptr<MeshComponent> CreateCirclePrimitiveMeshComponent(float radius, int fragments)
+		{
+			std::unique_ptr<MeshComponent> mesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());
+			mesh->AddRootMesh(CreateCirclePrimitive(radius, fragments));
+			return mesh;
+		}
 
 		std::unique_ptr<MeshComponent> CreateTrianglePrimitiveMeshComponent()
 		{
@@ -507,9 +533,9 @@ namespace Core
 			return boxMesh;
 		}
 
-		std::unique_ptr<MeshComponent> CreateQuadPrimitiveMeshComponent(float width, float depth, std::string texture = nullptr) const
+		std::shared_ptr<MeshComponent> CreateQuadPrimitiveMeshComponent(float width, float depth, std::string texture = "") const
 		{
-			std::unique_ptr<MeshComponent> quadMesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());
+			std::shared_ptr<MeshComponent> quadMesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
 			quadMesh->AddRootMesh(CreateQuadPrimitiveAdv(width, depth));
 			quadMesh->rootMeshNode->meshes[0]->materialID = texture;
 			return quadMesh;

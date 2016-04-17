@@ -21,6 +21,10 @@ namespace Core
 		ProjectionType projectionType = Perspective;
 		
 		vec3 target;
+		
+		
+		float left, right, top, bottom;
+
 
 		Camera() :target(0.0f, 0.0f, 100.0f)
 		{
@@ -42,12 +46,21 @@ namespace Core
 
 		void SetPerspectiveProjection(float fov, float width, float height, float zNear, float zFar)
 		{
+			this->nearPlane = zNear;
+			this->farPlane = zFar;
 			projectionType = Perspective;
 			projection = BuildPerspectiveProjection(fov, width, height, zNear, zFar);
 		}
 
 		void SetOrthographicProjection(float left, float right, float bottom, float top, float zNear, float zFar)
 		{
+			this->nearPlane = zNear;
+			this->farPlane = zFar;
+			this->left = left;
+			this->right = right;
+			this->bottom = bottom;
+			this->top = top;
+
 			projectionType = Orthographic;
 			projection = BuildOrthographicProjection(left, right, bottom, top, zNear, zFar);
 		}

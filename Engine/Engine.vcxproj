@@ -441,6 +441,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClCompile Include="Managers\SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera2D.h" />
     <ClInclude Include="Core\ShaderEffects\ColouredMeshEffect.h" />
     <ClInclude Include="Core\Colours.h" />
     <ClInclude Include="Core\Networking\ClientNetworkManager.h" />
@@ -455,6 +456,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\Components\Interfaces\IPhysicsComponent.h" />
     <ClInclude Include="Core\IcoSphereCreator.h" />
     <ClInclude Include="Core\Icosphere.h" />
+    <ClInclude Include="Scenes\Physics2DScene.h" />
     <ClInclude Include="Physics\IPhysicsManager.h" />
     <ClInclude Include="Physics\PhysicsManager.h" />
     <ClInclude Include="Physics\ParticleSystem\Particle.h" />

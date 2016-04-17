@@ -8,6 +8,7 @@
 #include "Scenes/TestScene.h"
 #include "Scenes/ServerScene.h"
 #include "Scenes/ClientScene.h"
+#include "Scenes/Physics2DScene.h"
 
 using namespace Core;
 using namespace Initialisation;
@@ -29,14 +30,17 @@ int main(int argc, char **argv)
 
 	InitialiseGLUT::Initialise(window, context, frameBufferInfo);
 
-
-#if IS_TEST
-	std::shared_ptr<IListener> scene = std::make_shared<TestScene>(window);
-#elif IS_SERVER
-	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ServerScene>(window);
-#else
-	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ClientScene>(window);
-#endif
+//
+//#if IS_TEST
+//	std::shared_ptr<IListener> scene = std::make_shared<TestScene>(window);
+//#elif IS_SERVER
+//	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ServerScene>(window);
+//#else
+//	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ClientScene>(window);
+//#endif
+//
+//
+	std::shared_ptr<IListener> scene = std::make_shared<Physics2DScene>(window);
 
 	scene->Initialise();
 	InitialiseGLUT::SetListener(scene);
