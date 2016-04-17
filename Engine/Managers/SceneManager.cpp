@@ -34,9 +34,20 @@ void SceneManager::notifyBeginFrame()
 
 	float elapsedTime = timer->GetElapsedTime();
 
-	for (std::shared_ptr<GameObject>& go : gameObjectManager)
-		go->UpdatePhysics(elapsedTime);
-	OnPhysicsUpdate();
+	static double physicsAccumulator = 0;
+	physicsAccumulator += elapsedTime;
+
+	//avoid spiral of death (if physics tick takes a long time, elapsed time will increase endlessly)
+	clamp(physicsAccumulator, 0.0, 0.1);
+	while (physicsAccumulator >= physicsTimeStep)
+	{
+		for (std::shared_ptr<GameObject>& go : gameObjectManager)
+			go->UpdatePhysics(elapsedTime);
+		OnPhysicsUpdate();
+		physicsAccumulator -= physicsTimeStep;
+	}
+
+
 
 	/* Network Manager updates registered network components on seperate thread
 	float nowTime = timer->GetRunningTime();

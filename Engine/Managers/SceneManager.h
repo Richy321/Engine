@@ -35,6 +35,7 @@ namespace Managers
 		int mouseDeltaX;
 		int mouseDeltaY;
 		bool paused = false;
+		const float physicsTimeStep = 1.0f / 60.0f;
 
 		std::mutex mutexGameObjectManager;
 	public:

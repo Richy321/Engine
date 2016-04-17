@@ -105,8 +105,6 @@ public:
 		floor2->RotateX(glm::radians(90.0f));
 		gameObjectManager.push_back(floor2);
 
-
-
 		std::shared_ptr<GameObject> square = std::make_shared<GameObject>();
 		square->AddComponent(AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(5.0f, 5.0f));
 		gameObjectManager.push_back(square);
@@ -116,13 +114,10 @@ public:
 		square2->Translate(10.0f, 0.0f, 0.0f);
 		gameObjectManager.push_back(square2);
 
-
 		std::shared_ptr<GameObject> circle = std::make_shared<GameObject>();
 		circle->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5f, 32));
 		circle->Translate(20.0f, 0.0f, 0.0f);
 		gameObjectManager.push_back(circle);
-
-
 
 		for (int i = 0; i < 1; i++)
 		{
