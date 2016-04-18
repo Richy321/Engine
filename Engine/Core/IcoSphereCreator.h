@@ -72,7 +72,7 @@ public:
 			0.000f,  0.000f, -1.000f };
 
 		mesh->indices.insert(std::end(mesh->indices), std::begin(Faces), std::end(Faces));
-		mesh->positions.insert(std::end(mesh->positions), std::begin(Verts), std::end(Verts));
+		mesh->vertices.insert(std::end(mesh->vertices), std::begin(Verts), std::end(Verts));
 	}
 
 	static void Create(std::shared_ptr<Core::Mesh> mesh, int recursionLevel)
@@ -159,7 +159,7 @@ private:
 	static int AddVertex(std::shared_ptr<Core::Mesh> mesh, vec3 position)
 	{
 		double length = sqrt(position.x * position.x + position.y * position.y + position.z * position.z);
-		mesh->positions.push_back(vec3(position.x / length, position.y / length, position.z / length));
+		mesh->vertices.push_back(vec3(position.x / length, position.y / length, position.z / length));
 		mesh->colours.push_back(Core::Colours_RGBA::HotPink);
 		return index++;
 	}
@@ -177,8 +177,8 @@ private:
 			return foundValueIterator->second;
 		}
 
-		vec3 point1 = mesh->positions[p1];
-		vec3 point2 = mesh->positions[p2];
+		vec3 point1 = mesh->vertices[p1];
+		vec3 point2 = mesh->vertices[p2];
 		vec3 middle = vec3((point1.x + point2.x) / 2.0,
 								(point1.y + point2.y) / 2.0,
 								(point1.z + point2.z) / 2.0);

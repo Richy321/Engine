@@ -6,7 +6,7 @@
 #include "../Core/AssetManager.h"
 #include "../Core/CameraFPS.h"
 #include "../Core/ShaderEffects/LitTexturedMeshEffect.h"
-#include "../Camera2D.h"
+#include "../Core/Camera2D.h"
 using namespace Core;
 
 class TestScene : public Managers::SceneManager

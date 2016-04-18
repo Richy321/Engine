@@ -47,8 +47,6 @@ void SceneManager::notifyBeginFrame()
 		physicsAccumulator -= physicsTimeStep;
 	}
 
-
-
 	/* Network Manager updates registered network components on seperate thread
 	float nowTime = timer->GetRunningTime();
 	if (nowTime > lastUpdateCommsTime + CommsTickDurationMs * 0.001)

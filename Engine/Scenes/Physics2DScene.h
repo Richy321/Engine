@@ -1,6 +1,5 @@
 #pragma once
 #include "../Managers/SceneManager.h"
-#include "../Camera2D.h"
 
 using namespace Core;
 

@@ -77,7 +77,7 @@ namespace Core
 
 				for (size_t v = 0; v < mesh->mNumVertices; v++)
 				{
-					subMesh->positions.push_back(vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z));
+					subMesh->vertices.push_back(vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z));
 
 					if (mesh->mNormals != nullptr)
 						subMesh->normals.push_back(vec3(mesh->mNormals[v].x, mesh->mNormals[v].y, mesh->mNormals[v].z));
@@ -289,11 +289,11 @@ namespace Core
 		{
 			std::shared_ptr<Mesh> triangleMesh = std::make_shared<Mesh>(&GetInstance());
 
-			triangleMesh->positions.push_back(vec3(0.25, -0.25, 0.0));
+			triangleMesh->vertices.push_back(vec3(0.25, -0.25, 0.0));
 			triangleMesh->colours.push_back(vec4(1, 0, 0, 1));
-			triangleMesh->positions.push_back(vec3(-0.25, -0.25, 0.0));
+			triangleMesh->vertices.push_back(vec3(-0.25, -0.25, 0.0));
 			triangleMesh->colours.push_back(vec4(0, 1, 0, 1));
-			triangleMesh->positions.push_back(vec3(0.25, 0.25, 0.0));
+			triangleMesh->vertices.push_back(vec3(0.25, 0.25, 0.0));
 			triangleMesh->colours.push_back(vec4(0, 0, 1, 1));
 
 			triangleMesh->BuildAndBindVertexPositionColorBuffer();
@@ -309,13 +309,13 @@ namespace Core
 			float halfWidth = width / 2;
 			float halfHeight = height / 2;
 
-			quadMesh->positions.push_back(vec3(-halfWidth, -halfHeight, 0.0));
+			quadMesh->vertices.push_back(vec3(-halfWidth, -halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(1, 0, 0, 1));
-			quadMesh->positions.push_back(vec3(-halfWidth, halfHeight, 0.0));
+			quadMesh->vertices.push_back(vec3(-halfWidth, halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 0, 0, 1));
-			quadMesh->positions.push_back(vec3(halfWidth, -halfHeight, 0.0));
+			quadMesh->vertices.push_back(vec3(halfWidth, -halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 1, 0, 1));
-			quadMesh->positions.push_back(vec3(halfWidth, halfHeight, 0.0));
+			quadMesh->vertices.push_back(vec3(halfWidth, halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 0, 1, 1));
 
 			quadMesh->BuildAndBindVertexPositionColorBuffer();
@@ -333,22 +333,22 @@ namespace Core
 
 			float increment = 2.0f * PI / fragments;
 
-			mesh->positions.push_back(vec3(0.0f, 0.0f, 0.0f));
+			mesh->vertices.push_back(vec3(0.0f, 0.0f, 0.0f));
 			mesh->colours.push_back(Colours_RGBA::Green);
 
 			for (float currAngle = 0.0f; currAngle < 2.0f * PI; currAngle += increment)
 			{
-				mesh->positions.push_back(vec3(radius * cos(currAngle), radius * sin(currAngle), 0));
+				mesh->vertices.push_back(vec3(radius * cos(currAngle), radius * sin(currAngle), 0));
 				if (currAngle == 0.0f || currAngle == 2.0f * PI)
 					mesh->colours.push_back(Colours_RGBA::HotPink);
 				else
 					mesh->colours.push_back(Colours_RGBA::Green);
 			}
 			float lastAngle = 2.0f * PI + increment;
-			mesh->positions.push_back(vec3(radius * cos(lastAngle), radius * sin(lastAngle), 0));
+			mesh->vertices.push_back(vec3(radius * cos(lastAngle), radius * sin(lastAngle), 0));
 			mesh->colours.push_back(Colours_RGBA::HotPink);
 
-			mesh->positions.push_back(vec3(0.0f, 0.0f, 0.0f));
+			mesh->vertices.push_back(vec3(0.0f, 0.0f, 0.0f));
 			mesh->colours.push_back(Colours_RGBA::HotPink);
 
 			mesh->BuildAndBindVertexPositionColorBuffer();
@@ -365,19 +365,19 @@ namespace Core
 
 			std::shared_ptr<Mesh> quadMesh = std::make_shared<Mesh>(&GetInstance());
 			
-			quadMesh->positions.push_back(vec3(0.0f, 0.0f, 0.0f));
+			quadMesh->vertices.push_back(vec3(0.0f, 0.0f, 0.0f));
 			quadMesh->normals.push_back(upNormal);
 			quadMesh->uvs.push_back(vec2(0.0f, 0.0f));
 
-			quadMesh->positions.push_back(vec3(0.0f, 0.0f, depth));
+			quadMesh->vertices.push_back(vec3(0.0f, 0.0f, depth));
 			quadMesh->normals.push_back(upNormal);
 			quadMesh->uvs.push_back(vec2(0.0f, 1.0f));
 
-			quadMesh->positions.push_back(vec3(width, 0.0f, depth));
+			quadMesh->vertices.push_back(vec3(width, 0.0f, depth));
 			quadMesh->normals.push_back(upNormal);
 			quadMesh->uvs.push_back(vec2(1.0f, 1.0f));
 
-			quadMesh->positions.push_back(vec3(width, 0.0f, 0.0f));
+			quadMesh->vertices.push_back(vec3(width, 0.0f, 0.0f));
 			quadMesh->normals.push_back(upNormal);
 			quadMesh->uvs.push_back(vec2(1.0f, 0.0f));
 
@@ -406,93 +406,93 @@ namespace Core
 			std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>(&GetInstance());
 
 			//front face of the cube
-			cubeMesh->positions.push_back(vec3(-width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, height, depth));
+			cubeMesh->vertices.push_back(vec3(width, height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 1.0, 1.0));
 
-			cubeMesh->positions.push_back(vec3(-width, height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, height, depth));
+			cubeMesh->vertices.push_back(vec3(width, height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 1.0, 1.0));
 
 			//right face of the cube
-			cubeMesh->positions.push_back(vec3(width, height, depth));
+			cubeMesh->vertices.push_back(vec3(width, height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 0.0, 1.0));
 
-			cubeMesh->positions.push_back(vec3(width, height, depth));
+			cubeMesh->vertices.push_back(vec3(width, height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 1.0, 1.0));
 
 			//back face of the cube
-			cubeMesh->positions.push_back(vec3(-width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 0.0, 1.0));
 
-			cubeMesh->positions.push_back(vec3(-width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 0.0, 1.0));
 
 			//left face of the cube
-			cubeMesh->positions.push_back(vec3(-width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 1.0, 1.0));
 
-			cubeMesh->positions.push_back(vec3(-width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 0.0, 1.0));
 
 			//upper face of the cube
-			cubeMesh->positions.push_back(vec3(width, height, depth));
+			cubeMesh->vertices.push_back(vec3(width, height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 0.0, 1.0));
 
-			cubeMesh->positions.push_back(vec3(-width, height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 1.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 1.0, 0.0, 1.0));
 
 			//bottom face of the cube
-			cubeMesh->positions.push_back(vec3(-width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 1.0, 1.0));
 
-			cubeMesh->positions.push_back(vec3(width, -height, -depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, -depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 0.0, 1.0));
-			cubeMesh->positions.push_back(vec3(-width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(-width, -height, depth));
 			cubeMesh->colours.push_back(vec4(0.0, 0.0, 1.0, 1.0));
-			cubeMesh->positions.push_back(vec3(width, -height, depth));
+			cubeMesh->vertices.push_back(vec3(width, -height, depth));
 			cubeMesh->colours.push_back(vec4(1.0, 0.0, 1.0, 1.0));
 
 			cubeMesh->BuildAndBindVertexPositionColorBuffer();
