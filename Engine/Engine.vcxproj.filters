@@ -314,6 +314,12 @@
     <ClInclude Include="Core\Components\Interfaces\ICollider.h">
       <Filter>Core\Components\Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\AABB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\BoundingSphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">

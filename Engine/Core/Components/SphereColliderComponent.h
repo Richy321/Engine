@@ -1,25 +1,28 @@
 #pragma once
 #include "Interfaces/ICollider.h"
 #include "../../Dependencies/glm/detail/type_vec3.hpp"
+#include "../../Physics/BoundingSphere.h"
 
 namespace Core
 {
 	class SphereColliderComponent : public ICollider, public IComponent
 	{
 	public:
+		BoundingSphere boundingSphere;
 
 		~SphereColliderComponent()
 		{
 		}
 
-		SphereColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, float radius, glm::vec3 position) : IComponent(gameObj)
+		SphereColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, BoundingSphere boundingSphere) : IComponent(gameObj), boundingSphere(boundingSphere)
 		{
-			this->radius = radius;
-			this->position = position;
 		}
 
-		float radius;
-		vec3 position;
+		SphereColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, float radius, glm::vec3 position) : IComponent(gameObj)
+		{
+			boundingSphere.radius = radius;
+			boundingSphere.position = position;
+		}
 
 		void Update(float deltaTime) override
 		{
@@ -33,7 +36,7 @@ namespace Core
 
 		ColliderType GetColliderType() override
 		{
-			return Sphere;
+			return SphereCollider;
 		}
 	};
 }

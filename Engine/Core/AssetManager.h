@@ -359,6 +359,11 @@ namespace Core
 			return mesh;
 		}
 
+		std::shared_ptr<Mesh> CreateRandomPolygonPrimitive() const
+		{
+			assert(true);
+		}
+
 		std::shared_ptr<Mesh> CreateQuadPrimitiveAdv(float width, float depth) const
 		{
 			const vec3 upNormal = vec3(0.0, 1.0f, 0.0f);
@@ -561,6 +566,14 @@ namespace Core
 			quadMesh->AddRootMesh(CreateQuadPrimitive(width, depth));
 			return quadMesh;
 		}
+
+		std::shared_ptr<MeshComponent> CreateRandomPolygonPrimitiveMeshComponent() const
+		{
+			std::shared_ptr<MeshComponent> mesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
+			mesh->AddRootMesh(CreateRandomPolygonPrimitive());
+			return mesh;
+		}
+
 
 		std::shared_ptr<MeshComponent> CreateIcospherePrimitiveMeshComponent(int recursionLevel = 1)
 		{

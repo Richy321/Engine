@@ -10,6 +10,8 @@
 #include "IAssetManager.h"
 #include "Colours.h"
 #include <limits>
+#include "../Physics/BoundingSphere.h"
+#include "../Physics/AABB.h"
 
 namespace Core
 {
@@ -249,7 +251,6 @@ namespace Core
 			vbos.push_back(vbo);
 		}
 
-		/*
 		AABB ComputeAABB()
 		{
 			float minX, minY, minZ;
@@ -284,6 +285,6 @@ namespace Core
 
 			return BoundingSphere(maxRadius, center);
 		}
-		*/
+		
 	};
 }

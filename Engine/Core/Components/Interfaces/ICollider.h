@@ -10,8 +10,8 @@ namespace Core
 
 		enum ColliderType
 		{
-			Sphere,
-			AABB
+			SphereCollider,
+			AABBCollider
 		};
 
 		virtual ColliderType GetColliderType() = 0;

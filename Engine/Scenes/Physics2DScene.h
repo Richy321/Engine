@@ -2,6 +2,8 @@
 #include "../Managers/SceneManager.h"
 #include "../Physics/RigidBody2DComponent.h"
 #include "../Core/Components/SphereColliderComponent.h"
+#include "../Physics/PhysicsManager.h"
+#include "../Core/Components/BoxColliderComponent.h"
 
 using namespace Core;
 
@@ -114,8 +116,7 @@ public:
 		square2->Translate(10.0f, 0.0f, 0.0f);
 		gameObjectManager.push_back(square2);
 
-		std::shared_ptr<GameObject> circle = std::make_shared<GameObject>();
-		circle->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5f, 32));
+		std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject();
 		circle->Translate(20.0f, 0.0f, 0.0f);
 		gameObjectManager.push_back(circle);
 
@@ -198,18 +199,34 @@ public:
 	std::shared_ptr<GameObject> CreateCirclePhysicsObject()
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
-		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(5, 32));
+		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5, 32));
 		
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
 
-		std::shared_ptr<SphereColliderComponent> sphereColliderComponent = std::make_shared<SphereColliderComponent>(go, 5.0f, vec3(0.0f, 0.0f, 0.0f));
+		std::shared_ptr<SphereColliderComponent> sphereColliderComponent = std::make_shared<SphereColliderComponent>(go, 2.5f, vec3(0.0f, 0.0f, 0.0f));
 		go->AddComponent(sphereColliderComponent);
+
+		PhysicsManager::ComputeSphereMass(rigidBodyComponent, sphereColliderComponent);
+
+		return go;
 	}
 
 	std::shared_ptr<GameObject> CreatePolygonPhysicsObject()
 	{
-		
+		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
+		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateRandomPolygonPrimitiveMeshComponent();
+		go->AddComponent(polygonMesh);
+
+		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
+		go->AddComponent(rigidBodyComponent);
+
+		std::shared_ptr<BoxColliderComponent> boxColliderComponent = std::make_shared<BoxColliderComponent>(go, polygonMesh->rootMeshNode->meshes[0]->ComputeAABB());
+		go->AddComponent(boxColliderComponent);
+
+		PhysicsManager::ComputePolygonMass(rigidBodyComponent, polygonMesh->rootMeshNode->meshes[0]->vertices);
+
+		return go;
 	}
 
 
