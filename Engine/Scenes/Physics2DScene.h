@@ -1,8 +1,9 @@
 #pragma once
 #include "../Managers/SceneManager.h"
+#include "../Physics/RigidBody2DComponent.h"
+#include "../Core/Components/SphereColliderComponent.h"
 
 using namespace Core;
-
 
 class Physics2DScene : public Managers::SceneManager
 {
@@ -193,5 +194,24 @@ public:
 		//else
 		//	camera2D->OnMouseMove(deltaX, deltaY);
 	}
+
+	std::shared_ptr<GameObject> CreateCirclePhysicsObject()
+	{
+		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
+		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(5, 32));
+		
+		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
+		go->AddComponent(rigidBodyComponent);
+
+		std::shared_ptr<SphereColliderComponent> sphereColliderComponent = std::make_shared<SphereColliderComponent>(go, 5.0f, vec3(0.0f, 0.0f, 0.0f));
+		go->AddComponent(sphereColliderComponent);
+	}
+
+	std::shared_ptr<GameObject> CreatePolygonPhysicsObject()
+	{
+		
+	}
+
+
 };
 

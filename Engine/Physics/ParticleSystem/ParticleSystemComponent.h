@@ -8,7 +8,7 @@
 
 using namespace glm;
 
-class ParticleSystemComponent : public Core::IRenderableComponent , public IPhysicsComponent
+class ParticleSystemComponent : public IRenderableComponent , public IPhysicsComponent
 {
 public:
 	

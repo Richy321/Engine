@@ -9,9 +9,7 @@
 #include "Camera.h"
 #include "IAssetManager.h"
 #include "Colours.h"
-#include "../Physics/AABB.h"
 #include <limits>
-#include "../Physics/BoundingSphere.h"
 
 namespace Core
 {
@@ -251,6 +249,7 @@ namespace Core
 			vbos.push_back(vbo);
 		}
 
+		/*
 		AABB ComputeAABB()
 		{
 			float minX, minY, minZ;
@@ -285,11 +284,6 @@ namespace Core
 
 			return BoundingSphere(maxRadius, center);
 		}
-
-		float ComputeMass()
-		{
-			
-		}
-
+		*/
 	};
 }

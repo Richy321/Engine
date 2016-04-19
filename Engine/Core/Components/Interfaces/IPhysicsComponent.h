@@ -1,7 +1,7 @@
 #pragma once
 #include "IComponent.h"
 
-class IPhysicsComponent : public virtual Core::IComponent
+class IPhysicsComponent : public Core::IComponent
 {
 public:
 

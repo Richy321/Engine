@@ -5,17 +5,22 @@
 
 using namespace Core;
 
-class RigidBody2DComponent : IPhysicsComponent
+class RigidBody2DComponent : public IPhysicsComponent
 {
 public:
 
-	RigidBody2DComponent(std::weak_ptr<Core::IGameObject> gameObj) : IComponent(gameObj), IPhysicsComponent(gameObj)
+	RigidBody2DComponent(std::weak_ptr<Core::IGameObject> gameObj) : IPhysicsComponent(gameObj)
 	{
 
 	}
 
 	~RigidBody2DComponent()
 	{
+	}
+
+	ComponentTypes GetComponentType() const override
+	{
+		return RigidBody;
 	}
 
 	//basic
@@ -45,6 +50,11 @@ public:
 
 	}
 	
+	void Update(float deltaTime)
+	{
+		
+	}
+
 	void ApplyForce(const glm::vec2& f)
 	{
 		force += f;
@@ -63,5 +73,6 @@ public:
 		inverseInertia = 0.0f;
 		inertia = 0.0f;
 	}
+
 };
 

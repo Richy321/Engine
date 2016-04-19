@@ -32,7 +32,9 @@ namespace Core
 			Mesh,
 			NetworkView,
 			DirectionalMovement,
-			ParticleSystem
+			ParticleSystem,
+			Collider,
+			RigidBody
 		};
 
 		int GetID() const { return id; }

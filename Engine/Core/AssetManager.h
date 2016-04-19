@@ -519,7 +519,6 @@ namespace Core
 			return mesh;
 		}
 
-
 		std::unique_ptr<MeshComponent> CreateCirclePrimitiveMeshComponent(float radius, int fragments)
 		{
 			std::unique_ptr<MeshComponent> mesh = std::make_unique<MeshComponent>(std::weak_ptr<GameObject>());

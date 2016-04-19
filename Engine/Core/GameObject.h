@@ -7,7 +7,7 @@
 #include "Components/NetworkViewComponent.h"
 #include "Components/Interfaces/IPhysicsComponent.h"
 
-class IComponent;
+//class IComponent;
 
 namespace Core
 {

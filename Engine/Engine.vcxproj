@@ -441,11 +441,11 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClCompile Include="Managers\SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Manifold.h" />
-    <ClInclude Include="Physics\BoundingSphere.h" />
+    <ClInclude Include="Core\Components\BoxColliderComponent.h" />
+    <ClInclude Include="Core\Components\Interfaces\ICollider.h" />
+    <ClInclude Include="Physics\Manifold.h" />
     <ClInclude Include="Physics\PhysicsMaterials.h" />
     <ClInclude Include="Physics\PhysicsMaterial.h" />
-    <ClInclude Include="Physics\AABB.h" />
     <ClInclude Include="Core\Camera2D.h" />
     <ClInclude Include="Physics\CollisionDetection.h" />
     <ClInclude Include="Core\ShaderEffects\ColouredMeshEffect.h" />
@@ -521,6 +521,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Core\TickTimer.h" />
     <ClInclude Include="Core\Networking\ServerNetworkingManager.h" />
+    <ClInclude Include="Core\Components\SphereColliderComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag" />
