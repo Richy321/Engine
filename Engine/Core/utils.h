@@ -58,5 +58,24 @@ namespace Core
 		{
 			return v.x * v.x + v.y * v.y;
 		}
+
+
+		static float DotVec2(const glm::vec2& a, const glm::vec2& b)
+		{
+			return a.x * b.x + a.y * b.y;
+		}
+
+		static float DistSquared(const glm::vec2& a, const glm::vec2& b)
+		{
+			glm::vec2 c = a - b;
+			return DotVec2(c, c);
+		}
+
+		static bool BiasGreaterThan(float a, float b)
+		{
+			const float k_biasRelative = 0.95f;
+			const float k_biasAbsolute = 0.01f;
+			return a >= b * k_biasRelative + a * k_biasAbsolute;
+		}
 	};
 }

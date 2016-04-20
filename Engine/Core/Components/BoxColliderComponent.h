@@ -21,8 +21,6 @@ namespace Core
 			aabb.max = max;
 		}
 
-
-
 		~BoxColliderComponent()
 		{
 		}

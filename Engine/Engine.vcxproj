@@ -465,6 +465,8 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Core\IcoSphereCreator.h" />
     <ClInclude Include="Core\Icosphere.h" />
     <ClInclude Include="Physics\RigidBody2DComponent.h" />
+    <ClInclude Include="Core\Components\PolygonColliderComponent.h" />
+    <ClInclude Include="Physics\BoundingPolygon.h" />
     <ClInclude Include="Scenes\Physics2DScene.h" />
     <ClInclude Include="Physics\IPhysicsManager.h" />
     <ClInclude Include="Physics\PhysicsManager.h" />

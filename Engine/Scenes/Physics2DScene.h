@@ -207,7 +207,7 @@ public:
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
 
-		std::shared_ptr<SphereColliderComponent> sphereColliderComponent = std::make_shared<SphereColliderComponent>(go, 2.5f, vec3(0.0f, 0.0f, 0.0f));
+		std::shared_ptr<SphereColliderComponent> sphereColliderComponent = std::make_shared<SphereColliderComponent>(go, 2.5f);
 		go->AddComponent(sphereColliderComponent);
 
 		PhysicsManager::ComputeSphereMass(rigidBodyComponent, sphereColliderComponent);

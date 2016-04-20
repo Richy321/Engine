@@ -197,12 +197,6 @@ namespace MultiplayerArena
 			networking::ClientNetworkManager::GetInstance()->UpdateComms();
 		}
 
-
-		virtual void OnPhysicsUpdate() override
-		{
-		
-		}
-
 		void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 		{
 			SceneManager::notifyProcessNormalKeys(key, x, y);

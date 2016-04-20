@@ -28,6 +28,25 @@ void SceneManager::Initialise()
 	timer->Start();
 }
 
+void SceneManager::OnPhysicsStep()
+{
+	//Generate contact info
+
+	//Integrate forces
+
+	//Initialise collisions
+
+	//Integrate velocities
+
+	//Correct positions (floating point errors)
+
+	//Reset forces
+
+	//Call specific physics GO functions
+	for (std::shared_ptr<GameObject>& go : gameObjectManager)
+		go->UpdatePhysics(physicsTimeStep);
+}
+
 void SceneManager::notifyBeginFrame()
 {
 	timer->Update();
@@ -41,9 +60,7 @@ void SceneManager::notifyBeginFrame()
 	clamp(physicsAccumulator, 0.0, 0.1);
 	while (physicsAccumulator >= physicsTimeStep)
 	{
-		for (std::shared_ptr<GameObject>& go : gameObjectManager)
-			go->UpdatePhysics(elapsedTime);
-		OnPhysicsUpdate();
+		OnPhysicsStep();
 		physicsAccumulator -= physicsTimeStep;
 	}
 

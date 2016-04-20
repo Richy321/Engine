@@ -191,7 +191,7 @@ namespace Core
 			world = glm::scale(world, scale);
 		}
 
-		#pragma endregion 
+#pragma endregion 
 	};
 }
 

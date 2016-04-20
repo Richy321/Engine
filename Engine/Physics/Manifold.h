@@ -26,5 +26,12 @@ public:
 	float df;
 	float sf;
 
+
+	void Solve()
+	{
+		
+	}
+
+
 };
 

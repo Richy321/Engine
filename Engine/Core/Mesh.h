@@ -283,7 +283,7 @@ namespace Core
 			}
 			center /= vertices.size();
 
-			return BoundingSphere(maxRadius, center);
+			return BoundingSphere(maxRadius);
 		}
 		
 	};

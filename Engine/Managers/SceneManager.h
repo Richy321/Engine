@@ -46,7 +46,7 @@ namespace Managers
 		virtual void Initialise() override;
 
 		virtual void OnUpdate(float deltaTime) {};
-		virtual void OnPhysicsUpdate() {};
+		virtual void OnPhysicsStep();
 		virtual void OnCommsUpdate(float deltaTime) {};
 
 		virtual void notifyBeginFrame() override;

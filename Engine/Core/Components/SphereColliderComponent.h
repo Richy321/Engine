@@ -18,10 +18,9 @@ namespace Core
 		{
 		}
 
-		SphereColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, float radius, glm::vec3 position) : IComponent(gameObj)
+		SphereColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, float radius) : IComponent(gameObj)
 		{
 			boundingSphere.radius = radius;
-			boundingSphere.position = position;
 		}
 
 		void Update(float deltaTime) override

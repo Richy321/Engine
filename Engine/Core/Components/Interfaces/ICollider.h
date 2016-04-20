@@ -11,7 +11,8 @@ namespace Core
 		enum ColliderType
 		{
 			SphereCollider,
-			AABBCollider
+			PolygonCollider,
+			Count
 		};
 
 		virtual ColliderType GetColliderType() = 0;

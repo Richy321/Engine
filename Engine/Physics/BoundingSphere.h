@@ -9,10 +9,9 @@ public:
 	{
 	}
 
-	BoundingSphere(float radius, glm::vec3 position)
+	BoundingSphere(float radius)
 	{
 		this->radius = radius;
-		this->position = position;
 	}
 
 	~BoundingSphere()
@@ -20,6 +19,5 @@ public:
 	}
 
 	float radius;
-	glm::vec3 position;
 };
 
