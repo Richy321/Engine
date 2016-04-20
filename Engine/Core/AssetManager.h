@@ -7,6 +7,7 @@
 #include "IAssetManager.h"
 #include "Components/MeshComponent.h"
 #include "IcoSphereCreator.h"
+#include "../Dependencies/glm/gtc/random.hpp"
 
 using namespace glm;
 
@@ -359,9 +360,113 @@ namespace Core
 			return mesh;
 		}
 
-		std::shared_ptr<Mesh> CreateRandomPolygonPrimitive() const
+		std::shared_ptr<Mesh> CreateRandomPolygonPrimitive(int minVertexCount, int maxVertexCount, float sizeRange) const
 		{
-			assert(true);
+			const int MaxPolyVertexCount = 64;
+			const float EPSILON = 0.0001f;
+
+			assert(minVertexCount > 2 && maxVertexCount > 2);
+
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
+
+			std::vector<vec2> verts;
+
+			int vertexCount = linearRand(minVertexCount, maxVertexCount);
+			for (int i = 0; i < vertexCount; i++)
+			{
+				verts.push_back(vec2(linearRand(-sizeRange, sizeRange), linearRand(-sizeRange, sizeRange)));
+			}
+
+			// Find the right most point on the hull
+			int32 rightMost = 0;
+			float highestXCoord = verts[0].x;
+			for (uint32 i = 1; i < vertexCount; ++i)
+			{
+				float x = verts[i].x;
+				if (x > highestXCoord)
+				{
+					highestXCoord = x;
+					rightMost = i;
+				}
+
+				// If matching x then take farthest negative y
+				else if (x == highestXCoord)
+					if (verts[i].y < verts[rightMost].y)
+						rightMost = i;
+			}
+
+
+			int32 hull[MaxPolyVertexCount];
+			int32 outCount = 0;
+			int32 indexHull = rightMost;
+
+			for (;;)
+			{
+				hull[outCount] = indexHull;
+
+				// Search for next index that wraps around the hull
+				// by computing cross products to find the most counter-clockwise
+				// vertex in the set, given the previous hull index
+				int32 nextHullIndex = 0;
+				for (int32 i = 1; i < (int32)vertexCount; ++i)
+				{
+					// Skip if same coordinate as we need three unique
+					// points in the set to perform a cross product
+					if (nextHullIndex == indexHull)
+					{
+						nextHullIndex = i;
+						continue;
+					}
+
+					// Cross every set of three unique vertices
+					// Record each counter clockwise third vertex and add
+					// to the output hull
+					// See : http://www.oocities.org/pcgpe/math2d.html
+					vec2 e1 = verts[nextHullIndex] - verts[hull[outCount]];
+					vec2 e2 = verts[i] - verts[hull[outCount]];
+					float c = Utils::CrossVec2(e1, e2);
+					if (c < 0.0f)
+						nextHullIndex = i;
+
+					// Cross product is zero then e vectors are on same line
+					// therefor want to record vertex farthest along that line
+					if (c == 0.0f && Utils::Len2Vec2(e2) > Utils::Len2Vec2(e1))
+						nextHullIndex = i;
+				}
+
+				++outCount;
+				indexHull = nextHullIndex;
+
+				// Conclude algorithm upon wrap-around
+				if (nextHullIndex == rightMost)
+				{
+					break;
+				}
+			}
+
+			for (int i = 0; i < verts.size(); i++)
+				mesh->vertices.push_back(vec3(verts[hull[i]], 0.0f));
+
+			// Compute face normals
+			for (uint32 i1 = 0; i1 < mesh->vertices.size(); ++i1)
+			{
+				uint32 i2 = i1 + 1 < mesh->vertices.size() ? i1 + 1 : 0;
+				vec3 face = mesh->vertices[i2] - mesh->vertices[i1];
+
+				// Ensure no zero-length edges, because that's bad
+				assert(Utils::Len2Vec2(vec2(face.x, face.y)) > EPSILON * EPSILON);
+
+				// Calculate normal with 2D cross product between vector and scalar
+				mesh->normals.push_back(vec3(face.y, -face.x, 0.0f));
+				mesh->normals[i1] = normalize(mesh->normals[i1]);
+			}
+
+			mesh->BuildAndBindVertexPositionColorBuffer();
+			mesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
+			mesh->mode  = GL_LINE_LOOP;
+			mesh->renderType = Mesh::Coloured;
+
+			return mesh;
 		}
 
 		std::shared_ptr<Mesh> CreateQuadPrimitiveAdv(float width, float depth) const
@@ -567,10 +672,10 @@ namespace Core
 			return quadMesh;
 		}
 
-		std::shared_ptr<MeshComponent> CreateRandomPolygonPrimitiveMeshComponent() const
+		std::shared_ptr<MeshComponent> CreateRandomPolygonPrimitiveMeshComponent(float polyCountMin, float polyCountMax, float size) const
 		{
 			std::shared_ptr<MeshComponent> mesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
-			mesh->AddRootMesh(CreateRandomPolygonPrimitive());
+			mesh->AddRootMesh(CreateRandomPolygonPrimitive(polyCountMin, polyCountMax, size));
 			return mesh;
 		}
 

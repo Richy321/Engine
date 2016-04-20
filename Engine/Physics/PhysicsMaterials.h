@@ -1,5 +1,5 @@
 #pragma once
-#include "Physics/PhysicsMaterial.h"
+#include "PhysicsMaterial.h"
 
 namespace PhysicsMaterials
 {

@@ -11,7 +11,7 @@ public:
 
 	RigidBody2DComponent(std::weak_ptr<Core::IGameObject> gameObj) : IPhysicsComponent(gameObj)
 	{
-
+		physicsMaterial = std::make_shared<PhysicsMaterial>(0.3f, 0.2f);
 	}
 
 	~RigidBody2DComponent()

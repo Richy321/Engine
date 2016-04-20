@@ -101,12 +101,16 @@ public:
 		InitialiseTextures();
 		InitialiseCamera();
 
+		std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject();
+		poly->Translate(30.0f, 0.0f, 0.0f);
+		gameObjectManager.push_back(poly);
+		
 		std::shared_ptr<GameObject> floor2 = std::make_shared<GameObject>();
 		floor2->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
 		floor2->Translate(0, floorWidth*0.5f, -floorWidth*0.5f);
 		floor2->RotateX(glm::radians(90.0f));
 		gameObjectManager.push_back(floor2);
-
+		
 		std::shared_ptr<GameObject> square = std::make_shared<GameObject>();
 		square->AddComponent(AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(5.0f, 5.0f));
 		gameObjectManager.push_back(square);
@@ -175,7 +179,6 @@ public:
 		SceneManager::notifyDisplayFrame();
 	}
 
-
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
 		SceneManager::notifyProcessNormalKeys(key, x, y);
@@ -196,7 +199,7 @@ public:
 		//	camera2D->OnMouseMove(deltaX, deltaY);
 	}
 
-	std::shared_ptr<GameObject> CreateCirclePhysicsObject()
+	std::shared_ptr<GameObject> CreateCirclePhysicsObject() const
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5, 32));
@@ -212,10 +215,10 @@ public:
 		return go;
 	}
 
-	std::shared_ptr<GameObject> CreatePolygonPhysicsObject()
+	std::shared_ptr<GameObject> CreatePolygonPhysicsObject() const
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
-		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateRandomPolygonPrimitiveMeshComponent();
+		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateRandomPolygonPrimitiveMeshComponent(3,6, 2.5f);
 		go->AddComponent(polygonMesh);
 
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
@@ -224,11 +227,13 @@ public:
 		std::shared_ptr<BoxColliderComponent> boxColliderComponent = std::make_shared<BoxColliderComponent>(go, polygonMesh->rootMeshNode->meshes[0]->ComputeAABB());
 		go->AddComponent(boxColliderComponent);
 
+
 		PhysicsManager::ComputePolygonMass(rigidBodyComponent, polygonMesh->rootMeshNode->meshes[0]->vertices);
+
+		//ComputePolygonMass centers vertices around the centroid, need to re-bind
+		polygonMesh->rootMeshNode->meshes[0]->BuildAndBindVertexPositionColorBuffer();
 
 		return go;
 	}
-
-
 };
 

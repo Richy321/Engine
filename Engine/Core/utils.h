@@ -3,7 +3,7 @@
 #include "../Dependencies/glew/glew.h"
 #include <memory>
 #include "Networking/Address.h"
-
+#include "../Dependencies/glm/vec2.hpp"
 #define Check_GLError() Utils::CheckGLError(__FILE__,__LINE__)
 
 namespace Core
@@ -47,5 +47,16 @@ namespace Core
 				return left->toString() < right->toString();
 			}
 		};
+
+
+		static float CrossVec2(const glm::vec2& a, const glm::vec2& b)
+		{
+			return  a.x * b.y - a.y * b.x;
+		}
+
+		static float Len2Vec2(const glm::vec2& v)
+		{
+			return v.x * v.x + v.y * v.y;
+		}
 	};
 }

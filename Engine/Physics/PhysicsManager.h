@@ -1,14 +1,11 @@
 #pragma once
-#define _USE_MATH_DEFINES
 
 #include <memory>
-#include "RigidBody2DComponent.h""
+#include "RigidBody2DComponent.h"
 #include "../Core/Components/SphereColliderComponent.h"
-#include <math.h>
-#include "../Dependencies/glm/detail/func_geometric.inl"
 #include "IPhysicsManager.h"
 
-
+const float M_PI = 3.14159f;
 using namespace glm;
 
 namespace Core
@@ -29,13 +26,13 @@ namespace Core
 		static void ComputeSphereMass(std::shared_ptr<RigidBody2DComponent>& body, std::shared_ptr<SphereColliderComponent>& sphere)
 		{
 			float density = body->physicsMaterial->density;
-			body->mass = M_PI * sphere->radius * sphere->radius * density;
+			body->mass = M_PI * sphere->boundingSphere.radius * sphere->boundingSphere.radius * density;
 			body->inverseMass = (body->mass) ? 1.0f / body->mass : 0.0f;
-			body->inertia = body->mass * sphere->radius * sphere->radius;
+			body->inertia = body->mass * sphere->boundingSphere.radius * sphere->boundingSphere.radius;
 			body->inverseInertia = (body->inertia) ? 1.0f / body->inertia : 0.0f;
 		}
 
-		static void ComputePolygonMass(std::shared_ptr<RigidBody2DComponent> body, std::vector<glm::vec3> vertices)
+		static void ComputePolygonMass(std::shared_ptr<RigidBody2DComponent>& body, std::vector<glm::vec3>& vertices)
 		{
 			float density = body->physicsMaterial->density;
 			// Calculate centroid and moment of interia
@@ -70,7 +67,7 @@ namespace Core
 			// for the polygon in model space)
 			// Not really necessary, but I like doing this anyway
 			for (uint32 i = 0; i < vertices.size(); ++i)
-				vertices[i] -= c;
+				vertices[i] -= vec3(c, 0.0f);
 
 			body->mass = density * area;
 			body->inverseMass = (body->mass) ? 1.0f / body->mass : 0.0f;
