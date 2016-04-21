@@ -191,6 +191,18 @@ namespace Core
 			world = glm::scale(world, scale);
 		}
 
+
+		void SetOrientation2D(float rad) override
+		{
+			float c = std::cos(rad);
+			float s = std::sin(rad);
+
+			world[0][0] = c; 
+			world[0][1] = -s;
+			world[1][0] = s;
+			world[1][1] = c;
+		}
+
 #pragma endregion 
 	};
 }

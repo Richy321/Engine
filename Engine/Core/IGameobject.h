@@ -25,6 +25,8 @@ namespace Core
 		virtual void Scale(float x, float y, float z) = 0;
 		virtual void Scale(vec3 scale) = 0;
 
+		virtual void SetOrientation2D(float rad) = 0;
+
 		virtual std::vector<std::shared_ptr<IComponent>> GetComponentsOfType(IComponent::ComponentTypes type) = 0;
 		virtual std::shared_ptr<IComponent> GetComponentByID(int id) = 0;
 		virtual std::shared_ptr<IComponent> GetComponentByType(IComponent::ComponentTypes type) = 0;

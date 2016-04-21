@@ -443,6 +443,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
   <ItemGroup>
     <ClInclude Include="Core\Components\BoxColliderComponent.h" />
     <ClInclude Include="Core\Components\Interfaces\ICollider.h" />
+    <ClInclude Include="IManifold.h" />
     <ClInclude Include="Physics\AABB.h" />
     <ClInclude Include="Physics\BoundingSphere.h" />
     <ClInclude Include="Physics\Manifold.h" />

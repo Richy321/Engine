@@ -8,9 +8,12 @@
 
 namespace Core
 {
+	const float EPSILON = 0.0001f;
+
 	class Utils
 	{
 	public:
+		
 		static void CheckGLError(const char *file, int line)
 		{
 			GLenum err(glGetError());
@@ -54,11 +57,15 @@ namespace Core
 			return  a.x * b.y - a.y * b.x;
 		}
 
+		static glm::vec2 CrossVec2(float a, const glm::vec2& v)
+		{
+			return glm::vec2(-a * v.y, a * v.x);
+		}
+
 		static float Len2Vec2(const glm::vec2& v)
 		{
 			return v.x * v.x + v.y * v.y;
 		}
-
 
 		static float DotVec2(const glm::vec2& a, const glm::vec2& b)
 		{
@@ -76,6 +83,11 @@ namespace Core
 			const float k_biasRelative = 0.95f;
 			const float k_biasAbsolute = 0.01f;
 			return a >= b * k_biasRelative + a * k_biasAbsolute;
+		}
+
+		static bool EqualWithEpsilon(float a, float b)
+		{
+			return std::abs(a - b) <= EPSILON;
 		}
 	};
 }

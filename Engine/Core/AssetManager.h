@@ -672,7 +672,7 @@ namespace Core
 			return quadMesh;
 		}
 
-		std::shared_ptr<MeshComponent> CreateRandomPolygonPrimitiveMeshComponent(float polyCountMin, float polyCountMax, float size) const
+		std::shared_ptr<MeshComponent> CreateRandomPolygonPrimitiveMeshComponent(int polyCountMin, int polyCountMax, float size) const
 		{
 			std::shared_ptr<MeshComponent> mesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
 			mesh->AddRootMesh(CreateRandomPolygonPrimitive(polyCountMin, polyCountMax, size));

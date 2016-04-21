@@ -35,7 +35,7 @@ namespace Managers
 		int mouseDeltaX;
 		int mouseDeltaY;
 		bool paused = false;
-		const float physicsTimeStep = 1.0f / 60.0f;
+		const float fixedTimeStep = 1.0f / 60.0f;
 
 		std::mutex mutexGameObjectManager;
 	public:
@@ -46,7 +46,7 @@ namespace Managers
 		virtual void Initialise() override;
 
 		virtual void OnUpdate(float deltaTime) {};
-		virtual void OnPhysicsStep();
+		virtual void OnFixedTimeStep();
 		virtual void OnCommsUpdate(float deltaTime) {};
 
 		virtual void notifyBeginFrame() override;

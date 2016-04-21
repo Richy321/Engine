@@ -4,6 +4,7 @@
 #include "../Core/Components/SphereColliderComponent.h"
 #include "../Physics/PhysicsManager.h"
 #include "../Core/Components/BoxColliderComponent.h"
+#include "../Physics/Manifold.h"
 
 using namespace Core;
 
@@ -17,8 +18,13 @@ public:
 	std::vector<std::shared_ptr<SpotLight>> spotLights;
 	std::vector<std::shared_ptr<PointLight>> pointLights;
 
+	const f32 gravityScale = 5.0f;
+	const vec2 gravity;
 
-	std::vector<std::shared_ptr<GameObject>> physicsObjects;
+	std::vector<std::shared_ptr<RigidBody2DComponent>> physicsObjects;
+
+	std::vector<std::shared_ptr<Manifold>> contacts;
+
 
 	bool isUseCamera3D = false;
 
@@ -29,8 +35,10 @@ public:
 
 	float m_scale = 0.0f;
 
+	const static int physicsIterations = 10;
 
-	Physics2DScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
+
+	Physics2DScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo), gravity(0.0f, 10.0f * gravityScale)
 	{
 		if(isUseCamera3D)
 			camera = std::make_shared<CameraFPS>();
@@ -150,7 +158,83 @@ public:
 
 	}
 
-	virtual void notifyDisplayFrame() override
+	void GenerateCollisionManifolds()
+	{
+		//Generate contact info
+		contacts.clear();
+		for (size_t i = 0; i < physicsObjects.size(); i++)
+		{
+			std::shared_ptr<RigidBody2DComponent> bodyA = physicsObjects[i];
+
+			for (size_t j = i + 1; j < physicsObjects.size(); ++j)
+			{
+				std::shared_ptr<RigidBody2DComponent> bodyB = physicsObjects[j];
+
+				std::shared_ptr<Manifold> manifold = std::make_shared<Manifold>(bodyA, bodyB);
+
+				manifold->Solve();
+				if (manifold->contacts.size() > 0)
+					contacts.push_back(manifold);
+			}
+		}
+	}
+
+	void IntegrateForces(std::shared_ptr<RigidBody2DComponent>& body, float dt)
+	{
+		if (body->inverseMass == 0.0f)
+			return;
+
+		body->velocity += (body->force * body->inverseMass + gravity) * (dt * 0.5f); //apply current forces and gravity
+		body->angularVelocity += body->torque * body->inverseInertia * (dt *0.5f);
+	}
+
+	void IntegrateVelocity(std::shared_ptr<RigidBody2DComponent>& body, float dt)
+	{
+		if (body->inverseMass == 0.0f)
+			return;
+
+		body->GetParentGameObject().lock()->Translate(vec3(body->velocity * dt, 0.0f));
+		body->orient += body->angularVelocity * dt;
+		body->GetParentGameObject().lock()->SetOrientation2D(body->orient);
+		IntegrateForces(body, dt);
+		
+	}
+
+	void OnFixedTimeStep() override
+	{
+		GenerateCollisionManifolds();
+
+		//Integrate forces
+		for (size_t i = 0; i < physicsObjects.size(); i++)
+			IntegrateForces(physicsObjects[i], fixedTimeStep);
+
+		//Initialise collisions
+		for (size_t i = 0; i < contacts.size(); i++)
+			contacts[i]->Initialise(fixedTimeStep, gravity);
+
+		//Solve collisions
+		for (size_t j = 0; j < physicsIterations; ++j)
+			for (size_t i = 0; i < contacts.size(); ++i)
+				contacts[i]->ApplyImpulse();
+
+		//Integrate velocities
+		for (size_t i = 0; i < physicsObjects.size(); ++i)
+			IntegrateVelocity(physicsObjects[i], fixedTimeStep);
+
+		//Correct positions (due to floating point errors)
+		for (size_t i = 0; i < contacts.size(); i++)
+			contacts[i]->PositionalCorrection();
+
+		//Reset forces
+		for (size_t i = 0; i < physicsObjects.size(); ++i)
+		{
+			physicsObjects[i]->force.x = 0.0f;
+			physicsObjects[i]->force.y = 0.0f;
+			physicsObjects[i]->torque = 0.0f;
+		}
+	}
+
+	void notifyDisplayFrame() override
 	{
 		Check_GLError();
 		vec3 cameraPos;
@@ -189,7 +273,7 @@ public:
 			camera2D->OnKey(key, x, y);
 	}
 
-	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
+	void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
 	{
 		if (isUseCamera3D)
 		{
@@ -199,8 +283,7 @@ public:
 		//	camera2D->OnMouseMove(deltaX, deltaY);
 	}
 
-	std::shared_ptr<GameObject> CreateCirclePhysicsObject() const
-	{
+	std::shared_ptr<GameObject> CreateCirclePhysicsObject()	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5, 32));
 		
@@ -212,10 +295,12 @@ public:
 
 		PhysicsManager::ComputeSphereMass(rigidBodyComponent, sphereColliderComponent);
 
+		physicsObjects.push_back(rigidBodyComponent);
+
 		return go;
 	}
 
-	std::shared_ptr<GameObject> CreatePolygonPhysicsObject() const
+	std::shared_ptr<GameObject> CreatePolygonPhysicsObject()
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateRandomPolygonPrimitiveMeshComponent(3,6, 2.5f);
@@ -232,6 +317,9 @@ public:
 
 		//ComputePolygonMass centers vertices around the centroid, need to re-bind
 		polygonMesh->rootMeshNode->meshes[0]->BuildAndBindVertexPositionColorBuffer();
+
+
+		physicsObjects.push_back(rigidBodyComponent);
 
 		return go;
 	}

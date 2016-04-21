@@ -28,23 +28,11 @@ void SceneManager::Initialise()
 	timer->Start();
 }
 
-void SceneManager::OnPhysicsStep()
+void SceneManager::OnFixedTimeStep()
 {
-	//Generate contact info
-
-	//Integrate forces
-
-	//Initialise collisions
-
-	//Integrate velocities
-
-	//Correct positions (floating point errors)
-
-	//Reset forces
-
 	//Call specific physics GO functions
 	for (std::shared_ptr<GameObject>& go : gameObjectManager)
-		go->UpdatePhysics(physicsTimeStep);
+		go->UpdatePhysics(fixedTimeStep);
 }
 
 void SceneManager::notifyBeginFrame()
@@ -53,15 +41,15 @@ void SceneManager::notifyBeginFrame()
 
 	float elapsedTime = timer->GetElapsedTime();
 
-	static double physicsAccumulator = 0;
-	physicsAccumulator += elapsedTime;
+	static double timeStepAccumulator = 0;
+	timeStepAccumulator += elapsedTime;
 
-	//avoid spiral of death (if physics tick takes a long time, elapsed time will increase endlessly)
-	clamp(physicsAccumulator, 0.0, 0.1);
-	while (physicsAccumulator >= physicsTimeStep)
+	//avoid spiral of death (if fixed timestep tick takes a long time, elapsed time will increase endlessly)
+	clamp(timeStepAccumulator, 0.0, 0.1);
+	while (timeStepAccumulator >= fixedTimeStep)
 	{
-		OnPhysicsStep();
-		physicsAccumulator -= physicsTimeStep;
+		OnFixedTimeStep();
+		timeStepAccumulator -= fixedTimeStep;
 	}
 
 	/* Network Manager updates registered network components on seperate thread
