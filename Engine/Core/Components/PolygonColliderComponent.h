@@ -10,13 +10,14 @@ namespace Core
 	public:
 		BoundingPolygon polygonCollider;
 
-		PolygonColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, BoundingPolygon polygonCollider) : IComponent(gameObj), polygonCollider(polygonCollider)
+		PolygonColliderComponent(std::weak_ptr<IGameObject> gameObj, BoundingPolygon polygonCollider) : IComponent(gameObj), polygonCollider(polygonCollider)
 		{
 		}
 
-		PolygonColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, std::vector<glm::vec2> verts) : IComponent(gameObj)
+		PolygonColliderComponent(std::weak_ptr<IGameObject> gameObj, std::vector<vec2> verts, std::vector<vec2> norms): IComponent(gameObj)
 		{
 			polygonCollider.vertices = verts;
+			polygonCollider.normals = norms;
 		}
 
 		~PolygonColliderComponent()

@@ -5,7 +5,6 @@
 #include "../Core/Components/SphereColliderComponent.h"
 #include "IPhysicsManager.h"
 
-const float M_PI = 3.14159f;
 using namespace glm;
 
 namespace Core
@@ -48,7 +47,7 @@ namespace Core
 				uint32 i2 = i1 + 1 < vertices.size() ? i1 + 1 : 0;
 				vec2 p2(vertices[i2]);
 
-				float D = p1.x * p2.y - p1.y * p2.x; //vec2 'cross'
+				float D = Utils::CrossVec2(p1, p2); //vec2 'cross'
 				float triangleArea = 0.5f * D;
 
 				area += triangleArea;

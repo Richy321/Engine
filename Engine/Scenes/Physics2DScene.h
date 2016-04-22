@@ -18,7 +18,7 @@ public:
 	std::vector<std::shared_ptr<SpotLight>> spotLights;
 	std::vector<std::shared_ptr<PointLight>> pointLights;
 
-	const f32 gravityScale = 5.0f;
+	const float gravityScale = 5.0f;
 	const vec2 gravity;
 
 	std::vector<std::shared_ptr<RigidBody2DComponent>> physicsObjects;
@@ -38,7 +38,7 @@ public:
 	const static int physicsIterations = 10;
 
 
-	Physics2DScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo), gravity(0.0f, 10.0f * gravityScale)
+	Physics2DScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo), gravity(0.0f, -10.0f * gravityScale)
 	{
 		if(isUseCamera3D)
 			camera = std::make_shared<CameraFPS>();
@@ -109,41 +109,18 @@ public:
 		InitialiseTextures();
 		InitialiseCamera();
 
-		std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject();
+		/*std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject();
 		poly->Translate(30.0f, 0.0f, 0.0f);
-		gameObjectManager.push_back(poly);
+		gameObjectManager.push_back(poly);*/
 		
-		std::shared_ptr<GameObject> floor2 = std::make_shared<GameObject>();
-		floor2->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(floorWidth, floorDepth, defaultCheckeredTexture));
-		floor2->Translate(0, floorWidth*0.5f, -floorWidth*0.5f);
-		floor2->RotateX(glm::radians(90.0f));
-		gameObjectManager.push_back(floor2);
 		
-		std::shared_ptr<GameObject> square = std::make_shared<GameObject>();
-		square->AddComponent(AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(5.0f, 5.0f));
-		gameObjectManager.push_back(square);
-
-		std::shared_ptr<GameObject> square2 = std::make_shared<GameObject>();
-		square2->AddComponent(AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(5.0f, 5.0f));
-		square2->Translate(10.0f, 0.0f, 0.0f);
-		gameObjectManager.push_back(square2);
+		std::shared_ptr<GameObject> floor = CreateFloorPhysicsObject();
+		floor->Translate(0.0f, -5.0f, 0.0f);
+		gameObjectManager.push_back(floor);
 
 		std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject();
 		circle->Translate(20.0f, 0.0f, 0.0f);
 		gameObjectManager.push_back(circle);
-
-		for (int i = 0; i < 1; i++)
-		{
-			//std::shared_ptr<GameObject> box = std::make_shared<GameObject>();
-			//box->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(100,100, defaultCheckeredTexture));
-			//gameObjectManager.push_back(box);
-			//physicsObjects.push_back(box);
-
-			//std::shared_ptr<GameObject> sphere = std::make_shared<GameObject>();
-			//sphere->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(1.0f, 8));
-			//gameObjectManager.push_back(sphere);
-			//physicsObjects.push_back(sphere);
-		}
 	}
 
 	void OnUpdate(float deltaTime) override
@@ -195,7 +172,7 @@ public:
 
 		body->GetParentGameObject().lock()->Translate(vec3(body->velocity * dt, 0.0f));
 		body->orient += body->angularVelocity * dt;
-		body->GetParentGameObject().lock()->SetOrientation2D(body->orient);
+		//body->GetParentGameObject().lock()->SetOrientation2D(body->orient);
 		IntegrateForces(body, dt);
 		
 	}
@@ -283,9 +260,10 @@ public:
 		//	camera2D->OnMouseMove(deltaX, deltaY);
 	}
 
-	std::shared_ptr<GameObject> CreateCirclePhysicsObject()	{
+	std::shared_ptr<GameObject> CreateCirclePhysicsObject()	
+	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
-		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5, 32));
+		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5f, 32));
 		
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
@@ -309,18 +287,55 @@ public:
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
 
-		std::shared_ptr<BoxColliderComponent> boxColliderComponent = std::make_shared<BoxColliderComponent>(go, polygonMesh->rootMeshNode->meshes[0]->ComputeAABB());
-		go->AddComponent(boxColliderComponent);
+		std::vector<vec2> verts2D;
+		std::vector<vec2> norms2D;
 
+		for(auto i : polygonMesh->rootMeshNode->meshes[0]->vertices)
+			verts2D.push_back(vec2(i));
+
+		for (auto i : polygonMesh->rootMeshNode->meshes[0]->normals)
+			norms2D.push_back(vec2(i));
+
+		std::shared_ptr<PolygonColliderComponent> polyColliderComponent = std::make_shared<PolygonColliderComponent>(go, verts2D, norms2D);
+		go->AddComponent(polyColliderComponent);
 
 		PhysicsManager::ComputePolygonMass(rigidBodyComponent, polygonMesh->rootMeshNode->meshes[0]->vertices);
 
 		//ComputePolygonMass centers vertices around the centroid, need to re-bind
 		polygonMesh->rootMeshNode->meshes[0]->BuildAndBindVertexPositionColorBuffer();
 
-
 		physicsObjects.push_back(rigidBodyComponent);
 
+		return go;
+	}
+
+	std::shared_ptr<GameObject> CreateFloorPhysicsObject()
+	{
+		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
+		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(30.0f, 2.0f);
+		go->AddComponent(polygonMesh);
+		go->Translate(15.0f, -10.0f, 0.0f);
+		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
+		go->AddComponent(rigidBodyComponent);
+		
+		std::vector<vec2> verts2D;
+		std::vector<vec2> norms2D;
+
+		for (auto i : polygonMesh->rootMeshNode->meshes[0]->vertices)
+			verts2D.push_back(vec2(i));
+
+		for (auto i : polygonMesh->rootMeshNode->meshes[0]->normals)
+			norms2D.push_back(vec2(i));
+
+		std::shared_ptr<PolygonColliderComponent> polyColliderComponent = std::make_shared<PolygonColliderComponent>(go, verts2D, norms2D);
+		go->AddComponent(polyColliderComponent);
+		
+		
+		physicsObjects.push_back(rigidBodyComponent);
+		
+
+		rigidBodyComponent->SetStatic();
+		
 		return go;
 	}
 };

@@ -56,7 +56,6 @@ public:
 			vec2 rv = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
 				bodyA->velocity - Utils::CrossVec2(bodyA->angularVelocity, ra);
 
-
 			//if only gravity: collide without restitution
 			if (Utils::Len2Vec2(rv) < Utils::Len2Vec2(dt * gravity) + EPSILON)
 				e = 0.0f;

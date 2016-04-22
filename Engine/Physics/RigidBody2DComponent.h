@@ -2,6 +2,7 @@
 #include "../Core/Components/Interfaces/IPhysicsComponent.h"
 #include "../Dependencies/glm/detail/type_vec2.hpp"
 #include "PhysicsMaterial.h"
+#include "../Core/Utils.h"
 
 using namespace Core;
 
@@ -11,7 +12,7 @@ public:
 
 	RigidBody2DComponent(std::weak_ptr<Core::IGameObject> gameObj) : IPhysicsComponent(gameObj)
 	{
-		physicsMaterial = std::make_shared<PhysicsMaterial>(0.3f, 0.2f);
+		Reset();
 	}
 
 	~RigidBody2DComponent()
@@ -40,7 +41,7 @@ public:
 
 	float staticFriction;
 	float dynamicFriction;
-	
+
 	std::shared_ptr<PhysicsMaterial> physicsMaterial;
 
 	float gravityScale; //needed?
@@ -49,10 +50,10 @@ public:
 	{
 
 	}
-	
+
 	void Update(float deltaTime)
 	{
-		
+
 	}
 
 	void ApplyForce(const glm::vec2& f)
@@ -63,7 +64,7 @@ public:
 	void ApplyImpulse(const glm::vec2& impulse, const glm::vec2& contactVector)
 	{
 		velocity += inverseMass * impulse;
-		//TODO set angularVelocity
+		angularVelocity += inverseInertia * Utils::CrossVec2(contactVector, impulse);
 	}
 
 	void SetStatic()
@@ -72,6 +73,21 @@ public:
 		mass = 0.0f;
 		inverseInertia = 0.0f;
 		inertia = 0.0f;
+	}
+
+	void Reset()
+	{
+		velocity.x = 0.0f;
+		velocity.y = 0.0f;
+		angularVelocity = 0;
+		torque = 0;
+		orient = glm::linearRand(-M_PI, M_PI);
+		force.x = 0.0f;
+		force.y = 0.0f;
+		staticFriction = 0.5f;
+		dynamicFriction = 0.3f;
+		
+		physicsMaterial = std::make_shared<PhysicsMaterial>(0.3f, 0.2f);
 	}
 
 };

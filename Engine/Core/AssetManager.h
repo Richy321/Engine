@@ -312,12 +312,19 @@ namespace Core
 
 			quadMesh->vertices.push_back(vec3(-halfWidth, -halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(1, 0, 0, 1));
+			quadMesh->normals.push_back(vec3(0.0f, -1.0f, 0.0f));
+			
 			quadMesh->vertices.push_back(vec3(-halfWidth, halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 0, 0, 1));
+			quadMesh->normals.push_back(vec3(-1.0f, 0.0f, 0.0f));
+
 			quadMesh->vertices.push_back(vec3(halfWidth, -halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 1, 0, 1));
+			quadMesh->normals.push_back(vec3(1.0f, 0.0f, 0.0f));
+
 			quadMesh->vertices.push_back(vec3(halfWidth, halfHeight, 0.0));
 			quadMesh->colours.push_back(vec4(0, 0, 1, 1));
+			quadMesh->normals.push_back(vec3(0.0f, 1.0f, 0.0f));
 
 			quadMesh->BuildAndBindVertexPositionColorBuffer();
 			quadMesh->SetProgram(Managers::ShaderManager::GetShader("basicColor"));
@@ -678,7 +685,6 @@ namespace Core
 			mesh->AddRootMesh(CreateRandomPolygonPrimitive(polyCountMin, polyCountMax, size));
 			return mesh;
 		}
-
 
 		std::shared_ptr<MeshComponent> CreateIcospherePrimitiveMeshComponent(int recursionLevel = 1)
 		{
