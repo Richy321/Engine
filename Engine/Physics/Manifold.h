@@ -19,11 +19,17 @@ namespace Collision
 }
 class Manifold : public IManifold
 {
+
+	std::shared_ptr<Mesh> mesh;
+
 public:
 	Manifold(std::shared_ptr<RigidBody2DComponent> bodyA, std::shared_ptr<RigidBody2DComponent> bodyB)
 	{
 		this->bodyA = bodyA;
 		this->bodyB = bodyB;
+		mesh = std::make_shared<Mesh>(&AssetManager::GetInstance());
+		mesh->mode = GL_LINES;
+		mesh->renderType = Mesh::Coloured;
 	}
 
 	~Manifold()
@@ -60,6 +66,8 @@ public:
 			if (Utils::Len2Vec2(rv) < Utils::Len2Vec2(dt * gravity) + EPSILON)
 				e = 0.0f;
 		}
+
+		InitialiseMesh();
 	}
 
 	void ApplyImpulse() override
@@ -147,6 +155,30 @@ public:
 		bodyA->velocity.y = 0;
 		bodyB->velocity.x = 0;
 		bodyB->velocity.y = 0;
+	}
+
+
+	void InitialiseMesh()
+	{
+		for (auto v : contacts)
+		{
+			mesh->vertices.push_back(vec3(v.x, v.y, 0.0f));
+			mesh->colours.push_back(vec4(1.0f, 1.0f, 0.0f, 1.0f));
+
+			vec2 projectedAlongNorm = v + (normal * 2.0f);
+
+
+			mesh->vertices.push_back(vec3(projectedAlongNorm.x, projectedAlongNorm.y, 0.0f));
+			mesh->colours.push_back(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+
+		if(contacts.size() >0)
+			mesh->BuildAndBindVertexPositionColorBuffer();
+	}
+
+	void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld)
+	{
+		mesh->Render(mainCamera, toWorld);
 	}
 };
 

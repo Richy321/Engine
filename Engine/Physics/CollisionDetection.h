@@ -60,8 +60,6 @@ namespace Collision
 
 	void CircletoPolygon(std::shared_ptr<IManifold>& m, std::shared_ptr<ICollider>& colliderA, std::shared_ptr<ICollider>& colliderB)
 	{
-		const float EPSILON = 0.0001f;
-
 		std::shared_ptr<SphereColliderComponent> sphereA = std::dynamic_pointer_cast<SphereColliderComponent>(colliderA);
 		std::shared_ptr<PolygonColliderComponent> polyB = std::dynamic_pointer_cast<PolygonColliderComponent>(colliderB);
 		std::shared_ptr<IGameObject> bodyAGO = sphereA->GetParentGameObject().lock();
@@ -70,11 +68,13 @@ namespace Collision
 		//transform circle center to polygon model space
 		glm::vec2 center = vec2(bodyAGO->GetPosition());
 		glm::vec2 bPos = vec2(bodyBGO->GetPosition());
-		glm::vec2 aPos = vec2(bodyBGO->GetPosition());
+		glm::vec2 aPos = vec2(bodyAGO->GetPosition());
 
-		glm::mat2 mat2x2 = glm::mat2(bodyBGO->GetWorldTransform());
+		glm::mat2 b_transform_mat2 = glm::mat2(bodyBGO->GetWorldTransform());
 
-		center = transpose(mat2x2) * center - vec2(bodyBGO->GetPosition());
+		//m->contacts.clear();
+
+		center = transpose(b_transform_mat2) * center - vec2(bodyBGO->GetPosition());
 
 		// Find edge with minimum penetration
 		// Exact concept as using support points in Polygon vs Polygon
@@ -102,7 +102,7 @@ namespace Collision
 		// Check to see if center is within polygon
 		if (separation < EPSILON)
 		{
-			m->normal = -(mat2x2 * polyB->polygonCollider.normals[faceNormal]);
+			m->normal = -(b_transform_mat2 * polyB->polygonCollider.normals[faceNormal]);
 			m->penetration = sphereA->boundingSphere.radius;
 			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + aPos);
 			return;
@@ -120,11 +120,11 @@ namespace Collision
 				return;
 
 			vec2 n = v1 - center;
-			n = mat2x2 * n;
-			normalize(n);
+			n = b_transform_mat2 * n;
+			n = normalize(n);
 			m->normal = n;
-			v1 = mat2x2 * v1 + bPos;
-			m->contacts.push_back(vec2(v1));
+			v1 = b_transform_mat2 * v1 + bPos;
+			m->contacts.push_back(v1);
 		}
 
 		// Closest to v2
@@ -134,10 +134,10 @@ namespace Collision
 				return;
 
 			vec2 n = v2 - center;
-			v2 = mat2x2 * v2 + bPos;
+			v2 = b_transform_mat2 * v2 + bPos;
 			m->contacts.push_back(v2);
-			n = mat2x2 * n;
-			normalize(n);
+			n = b_transform_mat2 * n;
+			n = normalize(n);
 			m->normal = n;
 		}
 
@@ -148,7 +148,7 @@ namespace Collision
 			if (dot(center - v1, n) > sphereA->boundingSphere.radius)
 				return;
 
-			n = mat2x2 * n;
+			n = b_transform_mat2 * n;
 			m->normal = -n;
 			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + aPos);
 		}
@@ -168,7 +168,7 @@ namespace Collision
 		for (uint32 i = 0; i < polygonCollider->polygonCollider.vertices.size(); ++i)
 		{
 			vec2 v = polygonCollider->polygonCollider.vertices[i];
-			float projection = dot(v, dir);
+			float projection = Utils::DotVec2(v, dir);
 
 			if (projection > bestProjection)
 			{
@@ -189,7 +189,7 @@ namespace Collision
 		std::shared_ptr<IGameObject> bodyBGO = B->GetParentGameObject().lock();
 
 		vec2 bPos = vec2(bodyBGO->GetPosition());
-		vec2 aPos = vec2(bodyBGO->GetPosition());
+		vec2 aPos = vec2(bodyAGO->GetPosition());
 
 		glm::mat2 BTransform = glm::mat2(bodyBGO->GetWorldTransform());
 		glm::mat2 ATransform = glm::mat2(bodyAGO->GetWorldTransform());

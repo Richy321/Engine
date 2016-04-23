@@ -59,7 +59,8 @@ namespace Core
 		void Destroy()
 		{
 			glDeleteVertexArrays(1, &vao);
-			glDeleteBuffers(vbos.size(), &vbos[0]);
+			if(vbos.size() >0)
+				glDeleteBuffers(vbos.size(), &vbos[0]);
 			vbos.clear();
 		}
 

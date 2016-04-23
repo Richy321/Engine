@@ -17,7 +17,6 @@ public:
 	float penetration;
 	glm::vec2 normal;
 	std::vector<glm::vec2> contacts;
-	size_t contactCount;
 
 	float e; //avg restitution
 	float dynamicFriction;

@@ -64,7 +64,7 @@ public:
 	void ApplyImpulse(const glm::vec2& impulse, const glm::vec2& contactVector)
 	{
 		velocity += inverseMass * impulse;
-		angularVelocity += inverseInertia * Utils::CrossVec2(contactVector, impulse);
+		//angularVelocity += inverseInertia * Utils::CrossVec2(contactVector, impulse);
 	}
 
 	void SetStatic()
