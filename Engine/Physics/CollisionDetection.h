@@ -188,12 +188,11 @@ namespace Collision
 		std::shared_ptr<IGameObject> bodyAGO = A->GetParentGameObject().lock();
 		std::shared_ptr<IGameObject> bodyBGO = B->GetParentGameObject().lock();
 
-		vec2 bPos = vec2(bodyBGO->GetPosition());
 		vec2 aPos = vec2(bodyAGO->GetPosition());
-
-		glm::mat2 BTransform = glm::mat2(bodyBGO->GetWorldTransform());
+		vec2 bPos = vec2(bodyBGO->GetPosition());
+		
 		glm::mat2 ATransform = glm::mat2(bodyAGO->GetWorldTransform());
-
+		glm::mat2 BTransform = glm::mat2(bodyBGO->GetWorldTransform());
 
 		for (uint32 i = 0; i < A->polygonCollider.vertices.size(); ++i)
 		{
@@ -216,7 +215,7 @@ namespace Collision
 			v = buT * v;
 
 			// Compute penetration distance (in B's model space)
-			float d = dot(n, s - v);
+			float d = Utils::DotVec2(n, s - v);
 
 			// Store greatest distance
 			if (d > bestDistance)
@@ -334,7 +333,6 @@ namespace Collision
 			referenceIndex = faceA;
 			flip = false;
 		}
-
 		else
 		{
 			RefPoly = polyB;
@@ -351,16 +349,16 @@ namespace Collision
 		//        ^  ->n       ^
 		//      +---c ------posPlane--
 		//  x < | i |\
-		  //      +---+ c-----negPlane--
-	//             \       v
-	//              r
-	//
-	//  r : reference face
-	//  i : incident poly
-	//  c : clipped point
-	//  n : incident normal
+		//      +---+ c-----negPlane--
+		//             \       v
+		//              r
+		//
+		//  r : reference face
+		//  i : incident poly
+		//  c : clipped point
+		//  n : incident normal
 
-	// Setup reference face vertices
+		// Setup reference face vertices
 		std::shared_ptr<IGameObject> incGO = IncPoly->GetParentGameObject().lock();
 		std::shared_ptr<IGameObject> refGO = RefPoly->GetParentGameObject().lock();
 
@@ -376,7 +374,7 @@ namespace Collision
 		v2 = refTransform * v2 + refPos;
 
 		// Calculate reference face side normal in world space
-		vec2 sidePlaneNormal = (v2 - v1);
+		vec2 sidePlaneNormal = v2 - v1;
 		sidePlaneNormal = normalize(sidePlaneNormal);
 
 		// Orthogonalize
@@ -384,9 +382,9 @@ namespace Collision
 
 		// ax + by = c
 		// c is distance from origin
-		float refC = dot(refFaceNormal, v1);
-		float negSide = -dot(sidePlaneNormal, v1);
-		float posSide = dot(sidePlaneNormal, v2);
+		float refC = Utils::DotVec2(refFaceNormal, v1);
+		float negSide = -Utils::DotVec2(sidePlaneNormal, v1);
+		float posSide = Utils::DotVec2(sidePlaneNormal, v2);
 
 		// Clip incident face to reference face side planes
 		if (Clip(-sidePlaneNormal, negSide, incidentFace) < 2)
@@ -395,26 +393,25 @@ namespace Collision
 		if (Clip(sidePlaneNormal, posSide, incidentFace) < 2)
 			return; // Due to floating point error, possible to not have required points
 
-					// Flip
+		// Flip
 		m->normal = flip ? -refFaceNormal : refFaceNormal;
 
 		// Keep points behind reference face
 		uint32 cp = 0; // clipped points behind reference face
-		float separation = dot(refFaceNormal, incidentFace[0]) - refC;
+		float separation = Utils::DotVec2(refFaceNormal, incidentFace[0]) - refC;
 		if (separation <= 0.0f)
 		{
-			m->contacts[cp] = incidentFace[0];
+			m->contacts.push_back(incidentFace[0]);
 			m->penetration = -separation;
 			++cp;
 		}
 		else
 			m->penetration = 0;
 
-		separation = dot(refFaceNormal, incidentFace[1]) - refC;
+		separation = Utils::DotVec2(refFaceNormal, incidentFace[1]) - refC;
 		if (separation <= 0.0f)
 		{
-			m->contacts[cp] = incidentFace[1];
-
+			m->contacts.push_back(incidentFace[1]);
 			m->penetration += -separation;
 			++cp;
 
@@ -433,6 +430,15 @@ namespace Collision
 		//no seperating axis, at least one overlapping axis
 		return true;
 	}
+
+	//bool AABBvsAABB(std::shared_ptr<IManifold>& m, std::shared_ptr<AABB> a, std::shared_ptr<AABB> b)
+	//{
+	//	if (a->max.x < b->min.x || a->min.x > b->max.x) return false;
+	//	if (a->max.y < b->min.y || a->min.y > b->max.y) return false;
+
+	//	//no seperating axis, at least one overlapping axis
+	//	return true;
+	//}
 
 
 }

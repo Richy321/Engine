@@ -113,14 +113,18 @@ public:
 		//poly->Translate(30.0f, 0.0f, 0.0f);
 		//gameObjectManager.push_back(poly);
 		
-		
-		std::shared_ptr<GameObject> floor = CreateFloorPhysicsObject();
-		floor->Translate(0.0f, -5.0f, 0.0f);
-		gameObjectManager.push_back(floor);
-
 		std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject();
 		circle->Translate(20.0f, 0.0f, 0.0f);
 		gameObjectManager.push_back(circle);
+
+		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject();
+		circle2->Translate(22.5f, 10.0f, 0.0f);
+		gameObjectManager.push_back(circle2);
+
+
+		std::shared_ptr<GameObject> floor = CreateFloorPhysicsObject();
+		floor->Translate(0.0f, -5.0f, 0.0f);
+		gameObjectManager.push_back(floor);
 	}
 
 	void OnUpdate(float deltaTime) override
@@ -132,7 +136,6 @@ public:
 		m_scale += 0.0057f;
 		pointLights[0]->Position = vec3(floorWidth * 0.25f, 1.0f, floorDepth * (cosf(m_scale) + 1.0f) / 2.0f);
 		pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
-
 	}
 
 	void GenerateCollisionManifolds()
@@ -177,29 +180,6 @@ public:
 		
 	}
 
-	void ResolveCollisionSimple(std::shared_ptr<Manifold> m)
-	{
-		vec2 relVel = m->bodyB->velocity - m->bodyA->velocity;
-
-		float velAlongNormal = Utils::DotVec2(relVel, m->normal);
-
-		if (velAlongNormal > 0)
-			return;
-
-		float e = min(m->bodyA->physicsMaterial->restitution, m->bodyB->physicsMaterial->restitution);
-
-		// Calculate impulse scalar
-		float j = -(1.0f + e) * velAlongNormal;
-		j /= m->bodyA->inverseMass + m->bodyB->inverseMass;
-
-		// Apply impulse
-		vec2 impulse = j * m->normal;
-
-		//impulse = 100.0f * m->normal;
-		m->bodyA->velocity -= m->bodyA->inverseMass * impulse;
-		m->bodyB->velocity += m->bodyB->inverseMass * impulse;
-	}
-
 	void OnFixedTimeStep() override
 	{
 		GenerateCollisionManifolds();
@@ -208,29 +188,22 @@ public:
 		for (size_t i = 0; i < physicsObjects.size(); i++)
 			IntegrateForces(physicsObjects[i], fixedTimeStep);
 
-		for (size_t i = 0; i < contacts.size(); i++)
-			ResolveCollisionSimple(contacts[i]);
-
-		/*
 		//Initialise collisions
 		for (size_t i = 0; i < contacts.size(); i++)
 			contacts[i]->Initialise(fixedTimeStep, gravity);
-
+		
 		//Solve collisions
 		for (size_t j = 0; j < physicsIterations; ++j)
 			for (size_t i = 0; i < contacts.size(); ++i)
 				contacts[i]->ApplyImpulse();
-*/
 
 		//Integrate velocities
 		for (size_t i = 0; i < physicsObjects.size(); ++i)
 			IntegrateVelocity(physicsObjects[i], fixedTimeStep);
 
 		//Correct positions (due to floating point errors)
-		//for (size_t i = 0; i < contacts.size(); i++)
-		//	contacts[i]->PositionalCorrection();
-
-
+		for (size_t i = 0; i < contacts.size(); i++)
+			contacts[i]->PositionalCorrection();
 
 		//Reset forces
 		for (size_t i = 0; i < physicsObjects.size(); ++i)
@@ -247,16 +220,11 @@ public:
 		vec3 cameraPos;
 		if (isUseCamera3D)
 		{
-			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
-			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
 			cameraPos = vec3(camera->GetWorldTransform()[3]);
 		}
 		else
 		{
-			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera2D->view);
-			//Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera2D->projection);
 			cameraPos = vec3(camera2D->GetWorldTransform()[3]);
-
 			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->Enable();
 			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
 			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
@@ -328,6 +296,8 @@ public:
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
 
+		PhysicsManager::ComputePolygonMass(rigidBodyComponent, polygonMesh->rootMeshNode->meshes[0]->vertices);
+
 		std::vector<vec2> verts2D;
 		std::vector<vec2> norms2D;
 
@@ -339,9 +309,6 @@ public:
 
 		std::shared_ptr<PolygonColliderComponent> polyColliderComponent = std::make_shared<PolygonColliderComponent>(go, verts2D, norms2D);
 		go->AddComponent(polyColliderComponent);
-
-
-		PhysicsManager::ComputePolygonMass(rigidBodyComponent, polygonMesh->rootMeshNode->meshes[0]->vertices);
 
 		//ComputePolygonMass centers vertices around the centroid, need to re-bind
 		polygonMesh->rootMeshNode->meshes[0]->BuildAndBindVertexPositionColorBuffer();

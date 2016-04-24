@@ -70,9 +70,63 @@ public:
 		InitialiseMesh();
 	}
 
-	void ApplyImpulse() override
+	void ApplyImpulseSimple()
 	{
-		if(Utils::EqualWithEpsilon( bodyA->inverseMass + bodyB->inverseMass, 0.0f))
+		if (Utils::EqualWithEpsilon(bodyA->inverseMass + bodyB->inverseMass, 0.0f))
+		{
+			InfiniteMassCorrection();
+			return;
+		}
+
+		vec2 ra = contacts[0] - vec2(bodyA->GetParentGameObject().lock()->GetPosition());
+		vec2 rb = contacts[0] - vec2(bodyB->GetParentGameObject().lock()->GetPosition());
+
+		vec2 relVel = bodyB->velocity - bodyA->velocity;
+
+		float velAlongNormal = Utils::DotVec2(relVel, normal);
+
+		if (velAlongNormal > 0)
+			return;
+
+		float e = min(bodyA->physicsMaterial->restitution, bodyB->physicsMaterial->restitution);
+
+		// Calculate impulse scalar
+		float j = -(1.0f + e) * velAlongNormal;
+		j /= bodyA->inverseMass + bodyB->inverseMass;
+
+		// Apply impulses
+		vec2 impulse = j * normal;
+		bodyA->ApplyImpulse(-(bodyA->inverseMass * impulse), ra);
+		bodyB->ApplyImpulse(bodyB->inverseMass * impulse, rb);
+	}
+
+	void ApplyImpulseWithFriction()
+	{
+		vec2 ra = contacts[0] - vec2(bodyA->GetParentGameObject().lock()->GetPosition());
+		vec2 rb = contacts[0] - vec2(bodyB->GetParentGameObject().lock()->GetPosition());
+
+		vec2 relVel = bodyB->velocity - bodyA->velocity;
+
+		float velAlongNormal = Utils::DotVec2(relVel, normal);
+
+		if (velAlongNormal > 0)
+			return;
+
+		float e = min(bodyA->physicsMaterial->restitution, bodyB->physicsMaterial->restitution);
+
+		// Calculate impulse scalar
+		float j = -(1.0f + e) * velAlongNormal;
+		j /= bodyA->inverseMass + bodyB->inverseMass;
+
+		// Apply impulses
+		vec2 impulse = j * normal;
+		bodyA->ApplyImpulse(-(bodyA->inverseMass * impulse), ra);
+		bodyB->ApplyImpulse(bodyB->inverseMass * impulse, rb);
+	}
+
+	void ApplyImpulseFrictionOrientation()
+	{
+		if (Utils::EqualWithEpsilon(bodyA->inverseMass + bodyB->inverseMass, 0.0f))
 		{
 			InfiniteMassCorrection();
 			return;
@@ -97,7 +151,7 @@ public:
 
 			float raCrossN = Utils::CrossVec2(ra, normal);
 			float rbCrossN = Utils::CrossVec2(rb, normal);
-			float invMassSum = bodyA->inverseMass + bodyB->inverseMass + pow(raCrossN,2) * bodyA->inverseInertia + pow(rbCrossN,2) * bodyB->inverseInertia;
+			float invMassSum = bodyA->inverseMass + bodyB->inverseMass + pow(raCrossN, 2) * bodyA->inverseInertia + pow(rbCrossN, 2) * bodyB->inverseInertia;
 
 			// Calculate impulse scalar
 			float j = -(1.0f + e) * contactVel;
@@ -138,13 +192,19 @@ public:
 		}
 	}
 
+	void ApplyImpulse() override
+	{
+		ApplyImpulseSimple();
+		return;
+	}
+
 	void PositionalCorrection() override
 	{
 		const float k_slop = 0.05f;
 		const float percent = 0.4f;
 
 		vec2 correction = (std::max(penetration - k_slop, 0.0f) / (bodyA->inverseMass + bodyB->inverseMass)) * normal * percent;
-
+		printf("Correction %f, %f\n", correction.x, correction.y);
 		bodyA->GetParentGameObject().lock()->Translate(-vec3(correction * bodyA->inverseMass, 0.0f));
 		bodyB->GetParentGameObject().lock()->Translate(vec3(correction * bodyB->inverseMass, 0.0f));
 	}
