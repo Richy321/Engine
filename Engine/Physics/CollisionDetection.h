@@ -121,7 +121,7 @@ namespace Collision
 
 			vec2 n = v1 - center;
 			n = b_transform_mat2 * n;
-			n = normalize(n);
+			n = Utils::NormaliseVec2(n);
 			m->normal = n;
 			v1 = b_transform_mat2 * v1 + bPos;
 			m->contacts.push_back(v1);
@@ -137,7 +137,7 @@ namespace Collision
 			v2 = b_transform_mat2 * v2 + bPos;
 			m->contacts.push_back(v2);
 			n = b_transform_mat2 * n;
-			n = normalize(n);
+			n = Utils::NormaliseVec2(n);
 			m->normal = n;
 		}
 
@@ -375,7 +375,7 @@ namespace Collision
 
 		// Calculate reference face side normal in world space
 		vec2 sidePlaneNormal = v2 - v1;
-		sidePlaneNormal = normalize(sidePlaneNormal);
+		sidePlaneNormal = Utils::NormaliseVec2(sidePlaneNormal);
 
 		// Orthogonalize
 		vec2 refFaceNormal(sidePlaneNormal.y, -sidePlaneNormal.x);

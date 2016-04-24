@@ -108,11 +108,12 @@ public:
 		InitialiseLights();
 		InitialiseTextures();
 		InitialiseCamera();
+		/*
+		std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject();
+		poly->Translate(30.0f, 0.0f, 0.0f);
+		gameObjectManager.push_back(poly);
+		*/
 
-		//std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject();
-		//poly->Translate(30.0f, 0.0f, 0.0f);
-		//gameObjectManager.push_back(poly);
-		
 		std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject();
 		circle->Translate(20.0f, 0.0f, 0.0f);
 		gameObjectManager.push_back(circle);
@@ -120,7 +121,6 @@ public:
 		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject();
 		circle2->Translate(22.5f, 10.0f, 0.0f);
 		gameObjectManager.push_back(circle2);
-
 
 		std::shared_ptr<GameObject> floor = CreateFloorPhysicsObject();
 		floor->Translate(0.0f, -5.0f, 0.0f);
@@ -176,7 +176,7 @@ public:
 		body->GetParentGameObject().lock()->Translate(vec3(body->velocity * dt, 0.0f));
 		//body->orient += body->angularVelocity * dt;
 		//body->GetParentGameObject().lock()->SetOrientation2D(body->orient);
-		//IntegrateForces(body, dt);
+		IntegrateForces(body, dt);
 		
 	}
 

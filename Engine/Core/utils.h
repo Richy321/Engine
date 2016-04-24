@@ -73,6 +73,18 @@ namespace Core
 			return a.x * b.x + a.y * b.y;
 		}
 
+		static glm::vec2 NormaliseVec2(glm::vec2& v)
+		{
+			float len = Len2Vec2(v);
+
+			if (len > EPSILON)
+			{
+				float invLen = 1.0f / len;
+				v.x *= invLen;
+				v.y *= invLen;
+			}
+			return v;
+		}
 		static float DistSquared(const glm::vec2& a, const glm::vec2& b)
 		{
 			glm::vec2 c = a - b;
