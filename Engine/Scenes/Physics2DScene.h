@@ -110,18 +110,15 @@ public:
 		InitialiseTextures();
 		InitialiseCamera();
 	
-		//vec2 poly1Pos(30.0f, 0.0f);
-		//std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject(poly1Pos, 0.0f);
-		//gameObjectManager.push_back(poly);
-		
-		//std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject(PhysicsMaterials::Wood.density, PhysicsMaterials::Wood.restitution);
-		//circle->Translate(20.0f, 0.0f, 0.0f);
-		//gameObjectManager.push_back(circle);
+		InitialiseFictionDemoScene();
+	}
 
+	void InitialiseFictionDemoScene()
+	{
 		vec2 pos2 = vec2(17.0f, 20.0f);
 		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject(1.0f, 0.2f, pos2, 0.0f);
 		gameObjectManager.push_back(circle2);
-		
+
 		vec2 pos1 = vec2(20.0f, 10.0f);
 		std::shared_ptr<GameObject> circle1 = CreateCirclePhysicsObject(1.0f, 0.2f, pos1, 0.0f);
 		gameObjectManager.push_back(circle1);

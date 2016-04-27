@@ -62,10 +62,11 @@ public:
 		force += f;
 	}
 
-	void ApplyImpulse(const glm::vec2& impulse, const glm::vec2& contactVector)
+	void ApplyImpulse(const glm::vec2& impulse, const glm::vec2& contactVector, bool applyAngular = false)
 	{
 		velocity += inverseMass * impulse;
-		angularVelocity += inverseInertia * Utils::CrossVec2(contactVector, impulse);
+		if(applyAngular)
+			angularVelocity += inverseInertia * Utils::CrossVec2(contactVector, impulse);
 	}
 
 	void SetStatic()
