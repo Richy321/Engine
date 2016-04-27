@@ -116,7 +116,7 @@ public:
 	void InitialiseFictionDemoScene()
 	{
 		vec2 pos2 = vec2(17.0f, 20.0f);
-		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject(1.0f, 0.2f, pos2, 0.0f);
+		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject(50.0f, 0.2f, pos2, 0.0f);
 		gameObjectManager.push_back(circle2);
 
 		vec2 pos1 = vec2(20.0f, 10.0f);

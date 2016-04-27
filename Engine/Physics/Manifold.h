@@ -127,8 +127,6 @@ public:
 			if (velAlongNormal > 0)
 				return;
 
-			float e = min(bodyA->physicsMaterial->restitution, bodyB->physicsMaterial->restitution);
-
 			// Calculate impulse scalar
 			float j = -(1.0f + e) * velAlongNormal;
 			j /= combinedInverseMass;
@@ -178,7 +176,7 @@ public:
 			printf("tangentImpulse %f,%f, Friction Type: %s\n", tangentImpulse.x, tangentImpulse.y, isUsingStaticFriction ? "static" : "dynamic");
 		}
 	}
-	void ApplyImpulseFrictionOrientation2()
+	void ApplyImpulseFrictonOrientation()
 	{
 		if (Utils::EqualWithEpsilon(bodyA->inverseMass + bodyB->inverseMass, 0.0f))
 		{
@@ -191,24 +189,18 @@ public:
 			vec2 ra = contacts[i] - vec2(bodyA->position);
 			vec2 rb = contacts[i] - vec2(bodyB->position);
 
-			//vec2 relVel = bodyB->velocity - bodyA->velocity;
-
 			vec2 relVel = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
-				bodyA->velocity + Utils::CrossVec2(bodyA->angularVelocity, ra);
+				bodyA->velocity - Utils::CrossVec2(bodyA->angularVelocity, ra);
 
 
+			//early out if separating by themselves
 			float velAlongNormal = Utils::DotVec2(relVel, normal);
-
-			//no resolve if separating
 			if (velAlongNormal > 0)
 				return;
 
 			float raCrossN = Utils::CrossVec2(ra, normal);
 			float rbCrossN = Utils::CrossVec2(rb, normal);
-
-			float combinedInverseMass = bodyA->inverseMass + bodyB->inverseMass +
-				(raCrossN * raCrossN) * bodyA->inverseInertia +
-				(rbCrossN * rbCrossN) * bodyB->inverseInertia;
+			float combinedInverseMass = bodyA->inverseMass + bodyB->inverseMass + pow(raCrossN, 2) * bodyA->inverseInertia + pow(rbCrossN, 2) * bodyB->inverseInertia;
 
 			// Calculate impulse scalar
 			float j = -(1.0f + e) * velAlongNormal;
@@ -217,16 +209,23 @@ public:
 
 			// Apply impulses
 			vec2 impulse = j * normal;
-			bodyA->ApplyImpulse(-(bodyA->inverseMass * impulse), ra);
-			bodyB->ApplyImpulse(bodyB->inverseMass * impulse, rb);
-
+			bodyA->ApplyImpulse(-impulse, ra, true);
+			bodyB->ApplyImpulse(impulse, rb, true);
+			printf("Impulse %f,%f\n", impulse.x, impulse.y);
 
 			//tangent
-			float dotRelNorm = Utils::DotVec2(relVel, normal);
+			relVel = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
+				bodyA->velocity - Utils::CrossVec2(bodyA->angularVelocity, ra);
 
-			vec2 tangent = relVel - normal * dotRelNorm;
+			vec2 tangent = relVel - (Utils::DotVec2(relVel, normal) * normal);
+			
+			if (Utils::CrossVec2(relVel, normal) < 0)
+				tangent = vec2(-normal.y, normal.x);
+			else
+				tangent = vec2(normal.y, -normal.x);
+
 			tangent = Utils::NormaliseVec2(tangent);
-
+						
 			// j tangent magnitude
 			float jt = -Utils::DotVec2(relVel, tangent); //friction applies negatively along tangent
 			jt /= combinedInverseMass;
@@ -237,91 +236,45 @@ public:
 				return;
 
 			// Coulumb's law
+			bool isUsingStaticFriction = true;
 			vec2 tangentImpulse;
+
 			if (std::abs(jt) < j * staticFriction)
+			{
+				isUsingStaticFriction = true;
 				tangentImpulse = tangent * jt;
+			}
 			else
+			{
+				isUsingStaticFriction = false;
 				tangentImpulse = tangent * -j * dynamicFriction;
+			}
+
+			//Apply an exponential decay to stop spinning
+			float decay = 0.999f;
+			bodyA->velocity *= decay;
+			bodyA->angularVelocity *= decay;
+			bodyB->velocity *= decay;
+			bodyB->angularVelocity *= decay;
+
+			if (Utils::EqualWithEpsilon(bodyA->angularVelocity, 0.0f))
+				bodyA->angularVelocity = 0.0f;
+
+			if (Utils::EqualWithEpsilon(bodyB->angularVelocity, 0.0f))
+				bodyB->angularVelocity = 0.0f;
 
 			// Apply friction impulse
-			bodyA->ApplyImpulse(-tangentImpulse, ra);
-			bodyB->ApplyImpulse(tangentImpulse, rb);
-		}
-	}
-
-	void ApplyImpulseFrictionOrientation()
-	{
-		if (Utils::EqualWithEpsilon(bodyA->inverseMass + bodyB->inverseMass, 0.0f))
-		{
-			InfiniteMassCorrection();
-			return;
-		}
-
-		for (size_t i = 0; i < contacts.size(); ++i)
-		{
-			// Calculate radii from COM to contact
-			vec2 ra = contacts[i] - vec2(bodyA->position);
-			vec2 rb = contacts[i] - vec2(bodyB->position);
-
-			// Relative velocity
-			vec2 rv = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
-				bodyA->velocity - Utils::CrossVec2(bodyA->angularVelocity, ra);
-
-			// Relative velocity along the normal
-			float contactVel = Utils::DotVec2(rv, normal);
-
-			// Do not resolve if velocities are separating
-			if (contactVel > 0)
-				return;
-
-			float raCrossN = Utils::CrossVec2(ra, normal);
-			float rbCrossN = Utils::CrossVec2(rb, normal);
-			float invMassSum = bodyA->inverseMass + bodyB->inverseMass + pow(raCrossN, 2) * bodyA->inverseInertia + pow(rbCrossN, 2) * bodyB->inverseInertia;
-
-			// Calculate impulse scalar
-			float j = -(1.0f + e) * contactVel;
-			j /= invMassSum;
-			j /= (float)contacts.size();
-
-			// Apply impulse
-			vec2 impulse = normal * j;
-			bodyA->ApplyImpulse(-impulse, ra);
-			bodyB->ApplyImpulse(impulse, rb);
-
-			// Friction impulse
-			rv = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
-				bodyA->velocity - Utils::CrossVec2(bodyA->angularVelocity, ra);
-
-			vec2 t = rv - (normal * Utils::DotVec2(rv, normal));
-			t = Utils::NormaliseVec2(t);
-
-			// j tangent magnitude
-			float jt = -Utils::DotVec2(rv, t);
-			jt /= invMassSum;
-			jt /= (float)contacts.size();
-
-			// Don't apply tiny friction impulses
-			if (Utils::EqualWithEpsilon(jt, 0.0f))
-				return;
-
-			// Coulumb's law
-			vec2 tangentImpulse;
-			if (std::abs(jt) < j * staticFriction)
-				tangentImpulse = t * jt;
-			else
-				tangentImpulse = t * -j * dynamicFriction;
-
-			// Apply friction impulse
-			bodyA->ApplyImpulse(-tangentImpulse, ra);
-			bodyB->ApplyImpulse(tangentImpulse, rb);
+			bodyA->ApplyImpulse(-tangentImpulse, ra, true);
+			bodyB->ApplyImpulse(tangentImpulse, rb, true);
+			printf("tangentImpulse %f,%f, Friction Type: %s\n", tangentImpulse.x, tangentImpulse.y, isUsingStaticFriction ? "static" : "dynamic");
 		}
 	}
 
 	void ApplyImpulse() override
 	{
 		//ApplyImpulseSimple();
-		ApplyImpulseWithFriction();
-		//ApplyImpulseFrictionOrientation();
+		//ApplyImpulseWithFriction();
+		ApplyImpulseFrictonOrientation();
 		return;
 	}
 
@@ -364,9 +317,6 @@ public:
 		}
 
 		frictionMeshes.clear();
-
-
-
 	}
 
 	void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld)
