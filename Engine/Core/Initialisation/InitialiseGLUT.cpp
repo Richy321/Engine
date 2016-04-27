@@ -11,7 +11,7 @@ void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
 	const ContextInfo& contextInfo,
 	const FramebufferInfo& framebufferInfo)
 {
-	windowInformation = windowInfo;//add this line
+	windowInformation = windowInfo;
 
 	//we need to create these fake arguments
 	int fakeargc = 1;
@@ -85,7 +85,7 @@ void InitialiseGLUT::Initialise(const WindowInfo& windowInfo,
 #endif
 
 
-	//init GLEW, this can be called in main.cpp
+	//init GLEW
 	InitialiseGLEW::Initialise();
 
 	//cleanup

@@ -227,18 +227,12 @@ namespace Collision
 	{
 		vec2 referenceNormal = RefPoly->polygonCollider.normals[referenceIndex];
 
-		std::shared_ptr<IGameObject> incGO = IncPoly->GetParentGameObject().lock();
-		std::shared_ptr<IGameObject> refGO = RefPoly->GetParentGameObject().lock();
-
-		vec2 incPos = vec2(incGO->GetPosition());
-		vec2 refPos = vec2(refGO->GetPosition());
-
-		mat2 refTransform = mat2(refGO->GetWorldTransform());
-		mat2 incTransform = mat2(incGO->GetWorldTransform());
+		std::shared_ptr<RigidBody2DComponent> incRB = std::dynamic_pointer_cast<RigidBody2DComponent>(IncPoly->GetParentGameObject().lock()->GetComponentByType(IComponent::RigidBody));
+		std::shared_ptr<RigidBody2DComponent> refRB = std::dynamic_pointer_cast<RigidBody2DComponent>(RefPoly->GetParentGameObject().lock()->GetComponentByType(IComponent::RigidBody));
 
 		// Calculate normal in incident's frame of reference
-		referenceNormal = refTransform * referenceNormal; // To world space
-		referenceNormal = transpose(incTransform) * referenceNormal; // To incident's model space
+		referenceNormal = refRB->u * referenceNormal; // To world space
+		referenceNormal = Utils::Transpose2D(incRB->u) * referenceNormal; // To incident's model space
 
 		// Find most anti-normal face on incident polygon
 		int32 incidentFace = 0;
@@ -254,9 +248,9 @@ namespace Collision
 		}
 
 		// Assign face vertices for incidentFace
-		v[0] = incTransform * IncPoly->polygonCollider.vertices[incidentFace] + incPos;
+		v[0] = incRB->u * IncPoly->polygonCollider.vertices[incidentFace] + incRB->position;
 		incidentFace = incidentFace + 1 >= (int32)IncPoly->polygonCollider.vertices.size() ? 0 : incidentFace + 1;
-		v[1] = incTransform * IncPoly->polygonCollider.vertices[incidentFace] + incPos;
+		v[1] = incRB->u * IncPoly->polygonCollider.vertices[incidentFace] + incRB->position;
 	}
 
 	int32 Clip(vec2 n, float c, vec2 *face)
@@ -353,19 +347,16 @@ namespace Collision
 		//  n : incident normal
 
 		// Setup reference face vertices
-		std::shared_ptr<IGameObject> incGO = IncPoly->GetParentGameObject().lock();
-		std::shared_ptr<IGameObject> refGO = RefPoly->GetParentGameObject().lock();
-
-		vec2 refPos = vec2(refGO->GetPosition());
-		mat2 refTransform = mat2(refGO->GetWorldTransform());
+		std::shared_ptr<RigidBody2DComponent> incRB = std::dynamic_pointer_cast<RigidBody2DComponent>(IncPoly->GetParentGameObject().lock()->GetComponentByType(IComponent::RigidBody));
+		std::shared_ptr<RigidBody2DComponent> refRB = std::dynamic_pointer_cast<RigidBody2DComponent>(RefPoly->GetParentGameObject().lock()->GetComponentByType(IComponent::RigidBody));
 
 		vec2 v1 = RefPoly->polygonCollider.vertices[referenceIndex];
 		referenceIndex = referenceIndex + 1 == RefPoly->polygonCollider.vertices.size() ? 0 : referenceIndex + 1;
 		vec2 v2 = RefPoly->polygonCollider.vertices[referenceIndex];
 
 		// Transform vertices to world space
-		v1 = refTransform * v1 + refPos;
-		v2 = refTransform * v2 + refPos;
+		v1 = refRB->u * v1 + refRB->position;
+		v2 = refRB->u * v2 + refRB->position;
 
 		// Calculate reference face side normal in world space
 		vec2 sidePlaneNormal = v2 - v1;

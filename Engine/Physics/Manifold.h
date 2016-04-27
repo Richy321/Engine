@@ -192,7 +192,6 @@ public:
 			vec2 relVel = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
 				bodyA->velocity - Utils::CrossVec2(bodyA->angularVelocity, ra);
 
-
 			//early out if separating by themselves
 			float velAlongNormal = Utils::DotVec2(relVel, normal);
 			if (velAlongNormal > 0)
@@ -211,7 +210,7 @@ public:
 			vec2 impulse = j * normal;
 			bodyA->ApplyImpulse(-impulse, ra, true);
 			bodyB->ApplyImpulse(impulse, rb, true);
-			printf("Impulse %f,%f\n", impulse.x, impulse.y);
+			//printf("Impulse %f,%f\n", impulse.x, impulse.y);
 
 			//tangent
 			relVel = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
@@ -227,7 +226,7 @@ public:
 			tangent = Utils::NormaliseVec2(tangent);
 						
 			// j tangent magnitude
-			float jt = -Utils::DotVec2(relVel, tangent); //friction applies negatively along tangent
+			float jt = -Utils::DotVec2(relVel, tangent); //friction applies negatively along sliding tangent
 			jt /= combinedInverseMass;
 			jt /= static_cast<float>(contacts.size());
 
@@ -266,7 +265,7 @@ public:
 			// Apply friction impulse
 			bodyA->ApplyImpulse(-tangentImpulse, ra, true);
 			bodyB->ApplyImpulse(tangentImpulse, rb, true);
-			printf("tangentImpulse %f,%f, Friction Type: %s\n", tangentImpulse.x, tangentImpulse.y, isUsingStaticFriction ? "static" : "dynamic");
+			//printf("tangentImpulse %f,%f, Friction Type: %s\n", tangentImpulse.x, tangentImpulse.y, isUsingStaticFriction ? "static" : "dynamic");
 		}
 	}
 

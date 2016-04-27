@@ -39,6 +39,8 @@ public:
 	const static int physicsIterations = 10;
 
 
+	bool hasLMBClicked = false;
+
 	Physics2DScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo), gravity(0.0f, -10.0f * gravityScale)
 	{
 		if(isUseCamera3D)
@@ -95,7 +97,7 @@ public:
 		}
 		else
 		{
-			camera2D->SetOrthographicProjection(-static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.width), -static_cast<float>(windowInfo.height), static_cast<float>(windowInfo.height), 5, 1000);
+			camera2D->SetOrthographicProjection(-static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.width), -static_cast<float>(windowInfo.height), static_cast<float>(windowInfo.height), 5, 100);
 			camera2D->SetZoom(0.03f);
 			SetMainCamera(camera2D);
 			camera2D->Translate(floorWidth * 0.5f, 0.0f, floorDepth * 1.3f);
@@ -110,22 +112,46 @@ public:
 		InitialiseTextures();
 		InitialiseCamera();
 	
-		InitialiseFictionDemoScene();
+		//InitialisePolyDemoScene();
+		InitialiseFrictionDemoScene();
 	}
 
-	void InitialiseFictionDemoScene()
+	void InitialiseFrictionDemoScene()
+	{
+		vec2 floorPos(15.0f, -15.0f);
+		std::shared_ptr<GameObject> floor = CreateStaticPolyPhysicsObject(floorPos, 0.0f, 30.0f, 2.0f);
+		gameObjectManager.push_back(floor);
+
+		vec2 floorPosLeft(2.5f, -11.5f);
+		std::shared_ptr<GameObject> floorLeft = CreateStaticPolyPhysicsObject(floorPosLeft, 0.0f, 5.0f, 5.0f);
+		gameObjectManager.push_back(floorLeft);
+
+		vec2 floorPosRight(27.5f, -11.5f);
+		std::shared_ptr<GameObject> floorRight = CreateStaticPolyPhysicsObject(floorPosRight, 0.0f, 5.0f, 5.0f);
+		gameObjectManager.push_back(floorRight);
+
+		/*vec2 posZero = vec2(0.0f, 00.0f);
+		std::shared_ptr<GameObject> circleStatic = CreateCirclePhysicsObject(1.0f, 0.2f, posZero, 0.0f, true);
+		gameObjectManager.push_back(circleStatic);*/
+	}
+
+	void InitialisePolyDemoScene()
 	{
 		vec2 pos2 = vec2(17.0f, 20.0f);
-		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject(50.0f, 0.2f, pos2, 0.0f);
-		gameObjectManager.push_back(circle2);
-
-		vec2 pos1 = vec2(20.0f, 10.0f);
-		std::shared_ptr<GameObject> circle1 = CreateCirclePhysicsObject(1.0f, 0.2f, pos1, 0.0f);
-		gameObjectManager.push_back(circle1);
+		std::shared_ptr<GameObject> poly1 = CreatePolygonPhysicsObject(pos2, 0.0f);
+		gameObjectManager.push_back(poly1);
 
 		vec2 floorPos(15.0f, -15.0f);
-		std::shared_ptr<GameObject> floor = CreateFloorPhysicsObject(floorPos, 0.0f);
+		std::shared_ptr<GameObject> floor = CreateStaticPolyPhysicsObject(floorPos, 0.0f, 30.0f, 2.0f);
 		gameObjectManager.push_back(floor);
+
+		vec2 floorPosLeft(2.5f, -11.5f);
+		std::shared_ptr<GameObject> floorLeft = CreateStaticPolyPhysicsObject(floorPosLeft, 0.0f, 5.0f, 5.0f);
+		gameObjectManager.push_back(floorLeft);
+
+		vec2 floorPosRight(27.5f, -11.5f);
+		std::shared_ptr<GameObject> floorRight = CreateStaticPolyPhysicsObject(floorPosRight, 0.0f, 5.0f, 5.0f);
+		gameObjectManager.push_back(floorRight);
 	}
 
 	void OnUpdate(float deltaTime) override
@@ -137,6 +163,24 @@ public:
 		m_scale += 0.0057f;
 		pointLights[0]->Position = vec3(floorWidth * 0.25f, 1.0f, floorDepth * (cosf(m_scale) + 1.0f) / 2.0f);
 		pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
+
+
+		if(hasLMBClicked)
+		{
+
+			POINT mouse; 
+			GetCursorPos(&mouse); 
+			HWND hWnd = WindowFromDC(wglGetCurrentDC());
+			ScreenToClient(hWnd, &mouse);
+			printf("mouse: %i,%i\n", mouse.x, mouse.y);
+			vec2 pos;
+
+			pos = UnprojectGLM(mouse.x, mouse.y);
+		
+			std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject(1.0f, 0.2f, pos, 0.0f);
+			gameObjectManager.push_back(circle);
+			hasLMBClicked = false;
+		}
 	}
 
 	void GenerateCollisionManifolds()
@@ -180,7 +224,7 @@ public:
 		//pass to game object world transform
 		body->GetParentGameObject().lock()->SetPosition2D(body->position);
 		body->GetParentGameObject().lock()->SetOrientation2D(body->orient); //possibly set directly from body->u
-		//body->GetParentGameObject().lock()->SetOrientation2D(body->u); //possibly set directly from body->u
+		//body->GetParentGameObject().lock()->SetOrientation2D(body->u);
 		
 		IntegrateForces(body, dt);
 	}
@@ -265,11 +309,83 @@ public:
 			camera2D->OnKey(key, x, y);
 	}
 
+	void notifyProcessMouseState(int button, int state, int x, int y) override
+	{
+		if(button == GLUT_LEFT_BUTTON)
+		{
+			if (state == GLUT_UP)
+				hasLMBClicked = true;
+		}
+	}
+
+	vec2 UnprojectScreenSpaceCoords(int x, int y)
+	{
+		mat4 vp = mainCamera.lock()->projection * mainCamera.lock()->view;
+		mat4 pv = inverse(vp);
+
+		vec4 in;
+		float winZ = 1.0;
+
+		in[0] = (2.0f*((float)(x - 0) / (this->windowInfo.width - 0))) - 1.0f,
+		in[1] = 1.0f - (2.0f*((float)(y - 0) / (this->windowInfo.height - 0)));
+		in[2] = 2.0* winZ - 1.0;
+		in[3] = 1.0;
+
+		vec4 pos = in * pv;
+		pos.w = 1.0f / pos.w;
+		pos.x *= pos.w;
+		pos.y *= pos.w;
+		pos.z *= pos.w;
+
+		return vec2(pos);
+	}
+
+	vec2 UnprojectGLUT(int x, int y)
+	{
+		vec3 pos;
+
+		GLint viewport[4];
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		
+		GLdouble modelview[16];
+		glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+
+		GLdouble projection[16];
+		glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+		GLfloat winX, winY, winZ;
+		winX = (float)x;
+		winY = (float)viewport[3] - (float)y;
+		glReadPixels(winX, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+		GLdouble posX, posY, posZ;
+		gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+
+		return vec2(posX, posY);
+	}
+
+	vec2 UnprojectGLM(int x, int y)
+	{
+		GLint viewport[4];
+		GLfloat winY, z;
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		
+		winY = viewport[3] - (float)y;
+		glReadPixels(x, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+		glm::vec3 screen = glm::vec3(x, winY, z);
+
+		vec4 viewportGLM(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+		vec3 pos = glm::unProject(screen, camera2D->view, camera2D->projection, viewportGLM);
+		printf("GLM pos: %f,%f,%f\n", pos.x, pos.y, pos.z);
+
+		return vec2(pos);
+	}
+
 	void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
 	{
 		if (isUseCamera3D)
 		{
-			camera->OnMouseMove(deltaX, deltaY);
+			//camera->OnMouseMove(deltaX, deltaY);
 		}
 		//else
 		//	camera2D->OnMouseMove(deltaX, deltaY);
@@ -286,6 +402,8 @@ public:
 		rigidBodyComponent->physicsMaterial->restitution = restitution;
 		rigidBodyComponent->position = position;
 		rigidBodyComponent->SetOrientation2D(orientation);
+		go->SetPosition2D(position);
+		go->SetOrientation2D(orientation);
 
 		std::shared_ptr<SphereColliderComponent> sphereColliderComponent = std::make_shared<SphereColliderComponent>(go, 2.5f);
 		go->AddComponent(sphereColliderComponent);
@@ -310,6 +428,8 @@ public:
 		go->AddComponent(rigidBodyComponent);
 		rigidBodyComponent->position = position;
 		rigidBodyComponent->SetOrientation2D(orientation);
+		go->SetPosition2D(position);
+		go->SetOrientation2D(orientation);
 
 
 		PhysicsManager::ComputePolygonMass(rigidBodyComponent, polygonMesh->rootMeshNode->meshes[0]->vertices);
@@ -333,15 +453,17 @@ public:
 		return go;
 	}
 
-	std::shared_ptr<GameObject> CreateFloorPhysicsObject(vec2 position, float orientation)
+	std::shared_ptr<GameObject> CreateStaticPolyPhysicsObject(vec2 position, float orientation, float width, float height)
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
-		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(30.0f, 2.0f);
+		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(width, height);
 		go->AddComponent(polygonMesh);
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
 		rigidBodyComponent->position = position;
 		rigidBodyComponent->SetOrientation2D(orientation);
+		go->SetPosition2D(position);
+		go->SetOrientation2D(orientation);
 
 		std::vector<vec2> verts2D;
 		std::vector<vec2> norms2D;
