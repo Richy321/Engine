@@ -23,10 +23,10 @@ namespace Collision
 		std::shared_ptr<IGameObject> bodyAGO = sphereA->GetParentGameObject().lock();
 		std::shared_ptr<IGameObject> bodyBGO = sphereB->GetParentGameObject().lock();
 
-		glm::vec2 posA = glm::vec2(bodyAGO->GetWorldTransform()[3].x, bodyAGO->GetWorldTransform()[3].y);
-		glm::vec2 posB = glm::vec2(bodyBGO->GetWorldTransform()[3].x, bodyBGO->GetWorldTransform()[3].y);
+		std::shared_ptr<RigidBody2DComponent> rbA = std::dynamic_pointer_cast<RigidBody2DComponent>(bodyAGO->GetComponentByType(IComponent::RigidBody));
+		std::shared_ptr<RigidBody2DComponent> rbB = std::dynamic_pointer_cast<RigidBody2DComponent>(bodyBGO->GetComponentByType(IComponent::RigidBody));
 
-		glm::vec2 normal = posB - posA;
+		glm::vec2 normal = rbB->position - rbA->position;
 		float radius = sphereA->boundingSphere.radius + sphereB->boundingSphere.radius;
 
 		float squaredDistance = Utils::Len2Vec2(normal);
@@ -48,13 +48,13 @@ namespace Collision
 			//ontop each other exactly
 			m->penetration = sphereA->boundingSphere.radius;
 			m->normal = glm::vec2(1, 0);
-			m->contacts.push_back(glm::vec2(posA));
+			m->contacts.push_back(rbA->position);
 		}
 		else
 		{
 			m->penetration = radius - distance;
-			m->normal = normal / distance;
-			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + posA);
+			m->normal = normal / distance; //already done sqrt
+			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + rbA->position);
 		}
 	}
 
@@ -64,17 +64,14 @@ namespace Collision
 		std::shared_ptr<PolygonColliderComponent> polyB = std::dynamic_pointer_cast<PolygonColliderComponent>(colliderB);
 		std::shared_ptr<IGameObject> bodyAGO = sphereA->GetParentGameObject().lock();
 		std::shared_ptr<IGameObject> bodyBGO = polyB->GetParentGameObject().lock();
+		
+		std::shared_ptr<RigidBody2DComponent> rbA = std::dynamic_pointer_cast<RigidBody2DComponent>(bodyAGO->GetComponentByType(IComponent::RigidBody));
+		std::shared_ptr<RigidBody2DComponent> rbB = std::dynamic_pointer_cast<RigidBody2DComponent>(bodyBGO->GetComponentByType(IComponent::RigidBody));
 
 		//transform circle center to polygon model space
-		glm::vec2 center = vec2(bodyAGO->GetPosition());
-		glm::vec2 bPos = vec2(bodyBGO->GetPosition());
-		glm::vec2 aPos = vec2(bodyAGO->GetPosition());
-
-		glm::mat2 b_transform_mat2 = glm::mat2(bodyBGO->GetWorldTransform());
-
-		//m->contacts.clear();
-
-		center = transpose(b_transform_mat2) * center - vec2(bodyBGO->GetPosition());
+		m->contacts.clear();
+		glm::vec2 center = rbA->position;
+		center = Utils::Transpose2D(rbB->u) * center - vec2(rbB->position);
 
 		// Find edge with minimum penetration
 		// Exact concept as using support points in Polygon vs Polygon
@@ -102,9 +99,9 @@ namespace Collision
 		// Check to see if center is within polygon
 		if (separation < EPSILON)
 		{
-			m->normal = -(b_transform_mat2 * polyB->polygonCollider.normals[faceNormal]);
+			m->normal = -(rbB->u * polyB->polygonCollider.normals[faceNormal]);
 			m->penetration = sphereA->boundingSphere.radius;
-			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + aPos);
+			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + rbA->position);
 			return;
 		}
 
@@ -120,10 +117,10 @@ namespace Collision
 				return;
 
 			vec2 n = v1 - center;
-			n = b_transform_mat2 * n;
+			n = rbB->u * n;
 			n = Utils::NormaliseVec2(n);
 			m->normal = n;
-			v1 = b_transform_mat2 * v1 + bPos;
+			v1 = rbB->u * v1 + rbB->position;
 			m->contacts.push_back(v1);
 		}
 
@@ -134,9 +131,9 @@ namespace Collision
 				return;
 
 			vec2 n = v2 - center;
-			v2 = b_transform_mat2 * v2 + bPos;
+			v2 = rbB->u * v2 + rbB->position;
 			m->contacts.push_back(v2);
-			n = b_transform_mat2 * n;
+			n = rbB->u * n;
 			n = Utils::NormaliseVec2(n);
 			m->normal = n;
 		}
@@ -148,9 +145,9 @@ namespace Collision
 			if (dot(center - v1, n) > sphereA->boundingSphere.radius)
 				return;
 
-			n = b_transform_mat2 * n;
+			n = rbB->u * n;
 			m->normal = -n;
-			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + aPos);
+			m->contacts.push_back(m->normal * sphereA->boundingSphere.radius + rbA->position);
 		}
 	}
 
@@ -188,20 +185,17 @@ namespace Collision
 		std::shared_ptr<IGameObject> bodyAGO = A->GetParentGameObject().lock();
 		std::shared_ptr<IGameObject> bodyBGO = B->GetParentGameObject().lock();
 
-		vec2 aPos = vec2(bodyAGO->GetPosition());
-		vec2 bPos = vec2(bodyBGO->GetPosition());
-		
-		glm::mat2 ATransform = glm::mat2(bodyAGO->GetWorldTransform());
-		glm::mat2 BTransform = glm::mat2(bodyBGO->GetWorldTransform());
+		std::shared_ptr<RigidBody2DComponent> rbA = std::dynamic_pointer_cast<RigidBody2DComponent>(bodyAGO->GetComponentByType(IComponent::RigidBody));
+		std::shared_ptr<RigidBody2DComponent> rbB = std::dynamic_pointer_cast<RigidBody2DComponent>(bodyBGO->GetComponentByType(IComponent::RigidBody));
 
 		for (uint32 i = 0; i < A->polygonCollider.vertices.size(); ++i)
 		{
 			// Retrieve a face normal from A
 			vec2 n = A->polygonCollider.normals[i];
-			vec2 nw = ATransform * n;
+			vec2 nw = rbA->u * n;
 
 			// Transform face normal into B's model space
-			mat2 buT = transpose(BTransform);
+			mat2 buT = Utils::Transpose2D(rbB->u);
 			n = buT * nw;
 
 			// Retrieve support point from B along -n
@@ -210,8 +204,8 @@ namespace Collision
 			// Retrieve vertex on face from A, transform into
 			// B's model space
 			vec2 v = A->polygonCollider.vertices[i];
-			v = ATransform * v + aPos;
-			v -= bPos;
+			v = rbA->u * v + rbA->position;
+			v -= rbB->position;
 			v = buT * v;
 
 			// Compute penetration distance (in B's model space)

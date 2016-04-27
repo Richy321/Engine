@@ -5,6 +5,7 @@
 #include "../Physics/PhysicsManager.h"
 #include "../Core/Components/BoxColliderComponent.h"
 #include "../Physics/Manifold.h"
+#include "../Physics/PhysicsMaterials.h"
 
 using namespace Core;
 
@@ -108,22 +109,25 @@ public:
 		InitialiseLights();
 		InitialiseTextures();
 		InitialiseCamera();
-		/*
-		std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject();
-		poly->Translate(30.0f, 0.0f, 0.0f);
-		gameObjectManager.push_back(poly);
-		*/
+	
+		//vec2 poly1Pos(30.0f, 0.0f);
+		//std::shared_ptr<GameObject> poly = CreatePolygonPhysicsObject(poly1Pos, 0.0f);
+		//gameObjectManager.push_back(poly);
+		
+		//std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject(PhysicsMaterials::Wood.density, PhysicsMaterials::Wood.restitution);
+		//circle->Translate(20.0f, 0.0f, 0.0f);
+		//gameObjectManager.push_back(circle);
 
-		std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject();
-		circle->Translate(20.0f, 0.0f, 0.0f);
-		gameObjectManager.push_back(circle);
-
-		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject();
-		circle2->Translate(22.5f, 10.0f, 0.0f);
+		vec2 pos2 = vec2(17.0f, 20.0f);
+		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject(PhysicsMaterials::Wood.density, PhysicsMaterials::Wood.restitution, pos2, 0.0f);
 		gameObjectManager.push_back(circle2);
+		
+		vec2 pos1 = vec2(20.0f, 10.0f);
+		std::shared_ptr<GameObject> circle1 = CreateCirclePhysicsObject(PhysicsMaterials::Metal.density, PhysicsMaterials::Metal.restitution, pos1, 0.0f);
+		gameObjectManager.push_back(circle1);
 
-		std::shared_ptr<GameObject> floor = CreateFloorPhysicsObject();
-		floor->Translate(0.0f, -5.0f, 0.0f);
+		vec2 floorPos(15.0f, -15.0f);
+		std::shared_ptr<GameObject> floor = CreateFloorPhysicsObject(floorPos, 0.0f);
 		gameObjectManager.push_back(floor);
 	}
 
@@ -165,7 +169,7 @@ public:
 			return;
 
 		body->velocity += (body->force * body->inverseMass + gravity) * (dt * 0.5f); //apply current forces and gravity
-		//body->angularVelocity += body->torque * body->inverseInertia * (dt *0.5f);
+		body->angularVelocity += body->torque * body->inverseInertia * (dt *0.5f);
 	}
 
 	void IntegrateVelocity(std::shared_ptr<RigidBody2DComponent>& body, float dt)
@@ -173,11 +177,15 @@ public:
 		if (body->inverseMass == 0.0f)
 			return;
 
-		body->GetParentGameObject().lock()->Translate(vec3(body->velocity * dt, 0.0f));
-		//body->orient += body->angularVelocity * dt;
-		//body->GetParentGameObject().lock()->SetOrientation2D(body->orient);
-		IntegrateForces(body, dt);
+		body->position += body->velocity * dt;
+		body->orient += body->angularVelocity * dt;
+
+		//pass to game object world transform
+		body->GetParentGameObject().lock()->SetPosition2D(body->position);
+		body->GetParentGameObject().lock()->SetOrientation2D(body->orient); //possibly set directly from body->u
+		//body->GetParentGameObject().lock()->SetOrientation2D(body->u); //possibly set directly from body->u
 		
+		IntegrateForces(body, dt);
 	}
 
 	void OnFixedTimeStep() override
@@ -232,12 +240,13 @@ public:
 			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
 			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
 		}
-		
-		Check_GLError();
-		//RenderContacts();
-		Check_GLError();
 
+		Check_GLError();
 		SceneManager::notifyDisplayFrame();
+
+		Check_GLError();
+		RenderContacts();
+		Check_GLError();
 	}
 
 	void RenderContacts()
@@ -269,25 +278,32 @@ public:
 		//	camera2D->OnMouseMove(deltaX, deltaY);
 	}
 
-	std::shared_ptr<GameObject> CreateCirclePhysicsObject()	
+	std::shared_ptr<GameObject> CreateCirclePhysicsObject(float density, float restitution, vec2 position, float orientation, bool isStatic = false)
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		go->AddComponent(AssetManager::GetInstance().CreateCirclePrimitiveMeshComponent(2.5f, 32));
 		
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
+		rigidBodyComponent->physicsMaterial->density = density;
+		rigidBodyComponent->physicsMaterial->restitution = restitution;
+		rigidBodyComponent->position = position;
+		rigidBodyComponent->SetOrientation2D(orientation);
 
 		std::shared_ptr<SphereColliderComponent> sphereColliderComponent = std::make_shared<SphereColliderComponent>(go, 2.5f);
 		go->AddComponent(sphereColliderComponent);
 
 		PhysicsManager::ComputeSphereMass(rigidBodyComponent, sphereColliderComponent);
 
+		if (isStatic)
+			rigidBodyComponent->SetStatic();
+
 		physicsObjects.push_back(rigidBodyComponent);
 
 		return go;
 	}
 
-	std::shared_ptr<GameObject> CreatePolygonPhysicsObject()
+	std::shared_ptr<GameObject> CreatePolygonPhysicsObject(vec2 position, float orientation)
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateRandomPolygonPrimitiveMeshComponent(3,6, 2.5f);
@@ -295,8 +311,13 @@ public:
 
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
+		rigidBodyComponent->position = position;
+		rigidBodyComponent->SetOrientation2D(orientation);
+
 
 		PhysicsManager::ComputePolygonMass(rigidBodyComponent, polygonMesh->rootMeshNode->meshes[0]->vertices);
+		//ComputePolygonMass centers vertices around the centroid, need to re-bind
+		polygonMesh->rootMeshNode->meshes[0]->BuildAndBindVertexPositionColorBuffer();
 
 		std::vector<vec2> verts2D;
 		std::vector<vec2> norms2D;
@@ -310,23 +331,21 @@ public:
 		std::shared_ptr<PolygonColliderComponent> polyColliderComponent = std::make_shared<PolygonColliderComponent>(go, verts2D, norms2D);
 		go->AddComponent(polyColliderComponent);
 
-		//ComputePolygonMass centers vertices around the centroid, need to re-bind
-		polygonMesh->rootMeshNode->meshes[0]->BuildAndBindVertexPositionColorBuffer();
-
 		physicsObjects.push_back(rigidBodyComponent);
 
 		return go;
 	}
 
-	std::shared_ptr<GameObject> CreateFloorPhysicsObject()
+	std::shared_ptr<GameObject> CreateFloorPhysicsObject(vec2 position, float orientation)
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		std::shared_ptr<MeshComponent> polygonMesh = AssetManager::GetInstance().CreateSimpleQuadPrimitiveMeshComponent(30.0f, 2.0f);
 		go->AddComponent(polygonMesh);
-		go->Translate(15.0f, -10.0f, 0.0f);
 		std::shared_ptr<RigidBody2DComponent> rigidBodyComponent = std::make_shared<RigidBody2DComponent>(go);
 		go->AddComponent(rigidBodyComponent);
-		
+		rigidBodyComponent->position = position;
+		rigidBodyComponent->SetOrientation2D(orientation);
+
 		std::vector<vec2> verts2D;
 		std::vector<vec2> norms2D;
 
@@ -339,10 +358,8 @@ public:
 		std::shared_ptr<PolygonColliderComponent> polyColliderComponent = std::make_shared<PolygonColliderComponent>(go, verts2D, norms2D);
 		go->AddComponent(polyColliderComponent);
 		
-		
 		physicsObjects.push_back(rigidBodyComponent);
 		
-
 		rigidBodyComponent->SetStatic();
 		
 		return go;

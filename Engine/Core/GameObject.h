@@ -203,6 +203,27 @@ namespace Core
 			world[1][1] = c;
 		}
 
+		void SetPosition2D(vec2 pos) override
+		{
+			world[3].x = pos.x;
+			world[3].y = pos.y;
+			//world[3].z = 0.0f;
+		}
+
+
+		void SetOrientation2D(mat2 rotationMat) override
+		{
+			world[0][0] = rotationMat[0][0];
+			world[0][1] = rotationMat[0][1];
+			world[0][2] = 0.0f;
+			world[1][0] = rotationMat[1][0];
+			world[1][1] = rotationMat[1][1];
+			world[1][2] = 0.0f;
+			world[2][0] = 0.0f;
+			world[2][1] = 0.0f;
+			world[2][2] = 0.0f;
+		}
+
 #pragma endregion 
 	};
 }

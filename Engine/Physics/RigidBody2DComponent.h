@@ -28,23 +28,24 @@ public:
 	glm::vec2 velocity;
 	glm::vec2 force;
 
-	//orientated
-	float angularVelocity;
-	float torque;
-	float orient;
-
-	//mass data
+	//linear
 	float mass;
 	float inverseMass;
+
+	//angular
+	float angularVelocity;
+	float torque;
+	float orient; // in radians
 	float inertia;
 	float inverseInertia;
 
 	float staticFriction;
 	float dynamicFriction;
 
-	std::shared_ptr<PhysicsMaterial> physicsMaterial;
+	mat2 u;
+	vec2 position;
 
-	float gravityScale; //needed?
+	std::shared_ptr<PhysicsMaterial> physicsMaterial;
 
 	void UpdatePhysics(float deltaTime) override
 	{
@@ -64,7 +65,7 @@ public:
 	void ApplyImpulse(const glm::vec2& impulse, const glm::vec2& contactVector)
 	{
 		velocity += inverseMass * impulse;
-		//angularVelocity += inverseInertia * Utils::CrossVec2(contactVector, impulse);
+		angularVelocity += inverseInertia * Utils::CrossVec2(contactVector, impulse);
 	}
 
 	void SetStatic()
@@ -73,6 +74,8 @@ public:
 		mass = 0.0f;
 		inverseInertia = 0.0f;
 		inertia = 0.0f;
+		GetParentGameObject().lock()->SetPosition2D(position);
+		GetParentGameObject().lock()->SetOrientation2D(orient);
 	}
 
 	void Reset()
@@ -81,14 +84,26 @@ public:
 		velocity.y = 0.0f;
 		angularVelocity = 0;
 		torque = 0;
-		orient = glm::linearRand(-M_PI, M_PI);
+		orient = 0;
 		force.x = 0.0f;
 		force.y = 0.0f;
 		staticFriction = 0.5f;
 		dynamicFriction = 0.3f;
 		
 		physicsMaterial = std::make_shared<PhysicsMaterial>(0.3f, 0.2f);
+		u = mat2();
+		position = vec2();
 	}
 
+
+	void SetOrientation2D(float rad)
+	{
+		float c = std::cos(rad);
+		float s = std::sin(rad);
+		u[0][0] = c;
+		u[0][1] = -s;
+		u[1][0] = s;
+		u[1][1] = c;
+	}
 };
 

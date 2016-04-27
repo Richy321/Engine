@@ -20,22 +20,18 @@ namespace Collision
 class Manifold : public IManifold
 {
 
-	std::shared_ptr<Mesh> mesh;
+	std::vector<std::shared_ptr<Mesh>> meshes;
 
 public:
 	Manifold(std::shared_ptr<RigidBody2DComponent> bodyA, std::shared_ptr<RigidBody2DComponent> bodyB)
 	{
 		this->bodyA = bodyA;
 		this->bodyB = bodyB;
-		mesh = std::make_shared<Mesh>(&AssetManager::GetInstance());
-		mesh->mode = GL_LINES;
-		mesh->renderType = Mesh::Coloured;
 	}
 
 	~Manifold()
 	{
 	}
-
 
 	void Solve() override
 	{
@@ -56,8 +52,8 @@ public:
 
 		for (size_t i = 0; i < contacts.size(); i++)
 		{
-			vec2 ra = contacts[i] - vec2(bodyA->GetParentGameObject().lock()->GetPosition());
-			vec2 rb = contacts[i] - vec2(bodyB->GetParentGameObject().lock()->GetPosition());
+			vec2 ra = contacts[i] - vec2(bodyA->position);
+			vec2 rb = contacts[i] - vec2(bodyB->position);
 
 			vec2 rv = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
 				bodyA->velocity - Utils::CrossVec2(bodyA->angularVelocity, ra);
@@ -80,41 +76,8 @@ public:
 
 		for (size_t i = 0; i < contacts.size(); ++i)
 		{
-			vec2 ra = contacts[i] - vec2(bodyA->GetParentGameObject().lock()->GetPosition());
-			vec2 rb = contacts[i] - vec2(bodyB->GetParentGameObject().lock()->GetPosition());
-
-			vec2 relVel = bodyB->velocity - bodyA->velocity;
-
-			float velAlongNormal = Utils::DotVec2(relVel, normal);
-
-			if (velAlongNormal > 0)
-				return;
-
-			float e = min(bodyA->physicsMaterial->restitution, bodyB->physicsMaterial->restitution);
-
-			// Calculate impulse scalar
-			float j = -(1.0f + e) * velAlongNormal;
-			j /= bodyA->inverseMass + bodyB->inverseMass;
-
-			// Apply impulses
-			vec2 impulse = j * normal;
-			bodyA->ApplyImpulse(-(bodyA->inverseMass * impulse), ra);
-			bodyB->ApplyImpulse(bodyB->inverseMass * impulse, rb);
-		}
-	}
-
-	void ApplyImpulseWithFriction()
-	{
-		if (Utils::EqualWithEpsilon(bodyA->inverseMass + bodyB->inverseMass, 0.0f))
-		{
-			InfiniteMassCorrection();
-			return;
-		}
-
-		for (size_t i = 0; i < contacts.size(); ++i)
-		{
-			vec2 ra = contacts[i] - vec2(bodyA->GetParentGameObject().lock()->GetPosition());
-			vec2 rb = contacts[i] - vec2(bodyB->GetParentGameObject().lock()->GetPosition());
+			vec2 ra = contacts[i] - vec2(bodyA->position);
+			vec2 rb = contacts[i] - vec2(bodyB->position);
 
 			vec2 relVel = bodyB->velocity - bodyA->velocity;
 
@@ -130,16 +93,124 @@ public:
 			// Calculate impulse scalar
 			float j = -(1.0f + e) * velAlongNormal;
 			j /= combinedInverseMass;
+			j /= static_cast<float>(contacts.size());
+
+			// Apply impulses
+			vec2 impulse = j * normal;
+			//bodyA->ApplyImpulse(-(bodyA->inverseMass * impulse), ra);
+			//bodyB->ApplyImpulse(bodyB->inverseMass * impulse, rb);
+			bodyA->ApplyImpulse(-(impulse), ra);
+			bodyB->ApplyImpulse(impulse, rb);
+		}
+	}
+
+	void ApplyImpulseWithFriction()
+	{
+		if (Utils::EqualWithEpsilon(bodyA->inverseMass + bodyB->inverseMass, 0.0f))
+		{
+			InfiniteMassCorrection();
+			return;
+		}
+
+		for (size_t i = 0; i < contacts.size(); ++i)
+		{
+			vec2 ra = contacts[i] - vec2(bodyA->position);
+			vec2 rb = contacts[i] - vec2(bodyB->position);
+
+			vec2 relVel = bodyB->velocity - bodyA->velocity;
+
+			float combinedInverseMass = bodyA->inverseMass + bodyB->inverseMass;
+
+			float velAlongNormal = Utils::DotVec2(relVel, normal);
+
+			if (velAlongNormal > 0)
+				return;
+
+			float e = min(bodyA->physicsMaterial->restitution, bodyB->physicsMaterial->restitution);
+
+			// Calculate impulse scalar
+			float j = -(1.0f + e) * velAlongNormal;
+			j /= combinedInverseMass;
+			j /= static_cast<float>(contacts.size());
+
+			// Apply impulses
+			vec2 impulse = j * normal;
+			bodyA->ApplyImpulse(-impulse, ra);
+			bodyB->ApplyImpulse(impulse, rb);
+
+			//tangent
+			vec2 tangent = relVel - Utils::DotVec2(relVel, normal) * normal;
+			tangent = Utils::NormaliseVec2(tangent);
+
+			// j tangent magnitude
+			float jt = -Utils::DotVec2(relVel, tangent); //friction applies negatively along tangent
+			jt /= combinedInverseMass;
+			jt /= static_cast<float>(contacts.size());
+
+			// Don't apply tiny friction impulses
+			if (Utils::EqualWithEpsilon(jt, 0.0f) )
+				return;
+
+			// Coulumb's law
+			vec2 tangentImpulse;
+			if (std::abs(jt) < j * staticFriction)
+				tangentImpulse = jt * tangent;
+			else
+				tangentImpulse = tangent * -j * dynamicFriction;
+
+			// Apply friction impulse
+			bodyA->ApplyImpulse(-tangentImpulse, ra);
+			bodyB->ApplyImpulse(tangentImpulse, rb);
+			printf("tangentImpulse B %f,%f\n", tangentImpulse.x, tangentImpulse.y);
+		}
+	}
+	void ApplyImpulseFrictionOrientation2()
+	{
+		if (Utils::EqualWithEpsilon(bodyA->inverseMass + bodyB->inverseMass, 0.0f))
+		{
+			InfiniteMassCorrection();
+			return;
+		}
+
+		for (size_t i = 0; i < contacts.size(); ++i)
+		{
+			vec2 ra = contacts[i] - vec2(bodyA->position);
+			vec2 rb = contacts[i] - vec2(bodyB->position);
+
+			//vec2 relVel = bodyB->velocity - bodyA->velocity;
+
+			vec2 relVel = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
+				bodyA->velocity + Utils::CrossVec2(bodyA->angularVelocity, ra);
+
+
+			float velAlongNormal = Utils::DotVec2(relVel, normal);
+
+			//no resolve if separating
+			if (velAlongNormal > 0)
+				return;
+
+			float raCrossN = Utils::CrossVec2(ra, normal);
+			float rbCrossN = Utils::CrossVec2(rb, normal);
+
+			float combinedInverseMass = bodyA->inverseMass + bodyB->inverseMass +
+				(raCrossN * raCrossN) * bodyA->inverseInertia +
+				(rbCrossN * rbCrossN) * bodyB->inverseInertia;
+
+			// Calculate impulse scalar
+			float j = -(1.0f + e) * velAlongNormal;
+			j /= combinedInverseMass;
+			j /= static_cast<float>(contacts.size());
 
 			// Apply impulses
 			vec2 impulse = j * normal;
 			bodyA->ApplyImpulse(-(bodyA->inverseMass * impulse), ra);
 			bodyB->ApplyImpulse(bodyB->inverseMass * impulse, rb);
 
+
 			//tangent
 			float dotRelNorm = Utils::DotVec2(relVel, normal);
 
-			vec2 tangent = relVel - dotRelNorm * normal;
+			vec2 tangent = relVel - normal * dotRelNorm;
 			tangent = Utils::NormaliseVec2(tangent);
 
 			// j tangent magnitude
@@ -175,8 +246,8 @@ public:
 		for (size_t i = 0; i < contacts.size(); ++i)
 		{
 			// Calculate radii from COM to contact
-			vec2 ra = contacts[i] - vec2(bodyA->GetParentGameObject().lock()->GetPosition());
-			vec2 rb = contacts[i] - vec2(bodyB->GetParentGameObject().lock()->GetPosition());
+			vec2 ra = contacts[i] - vec2(bodyA->position);
+			vec2 rb = contacts[i] - vec2(bodyB->position);
 
 			// Relative velocity
 			vec2 rv = bodyB->velocity + Utils::CrossVec2(bodyB->angularVelocity, rb) -
@@ -236,6 +307,7 @@ public:
 	{
 		//ApplyImpulseSimple();
 		ApplyImpulseWithFriction();
+		//ApplyImpulseFrictionOrientation();
 		return;
 	}
 
@@ -245,9 +317,8 @@ public:
 		const float percent = 0.4f;
 
 		vec2 correction = (std::max(penetration - k_slop, 0.0f) / (bodyA->inverseMass + bodyB->inverseMass)) * normal * percent;
-		printf("Correction %f, %f\n", correction.x, correction.y);
-		bodyA->GetParentGameObject().lock()->Translate(-vec3(correction * bodyA->inverseMass, 0.0f));
-		bodyB->GetParentGameObject().lock()->Translate(vec3(correction * bodyB->inverseMass, 0.0f));
+		bodyA->position -= correction * bodyA->inverseMass;
+		bodyB->position += correction * bodyB->inverseMass;
 	}
 
 	void InfiniteMassCorrection() override
@@ -258,28 +329,31 @@ public:
 		bodyB->velocity.y = 0;
 	}
 
-
 	void InitialiseMesh()
 	{
+		meshes.clear();
 		for (auto v : contacts)
 		{
-			mesh->vertices.push_back(vec3(v.x, v.y, 0.0f));
-			mesh->colours.push_back(vec4(1.0f, 1.0f, 0.0f, 1.0f));
-
-			vec2 projectedAlongNorm = v + (normal * 2.0f);
-
-
-			mesh->vertices.push_back(vec3(projectedAlongNorm.x, projectedAlongNorm.y, 0.0f));
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&AssetManager::GetInstance());
+			mesh->mode = GL_LINES;
+			mesh->renderType = Mesh::Coloured;
+			
+			mesh->vertices.push_back(vec3(v.x, v.y, 1.0f));
 			mesh->colours.push_back(vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		}
 
-		if(contacts.size() >0)
+			vec2 projectedAlongNorm = v + (normal * 0.75f);
+
+			mesh->vertices.push_back(vec3(projectedAlongNorm.x, projectedAlongNorm.y, 1.0f));
+			mesh->colours.push_back(vec4(1.0f, 0.0f, 0.0f, 1.0f));
 			mesh->BuildAndBindVertexPositionColorBuffer();
+			meshes.push_back(mesh);
+		}
 	}
 
 	void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld)
 	{
-		mesh->Render(mainCamera, toWorld);
+		for(std::shared_ptr<Mesh> mesh : meshes)
+			mesh->Render(mainCamera, toWorld);
 	}
 };
 

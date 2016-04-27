@@ -4,6 +4,8 @@
 #include <memory>
 #include "Networking/Address.h"
 #include "../Dependencies/glm/vec2.hpp"
+#include "../Dependencies/glm/mat2x2.hpp"
+
 #define Check_GLError() Utils::CheckGLError(__FILE__,__LINE__)
 
 namespace Core
@@ -52,7 +54,6 @@ namespace Core
 			}
 		};
 
-
 		static float CrossVec2(const glm::vec2& a, const glm::vec2& b)
 		{
 			return  a.x * b.y - a.y * b.x;
@@ -63,6 +64,11 @@ namespace Core
 			return glm::vec2(-a * v.y, a * v.x);
 		}
 
+		static glm::vec2 Cross(const glm::vec2& v, float a)
+		{
+			return glm::vec2(a * v.y, -a * v.x);
+		}
+
 		static float Len2Vec2(const glm::vec2& v)
 		{
 			return v.x * v.x + v.y * v.y;
@@ -71,6 +77,11 @@ namespace Core
 		static float DotVec2(const glm::vec2& a, const glm::vec2& b)
 		{
 			return a.x * b.x + a.y * b.y;
+		}
+
+		static glm::mat2 Transpose2D(const glm::mat2& m)
+		{
+			return glm::mat2(m[0][0], m[1][0], m[0][1], m[1][1]);
 		}
 
 		static glm::vec2 NormaliseVec2(glm::vec2& v)
@@ -85,6 +96,7 @@ namespace Core
 			}
 			return v;
 		}
+
 		static float DistSquared(const glm::vec2& a, const glm::vec2& b)
 		{
 			glm::vec2 c = a - b;
