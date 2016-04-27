@@ -119,11 +119,11 @@ public:
 		//gameObjectManager.push_back(circle);
 
 		vec2 pos2 = vec2(17.0f, 20.0f);
-		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject(PhysicsMaterials::Wood.density, PhysicsMaterials::Wood.restitution, pos2, 0.0f);
+		std::shared_ptr<GameObject> circle2 = CreateCirclePhysicsObject(1.0f, 0.2f, pos2, 0.0f);
 		gameObjectManager.push_back(circle2);
 		
 		vec2 pos1 = vec2(20.0f, 10.0f);
-		std::shared_ptr<GameObject> circle1 = CreateCirclePhysicsObject(PhysicsMaterials::Metal.density, PhysicsMaterials::Metal.restitution, pos1, 0.0f);
+		std::shared_ptr<GameObject> circle1 = CreateCirclePhysicsObject(1.0f, 0.2f, pos1, 0.0f);
 		gameObjectManager.push_back(circle1);
 
 		vec2 floorPos(15.0f, -15.0f);

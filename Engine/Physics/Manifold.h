@@ -20,7 +20,8 @@ namespace Collision
 class Manifold : public IManifold
 {
 
-	std::vector<std::shared_ptr<Mesh>> meshes;
+	std::vector<std::shared_ptr<Mesh>> collisionMeshes;
+	std::vector<std::shared_ptr<Mesh>> frictionMeshes;
 
 public:
 	Manifold(std::shared_ptr<RigidBody2DComponent> bodyA, std::shared_ptr<RigidBody2DComponent> bodyB)
@@ -63,7 +64,7 @@ public:
 				e = 0.0f;
 		}
 
-		InitialiseMesh();
+		InitialiseMeshes();
 	}
 
 	void ApplyImpulseSimple()
@@ -137,10 +138,15 @@ public:
 			vec2 impulse = j * normal;
 			bodyA->ApplyImpulse(-impulse, ra);
 			bodyB->ApplyImpulse(impulse, rb);
+			//printf("Impulse %f,%f\n", impulse.x, impulse.y);
 
 			//tangent
 			vec2 tangent = relVel - Utils::DotVec2(relVel, normal) * normal;
-			tangent = Utils::NormaliseVec2(tangent);
+			if (Utils::CrossVec2(relVel, normal) < 0)
+				tangent = vec2(-normal.y, normal.x);
+			else
+				tangent = vec2(normal.y, -normal.x);
+			//tangent = Utils::NormaliseVec2(tangent);
 
 			// j tangent magnitude
 			float jt = -Utils::DotVec2(relVel, tangent); //friction applies negatively along tangent
@@ -148,20 +154,28 @@ public:
 			jt /= static_cast<float>(contacts.size());
 
 			// Don't apply tiny friction impulses
-			if (Utils::EqualWithEpsilon(jt, 0.0f) )
+			if (Utils::EqualWithEpsilon(jt, 0.0f))
 				return;
 
 			// Coulumb's law
+			bool isUsingStaticFriction = true;
 			vec2 tangentImpulse;
+
 			if (std::abs(jt) < j * staticFriction)
-				tangentImpulse = jt * tangent;
+			{
+				isUsingStaticFriction = true;
+				tangentImpulse = tangent * jt;
+			}
 			else
+			{
+				isUsingStaticFriction = false;
 				tangentImpulse = tangent * -j * dynamicFriction;
+			}
 
 			// Apply friction impulse
 			bodyA->ApplyImpulse(-tangentImpulse, ra);
 			bodyB->ApplyImpulse(tangentImpulse, rb);
-			printf("tangentImpulse B %f,%f\n", tangentImpulse.x, tangentImpulse.y);
+			printf("tangentImpulse %f,%f, Friction Type: %s\n", tangentImpulse.x, tangentImpulse.y, isUsingStaticFriction ? "static" : "dynamic");
 		}
 	}
 	void ApplyImpulseFrictionOrientation2()
@@ -329,9 +343,9 @@ public:
 		bodyB->velocity.y = 0;
 	}
 
-	void InitialiseMesh()
+	void InitialiseMeshes()
 	{
-		meshes.clear();
+		collisionMeshes.clear();
 		for (auto v : contacts)
 		{
 			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&AssetManager::GetInstance());
@@ -346,13 +360,18 @@ public:
 			mesh->vertices.push_back(vec3(projectedAlongNorm.x, projectedAlongNorm.y, 1.0f));
 			mesh->colours.push_back(vec4(1.0f, 0.0f, 0.0f, 1.0f));
 			mesh->BuildAndBindVertexPositionColorBuffer();
-			meshes.push_back(mesh);
+			collisionMeshes.push_back(mesh);
 		}
+
+		frictionMeshes.clear();
+
+
+
 	}
 
 	void Render(std::shared_ptr<Camera> mainCamera, const mat4 &toWorld)
 	{
-		for(std::shared_ptr<Mesh> mesh : meshes)
+		for(std::shared_ptr<Mesh> mesh : collisionMeshes)
 			mesh->Render(mainCamera, toWorld);
 	}
 };

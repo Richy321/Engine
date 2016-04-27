@@ -87,8 +87,8 @@ public:
 		orient = 0;
 		force.x = 0.0f;
 		force.y = 0.0f;
-		staticFriction = 0.5f;
-		dynamicFriction = 0.3f;
+		staticFriction = 0.2f;
+		dynamicFriction = 0.1f;
 		
 		physicsMaterial = std::make_shared<PhysicsMaterial>(0.3f, 0.2f);
 		u = mat2();
