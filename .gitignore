@@ -197,3 +197,5 @@ FakesAssemblies/
 /Engine/x64/Server Release
 /Engine/x64/Server Debug
 /Engine/Test Debug
+Physics2D Debug
+Physics2D Release

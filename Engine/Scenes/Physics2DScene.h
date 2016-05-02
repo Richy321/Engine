@@ -122,12 +122,12 @@ public:
 		std::shared_ptr<GameObject> floor = CreateStaticPolyPhysicsObject(floorPos, 0.0f, 30.0f, 2.0f);
 		gameObjectManager.push_back(floor);
 
-		vec2 floorPosLeft(2.5f, -11.5f);
-		std::shared_ptr<GameObject> floorLeft = CreateStaticPolyPhysicsObject(floorPosLeft, 0.0f, 5.0f, 5.0f);
+		vec2 floorPosLeft(0.5f, -11.5f);
+		std::shared_ptr<GameObject> floorLeft = CreateStaticPolyPhysicsObject(floorPosLeft, 0.0f, 1.0f, 5.0f);
 		gameObjectManager.push_back(floorLeft);
 
-		vec2 floorPosRight(27.5f, -11.5f);
-		std::shared_ptr<GameObject> floorRight = CreateStaticPolyPhysicsObject(floorPosRight, 0.0f, 5.0f, 5.0f);
+		vec2 floorPosRight(29.5f, -11.5f);
+		std::shared_ptr<GameObject> floorRight = CreateStaticPolyPhysicsObject(floorPosRight, 0.0f, 1.0f, 5.0f);
 		gameObjectManager.push_back(floorRight);
 
 		/*vec2 posZero = vec2(0.0f, 00.0f);
@@ -145,12 +145,12 @@ public:
 		std::shared_ptr<GameObject> floor = CreateStaticPolyPhysicsObject(floorPos, 0.0f, 30.0f, 2.0f);
 		gameObjectManager.push_back(floor);
 
-		vec2 floorPosLeft(2.5f, -11.5f);
-		std::shared_ptr<GameObject> floorLeft = CreateStaticPolyPhysicsObject(floorPosLeft, 0.0f, 5.0f, 5.0f);
+		vec2 floorPosLeft(2.5f, -9.5f);
+		std::shared_ptr<GameObject> floorLeft = CreateStaticPolyPhysicsObject(floorPosLeft, 0.0f, 2.0f, 5.0f);
 		gameObjectManager.push_back(floorLeft);
 
-		vec2 floorPosRight(27.5f, -11.5f);
-		std::shared_ptr<GameObject> floorRight = CreateStaticPolyPhysicsObject(floorPosRight, 0.0f, 5.0f, 5.0f);
+		vec2 floorPosRight(27.5f, -13.5f);
+		std::shared_ptr<GameObject> floorRight = CreateStaticPolyPhysicsObject(floorPosRight, 0.0f, 2.0f, 5.0f);
 		gameObjectManager.push_back(floorRight);
 	}
 
