@@ -9,6 +9,9 @@
 #include "Scenes/ServerScene.h"
 #include "Scenes/ClientScene.h"
 #include "Scenes/Physics2DScene.h"
+#include "Scenes/ClothScene.h"
+#include "Scenes/RayTracerScene.h"
+
 
 using namespace Core;
 using namespace Initialisation;
@@ -38,6 +41,10 @@ int main(int argc, char **argv)
 	std::shared_ptr<IListener> scene = std::make_shared<MultiplayerArena::ClientScene>(window);
 #elif IS_PHYSICS2D
 	std::shared_ptr<IListener> scene = std::make_shared<Physics2DScene>(window);
+#elif IS_CLOTH
+	std::shared_ptr<IListener> scene = std::make_shared<ClothScene>(window);
+#elif IS_RAYTRACER
+	std::shared_ptr<IListener> scene = std::make_shared<RayTracerScene>(window);
 #else
 	std::shared_ptr<IListener> scene = std::make_shared<TestScene>(window);
 #endif

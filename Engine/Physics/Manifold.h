@@ -3,7 +3,7 @@
 #include <vector>
 #include "CollisionDetection.h"
 #include "../Core/Components/Interfaces/ICollider.h"
-#include "../IManifold.h"
+#include "IManifold.h"
 
 namespace Collision
 {

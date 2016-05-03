@@ -7,7 +7,7 @@
 #include "../Core/Components/Interfaces/ICollider.h"
 #include "../Core/Components/SphereColliderComponent.h"
 #include "../Core/Components/PolygonColliderComponent.h"
-#include "../IManifold.h"
+#include "IManifold.h"
 
 using namespace glm;
 

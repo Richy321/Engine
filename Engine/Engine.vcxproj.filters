@@ -293,15 +293,6 @@
     <ClInclude Include="Physics\CollisionDetection.h">
       <Filter>Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\PhysicsMaterial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\PhysicsMaterials.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Manifold.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Components\BoxColliderComponent.h">
       <Filter>Core\Components</Filter>
     </ClInclude>
@@ -315,19 +306,34 @@
       <Filter>Core\Components\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Physics\AABB.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\BoundingSphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Components\PolygonColliderComponent.h">
-      <Filter>Header Files</Filter>
+      <Filter>Physics</Filter>
     </ClInclude>
     <ClInclude Include="Physics\BoundingPolygon.h">
-      <Filter>Header Files</Filter>
+      <Filter>Physics</Filter>
     </ClInclude>
-    <ClInclude Include="IManifold.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Physics\BoundingSphere.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Manifold.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\PhysicsMaterial.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\PhysicsMaterials.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\PolygonColliderComponent.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\RayTracerScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\ClothScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\IManifold.h">
+      <Filter>Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
