@@ -199,3 +199,5 @@ FakesAssemblies/
 /Engine/Test Debug
 Physics2D Debug
 Physics2D Release
+Cloth Debug
+RayTracer Release
