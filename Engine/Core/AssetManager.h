@@ -626,12 +626,12 @@ namespace Core
 			IcoSphereCreator::Create(mesh, recursionLevel, radius);
 			//IcoSphereCreator::CreateSimple(mesh);
 
-			//mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
-			mesh->BuildAndBindVertexPositionColorBuffer();
+			mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
+			//mesh->BuildAndBindVertexPositionColorBuffer();
 			//mesh->BuildAndBindIndexBuffer();
 
 			mesh->mode = GL_TRIANGLES;
-			mesh->renderType = Mesh::Coloured;
+			mesh->renderType = Mesh::LitTextured;
 
 			return mesh;
 		}
@@ -650,47 +650,36 @@ namespace Core
 					float const x = cos(2 * M_PI * s * S) * sin(M_PI * r * R);
 					float const z = sin(2 * M_PI * s * S) * sin(M_PI * r * R);
 
+					vec3 position(x, y, z);
+
 					mesh->uvs.push_back(vec2(s*S, r*R));
-					mesh->vertices.push_back(vec3(x, y, z) * radius);
-					pushIndices(mesh->indices, sectors, r, s);
+					mesh->vertices.push_back(position * radius);
+					mesh->normals.push_back(normalize(position));
+
+					//generate indices
+					int curRow = r * sectors;
+					int nextRow = (r + 1) * sectors;
+
+					mesh->indices.push_back(curRow + s);
+					mesh->indices.push_back(nextRow + s);
+					mesh->indices.push_back(nextRow + (s + 1));
+
+					mesh->indices.push_back(curRow + s);
+					mesh->indices.push_back(nextRow + (s + 1));
+					mesh->indices.push_back(curRow + (s + 1));
 				}
 			}
-			mesh->BuildAndBindVertexPositionColorBuffer();
+			//mesh->BuildAndBindVertexPositionColorBuffer();
+			mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
 			mesh->mode = GL_TRIANGLES;
-			mesh->renderType = Mesh::Coloured;
+			mesh->renderType = Mesh::LitTextured;
 			return mesh;
 
 		}
 
-		void pushIndices(std::vector<unsigned int>& indices, unsigned int sectors)
-		{
-			int r = 0;
-			int s = 0;
-
-			int curRow = r * sectors;
-			int nextRow = (r + 1) * sectors;
-
-			indices.push_back(curRow + s);
-			indices.push_back(nextRow + s);
-			indices.push_back(nextRow + (s + 1));
-
-			indices.push_back(curRow + s);
-			indices.push_back(nextRow + (s + 1));
-			indices.push_back(curRow + (s + 1));
-		}
-
 		void pushIndices(std::vector<unsigned int>& indices, int sectors, int r, int s)
 		{
-			int curRow = r * sectors;
-			int nextRow = (r + 1) * sectors;
 
-			indices.push_back(curRow + s);
-			indices.push_back(nextRow + s);
-			indices.push_back(nextRow + (s + 1));
-
-			indices.push_back(curRow + s);
-			indices.push_back(nextRow + (s + 1));
-			indices.push_back(curRow + (s + 1));
 		}
 
 		std::shared_ptr<Mesh> CreateSphere(float radius, unsigned int rings, unsigned int sectors)

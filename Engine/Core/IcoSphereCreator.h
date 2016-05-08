@@ -160,6 +160,10 @@ private:
 	{
 		mesh->vertices.push_back(position);
 		mesh->colours.push_back(Core::Colours_RGBA::HotPink);
+		mesh->normals.push_back(normalize(position));
+		float tu = asin(position.x) / Core::M_PI + 0.5;
+		float tv = asin(position.y) / Core::M_PI + 0.5;
+		mesh->uvs.push_back(vec2(tu, tv));
 		return index++;
 	}
 

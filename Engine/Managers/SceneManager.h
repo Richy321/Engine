@@ -20,6 +20,9 @@ namespace Managers
 	private:
 		bool captureCursor = false;
 		bool isWarpingCursor = false;
+
+		void UpdateShaderUniforms() const;
+
 	protected:
 		SceneManager(Core::Initialisation::WindowInfo winInfo);
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
@@ -36,6 +39,10 @@ namespace Managers
 		int mouseDeltaY;
 		bool paused = false;
 		const float fixedTimeStep = 1.0f / 60.0f;
+
+		std::shared_ptr<Core::DirectionalLight> directionalLight;
+		std::vector<std::shared_ptr<Core::SpotLight>> spotLights;
+		std::vector<std::shared_ptr<Core::PointLight>> pointLights;
 
 		std::mutex mutexGameObjectManager;
 	public:

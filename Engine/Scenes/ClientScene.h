@@ -31,11 +31,6 @@ namespace MultiplayerArena
 
 		
 		std::shared_ptr<GameObject> floor;
-
-		std::shared_ptr<DirectionalLight> directionalLight;
-		std::vector<std::shared_ptr<SpotLight>> spotLights;
-		std::vector<std::shared_ptr<PointLight>> pointLights;
-
 		const float floorWidth = 30.0f;
 		const float floorDepth = 30.0f;
 		float m_scale = 0.0f;
@@ -159,8 +154,8 @@ namespace MultiplayerArena
 			directionalLight = std::make_shared<DirectionalLight>();
 			directionalLight->Color = vec3(1.0f, 1.0f, 1.0f);
 			directionalLight->AmbientIntensity = 0.01f;
-			directionalLight->DiffuseIntensity = 0.2f;
-			directionalLight->Direction = vec3(0.0f, 0.0, -1.0);
+			directionalLight->DiffuseIntensity = 0.5f;
+			directionalLight->Direction = vec3(0.0f, -1.0, -1.0);
 
 			pointLights.push_back(std::make_shared<PointLight>());
 			pointLights[0]->DiffuseIntensity = 0.75f;
@@ -171,7 +166,7 @@ namespace MultiplayerArena
 			pointLights.push_back(std::make_shared<PointLight>());
 			pointLights[1]->DiffuseIntensity = 0.75f;
 			pointLights[1]->Color = vec3(0.0f, 0.5f, 1.0f);
-			pointLights[0]->Position = vec3(7.0f, 1.0f, 1.0f);
+			pointLights[1]->Position = vec3(7.0f, 1.0f, 1.0f);
 			pointLights[1]->Attenuation.Linear = 0.1f;
 
 			spotLights.push_back(std::make_shared<SpotLight>());
@@ -213,22 +208,22 @@ namespace MultiplayerArena
 			//camera->OnMouseMove(deltaX, deltaY);
 		}
 
-		virtual void notifyDisplayFrame() override
-		{
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
+		//virtual void notifyDisplayFrame() override
+		//{
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(camera->view);
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(camera->projection);
 
-			vec3 cameraPos = vec3(camera->GetWorldTransform()[3]);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
+		//	vec3 cameraPos = vec3(camera->GetWorldTransform()[3]);
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
 
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
-			Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
+		//	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
 
-			SceneManager::notifyDisplayFrame();
-		}
+		//	SceneManager::notifyDisplayFrame();
+		//}
 
 		std::shared_ptr<INetworkViewComponent> ConnectPlayer(GUID id, vec3 position)
 		{

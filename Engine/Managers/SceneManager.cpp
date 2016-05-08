@@ -69,8 +69,28 @@ void SceneManager::notifyBeginFrame()
 	OnUpdate(elapsedTime);
 }
 
+
+void SceneManager::UpdateShaderUniforms() const
+{
+	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetViewMatrix(mainCamera.lock()->view);
+	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetProjectionMatrix(mainCamera.lock()->projection);
+
+	vec3 cameraPos = vec3(mainCamera.lock()->GetWorldTransform()[3]);
+	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
+	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularIntensity(1.0f);
+	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetMatSpecularPower(32.0f);
+
+	if(directionalLight != nullptr)
+		ShaderManager::GetInstance().litTexturedMeshEffect->SetDirectionalLight(directionalLight);
+	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetPointLights(pointLights);
+	Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetSpotLights(spotLights);
+}
+
 void SceneManager::notifyDisplayFrame()
 {
+	Check_GLError();
+	UpdateShaderUniforms();
+
 	Check_GLError();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
