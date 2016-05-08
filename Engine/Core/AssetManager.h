@@ -619,19 +619,126 @@ namespace Core
 			return cubeMesh;
 		}
 
-		std::shared_ptr<Mesh> CreateIcospherePrimitive(int recursionLevel)
+		std::shared_ptr<Mesh> CreateIcospherePrimitive(int recursionLevel, float radius)
 		{
 			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
 
-			//IcoSphereCreator::Create(mesh, recursionLevel);
-			IcoSphereCreator::CreateSimple(mesh);
+			IcoSphereCreator::Create(mesh, recursionLevel, radius);
+			//IcoSphereCreator::CreateSimple(mesh);
 
-			mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
-			//mesh->BuildAndBindVertexPositionColorBuffer();
+			//mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
+			mesh->BuildAndBindVertexPositionColorBuffer();
 			//mesh->BuildAndBindIndexBuffer();
 
 			mesh->mode = GL_TRIANGLES;
-			mesh->renderType = Mesh::LitTextured;
+			mesh->renderType = Mesh::Coloured;
+
+			return mesh;
+		}
+
+		std::shared_ptr<Mesh> CreateSphereCustom(float radius, unsigned int rings, unsigned int sectors)
+		{
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
+			float const R = 1.0f / (float)(rings);
+			float const S = 1.0f / (float)(sectors);
+
+			for (int r = 0; r <= rings; ++r)
+			{
+				for (int s = 0; s <= sectors; ++s) 
+				{
+					float const y = sin(-M_PI_2 + M_PI * r * R);
+					float const x = cos(2 * M_PI * s * S) * sin(M_PI * r * R);
+					float const z = sin(2 * M_PI * s * S) * sin(M_PI * r * R);
+
+					mesh->uvs.push_back(vec2(s*S, r*R));
+					mesh->vertices.push_back(vec3(x, y, z) * radius);
+					pushIndices(mesh->indices, sectors, r, s);
+				}
+			}
+			mesh->BuildAndBindVertexPositionColorBuffer();
+			mesh->mode = GL_TRIANGLES;
+			mesh->renderType = Mesh::Coloured;
+			return mesh;
+
+		}
+
+		void pushIndices(std::vector<unsigned int>& indices, unsigned int sectors)
+		{
+			int r = 0;
+			int s = 0;
+
+			int curRow = r * sectors;
+			int nextRow = (r + 1) * sectors;
+
+			indices.push_back(curRow + s);
+			indices.push_back(nextRow + s);
+			indices.push_back(nextRow + (s + 1));
+
+			indices.push_back(curRow + s);
+			indices.push_back(nextRow + (s + 1));
+			indices.push_back(curRow + (s + 1));
+		}
+
+		void pushIndices(std::vector<unsigned int>& indices, int sectors, int r, int s)
+		{
+			int curRow = r * sectors;
+			int nextRow = (r + 1) * sectors;
+
+			indices.push_back(curRow + s);
+			indices.push_back(nextRow + s);
+			indices.push_back(nextRow + (s + 1));
+
+			indices.push_back(curRow + s);
+			indices.push_back(nextRow + (s + 1));
+			indices.push_back(curRow + (s + 1));
+		}
+
+		std::shared_ptr<Mesh> CreateSphere(float radius, unsigned int rings, unsigned int sectors)
+		{
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
+
+			float const R = 1.0f / (float)(rings - 1);
+			float const S = 1.0f / (float)(sectors - 1);
+			int r, s;
+
+			mesh->vertices.resize(rings * sectors * 3);
+			mesh->normals.resize(rings * sectors * 3);
+			mesh->uvs.resize(rings * sectors * 2);
+			std::vector<vec3>::iterator v = mesh->vertices.begin();
+			std::vector<vec3>::iterator n = mesh->normals.begin();
+			std::vector<vec2>::iterator t = mesh->uvs.begin();
+			for (r = 0; r < rings; r++) for (s = 0; s < sectors; s++) {
+				float const y = sin(-M_PI_2 + M_PI * r * R);
+				float const x = cos(2 * M_PI * s * S) * sin(M_PI * r * R);
+				float const z = sin(2 * M_PI * s * S) * sin(M_PI * r * R);
+
+				t->x = s*S;
+				t->y = r*R;
+				*t++;
+
+				v->x = x * radius;
+				v->y = y * radius;
+				v->z = z * radius;
+				*v++;
+
+				n->x = x;
+				n->y = y;
+				n->z = z;
+				*n++;
+			}
+
+			mesh->indices.resize(rings * sectors * 4);
+			std::vector<unsigned int>::iterator i = mesh->indices.begin();
+			for (r = 0; r < rings - 1; r++) for (s = 0; s < sectors - 1; s++) {
+				*i++ = r * sectors + s;
+				*i++ = r * sectors + (s + 1);
+				*i++ = (r + 1) * sectors + (s + 1);
+				*i++ = (r + 1) * sectors + s;
+			}
+
+			mesh->BuildAndBindVertexPositionColorBuffer();
+			//mesh->mode = GL_TRIANGLE_STRIP;
+			//mesh->renderType = Mesh::Coloured;
 
 			return mesh;
 		}
@@ -686,10 +793,17 @@ namespace Core
 			return mesh;
 		}
 
-		std::shared_ptr<MeshComponent> CreateIcospherePrimitiveMeshComponent(int recursionLevel = 1)
+		std::shared_ptr<MeshComponent> CreateIcospherePrimitiveMeshComponent(int recursionLevel = 1, float radius = 1.0f)
 		{
 			std::shared_ptr<MeshComponent> mesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
-			mesh->AddRootMesh(CreateIcospherePrimitive(recursionLevel));
+			mesh->AddRootMesh(CreateIcospherePrimitive(recursionLevel, radius));
+			return mesh;
+		}
+
+		std::shared_ptr<MeshComponent> CreateSpherePrimitiveMeshComponent(float radius, unsigned int rings, unsigned int sectors)
+		{
+			std::shared_ptr<MeshComponent> mesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
+			mesh->AddRootMesh(CreateSphereCustom(radius, rings, sectors));
 			return mesh;
 		}
 

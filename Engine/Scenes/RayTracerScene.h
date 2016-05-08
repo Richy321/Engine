@@ -14,6 +14,7 @@ public:
 
 	RayTracerScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
+		camera = std::make_shared<CameraFPS>();
 	}
 
 	~RayTracerScene()

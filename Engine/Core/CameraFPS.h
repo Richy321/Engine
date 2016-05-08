@@ -20,6 +20,8 @@ namespace Core
 		vec3 right;
 		vec3 up;
 
+		
+
 		void RotateSpherical(int deltaX, int deltaY)
 		{
 			// Compute new orientation
@@ -66,6 +68,7 @@ namespace Core
 
 	public:
 		bool useQuaternionRotation = true;
+		bool useWASD = false;
 
 		CameraFPS()
 		{
@@ -83,22 +86,44 @@ namespace Core
 
 		void OnKey(unsigned char key, int x, int y) override
 		{
-			if (key == 'j')
-				translateDelta -= right * cameraMovementSpeed;
-			if (key == 'l')
-				translateDelta += right * cameraMovementSpeed;
-			if (key == 'i')
-				translateDelta += forward * cameraMovementSpeed;
-			if (key == 'k')
-				translateDelta -= forward * cameraMovementSpeed;
-			if (key == 'm')
-				translateDelta += up * cameraMovementSpeed;
-			if (key == '.')
-				translateDelta -= up * cameraMovementSpeed;
-			if (key == 'u')
-				Rotate(30, 0);
-			if (key == 'o')
-				Rotate(-30, 0);
+			if (useWASD)
+			{
+				if (key == 'a')
+					translateDelta -= right * cameraMovementSpeed;
+				if (key == 'd')
+					translateDelta += right * cameraMovementSpeed;
+				if (key == 'w')
+					translateDelta += forward * cameraMovementSpeed;
+				if (key == 's')
+					translateDelta -= forward * cameraMovementSpeed;
+				if (key == 'z')
+					translateDelta += up * cameraMovementSpeed;
+				if (key == 'c')
+					translateDelta -= up * cameraMovementSpeed;
+				if (key == 'q')
+					Rotate(30, 0);
+				if (key == 'e')
+					Rotate(-30, 0);
+			}
+			else
+			{
+				if (key == 'j')
+					translateDelta -= right * cameraMovementSpeed;
+				if (key == 'l')
+					translateDelta += right * cameraMovementSpeed;
+				if (key == 'i')
+					translateDelta += forward * cameraMovementSpeed;
+				if (key == 'k')
+					translateDelta -= forward * cameraMovementSpeed;
+				if (key == 'm')
+					translateDelta += up * cameraMovementSpeed;
+				if (key == '.')
+					translateDelta -= up * cameraMovementSpeed;
+				if (key == 'u')
+					Rotate(30, 0);
+				if (key == 'o')
+					Rotate(-30, 0);
+			}
 		}
 
 		void Rotate(int deltaX, int deltaY)

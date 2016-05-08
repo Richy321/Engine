@@ -41,6 +41,8 @@ namespace Core
 		GLenum mode = GL_TRIANGLES;
 		IAssetManager* assetManager;
 
+		bool renderWireframe = false;
+
 		Mesh(IAssetManager* assMan) : assetManager(assMan)
 		{
 		}
@@ -87,7 +89,6 @@ namespace Core
 
 				Managers::ShaderManager::GetInstance().litTexturedMeshEffect->SetEyeWorldPos(cameraPos);
 
-
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -98,6 +99,11 @@ namespace Core
 
 			glBindVertexArray(vao);
 			Check_GLError();
+
+			if(renderWireframe)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
 
 			if(!materialID.empty())
 				assetManager->BindTexture(materialID, GL_TEXTURE0);
@@ -113,6 +119,9 @@ namespace Core
 				glDrawArrays(mode, 0, vertices.size());
 
 			glBindVertexArray(0);
+
+			if(renderWireframe)
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 
 		void SetProgram(GLuint program) { this->program = program; }
@@ -167,9 +176,7 @@ namespace Core
 				verts.push_back(VertexPositionNormalTextured(vertices[v], normal, uv));
 			}
 				
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+			BuildAndBindIndexBuffer();
 
 			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionNormalTextured) * verts.size(), &verts[0], GL_STATIC_DRAW);
 
@@ -192,6 +199,8 @@ namespace Core
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
 
+			glGenBuffers(1, &ebo);
+
 			GLuint vbo;
 			glGenBuffers(1, &vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -203,37 +212,38 @@ namespace Core
 
 				verts.push_back(VertexPositionColour(vertices[i], colour));
 			}
-
-			if (indices.size() > 0)
-			{
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-			}
-
+			
+			BuildAndBindIndexBuffer();
+			
 			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionColour) * verts.size(), &verts[0], GL_STATIC_DRAW);
-			
-			
+
+
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPositionColour), (void*)0);
 
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexPositionColour), (void*)(offsetof(VertexPositionColour, VertexPositionColour::color)));
-			
-			glBindVertexArray(0);
+
+			//glBindVertexArray(0);
 
 			vbos.push_back(vbo);
 		}
 
 		void BuildAndBindIndexBuffer()
 		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+			if (indices.size() > 0)
+			{
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+			}
 		}
 
 		void BuildAndBindVertexPositionBuffer()
 		{
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
+
+			glGenBuffers(1, &ebo);
 
 			GLuint vbo;
 			glGenBuffers(1, &vbo);
@@ -244,6 +254,8 @@ namespace Core
 			{
 				verts.push_back(VertexPosition(vertices[i]));
 			}
+
+			BuildAndBindIndexBuffer();
 
 			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionColour) * verts.size(), &verts[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);

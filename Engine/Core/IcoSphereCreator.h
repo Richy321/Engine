@@ -75,27 +75,27 @@ public:
 		mesh->vertices.insert(std::end(mesh->vertices), std::begin(Verts), std::end(Verts));
 	}
 
-	static void Create(std::shared_ptr<Core::Mesh> mesh, int recursionLevel)
+	static void Create(std::shared_ptr<Core::Mesh> mesh, int recursionLevel, float radius)
 	{
 		middlePointIndexCache.clear();
 		index = 0;
 
 		auto t = (1.0f + sqrt(5.0f)) / 2.0f;
 
-		AddVertex(mesh, vec3(-1, t, 0));
-		AddVertex(mesh, vec3(1, t, 0));
-		AddVertex(mesh, vec3(-1, -t, 0));
-		AddVertex(mesh, vec3(1, -t, 0));
+		AddVertex(mesh, normalize(vec3(-1, t, 0)) * radius);
+		AddVertex(mesh, normalize(vec3(1, t, 0)) * radius);
+		AddVertex(mesh, normalize(vec3(-1, -t, 0)) * radius);
+		AddVertex(mesh, normalize(vec3(1, -t, 0)) * radius);
 
-		AddVertex(mesh, vec3(0, -1, t));
-		AddVertex(mesh, vec3(0, 1, t));
-		AddVertex(mesh, vec3(0, -1, -t));
-		AddVertex(mesh, vec3(0, 1, -t));
+		AddVertex(mesh, normalize(vec3(0, -1, t)) * radius);
+		AddVertex(mesh, normalize(vec3(0, 1, t)) * radius);
+		AddVertex(mesh, normalize(vec3(0, -1, -t)) * radius);
+		AddVertex(mesh, normalize(vec3(0, 1, -t)) * radius);
 
-		AddVertex(mesh, vec3(t, 0, -1));
-		AddVertex(mesh, vec3(t, 0, 1));
-		AddVertex(mesh, vec3(-t, 0, -1));
-		AddVertex(mesh, vec3(-t, 0, 1));
+		AddVertex(mesh, normalize(vec3(t, 0, -1)) * radius);
+		AddVertex(mesh, normalize(vec3(t, 0, 1)) * radius);
+		AddVertex(mesh, normalize(vec3(-t, 0, -1)) * radius);
+		AddVertex(mesh, normalize(vec3(-t, 0, 1)) * radius);
 
 		auto faces = std::vector<std::shared_ptr<TriangleIndices>>();
 		faces.push_back(std::make_shared<TriangleIndices>(0, 11, 5));
@@ -127,9 +127,9 @@ public:
 			auto faces2 = std::vector<std::shared_ptr<TriangleIndices>>();
 			for (auto tri : faces)
 			{
-				int a = GetMiddlePoint(tri->v1, tri->v2, mesh);
-				int b = GetMiddlePoint(tri->v2, tri->v3, mesh);
-				int c = GetMiddlePoint(tri->v3, tri->v1, mesh);
+				int a = GetMiddlePoint(tri->v1, tri->v2, mesh, radius);
+				int b = GetMiddlePoint(tri->v2, tri->v3, mesh, radius);
+				int c = GetMiddlePoint(tri->v3, tri->v1, mesh, radius);
 
 				faces2.push_back(std::make_shared<TriangleIndices>(tri->v1, a, c));
 				faces2.push_back(std::make_shared<TriangleIndices>(tri->v2, b, a));
@@ -158,13 +158,12 @@ private:
 
 	static int AddVertex(std::shared_ptr<Core::Mesh> mesh, vec3 position)
 	{
-		double length = sqrt(position.x * position.x + position.y * position.y + position.z * position.z);
-		mesh->vertices.push_back(vec3(position.x / length, position.y / length, position.z / length));
+		mesh->vertices.push_back(position);
 		mesh->colours.push_back(Core::Colours_RGBA::HotPink);
 		return index++;
 	}
 
-	static int GetMiddlePoint(int p1, int p2, std::shared_ptr<Core::Mesh> mesh)
+	static int GetMiddlePoint(int p1, int p2, std::shared_ptr<Core::Mesh> mesh, float radius)
 	{
 		bool firstPointIsSmaller = p1 < p2;
 		int64_t smallerIndex = firstPointIsSmaller ? p1 : p2;
@@ -183,7 +182,7 @@ private:
 								(point1.y + point2.y) / 2.0,
 								(point1.z + point2.z) / 2.0);
 
-		int i = AddVertex(mesh, middle);
+		int i = AddVertex(mesh, normalize(middle) * radius);
 
 		middlePointIndexCache.insert(std::make_pair(key, i));
 		return i;

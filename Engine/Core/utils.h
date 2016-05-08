@@ -12,6 +12,7 @@ namespace Core
 {
 	const float EPSILON = 0.0001f;
 	const float M_PI = 3.14159f;
+	const float M_PI_2 = 1.5707963f;  // pi/2
 
 	class Utils
 	{
