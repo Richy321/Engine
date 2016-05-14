@@ -2,6 +2,9 @@
 #include "../Managers/SceneManager.h"
 #include "../Core/CameraFPS.h"
 #include "../Core/AssetManager.h"
+//#include "Physics/Cloth/ClothComponent.h"
+#include "Physics/ParticleSystem/ParticleSystemComponent.h"
+#include "../Physics/Cloth/ClothComponent.h"
 using namespace Core;
 
 class ClothScene : public Managers::SceneManager
@@ -34,6 +37,8 @@ public:
 		InitialiseTextures();
 		InitialiseCamera();
 		InitialiseSceneObjects();
+
+		clearColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void InitialiseTextures() const
@@ -89,10 +94,13 @@ public:
 		gameObjectManager.push_back(go);
 
 		cloth = std::make_shared<GameObject>();
-		cloth->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(clothWidth, clothDepth, defaultCheckeredTexture));
+		//cloth->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(clothWidth, clothDepth, defaultCheckeredTexture));
+		std::shared_ptr<ClothComponent> clothComponent = std::make_shared<ClothComponent>(std::weak_ptr<GameObject>(),vec2(clothWidth, clothDepth), vec2(10,10));
+		clothComponent->SetTexture(defaultCheckeredTexture);
+		cloth->AddComponent(clothComponent);
 		cloth->Translate(-clothWidth *0.5f, 20.0f, -clothDepth * 0.5f);
 		gameObjectManager.push_back(cloth);
-
+		
 		//std::shared_ptr<GameObject> go2 = std::make_shared<GameObject>();
 		//std::shared_ptr<MeshComponent> meshComponent2 = AssetManager::GetInstance().CreateIcospherePrimitiveMeshComponent(1, 5.0f);
 		////meshComponent2->rootMeshNode->meshes[0]->renderWireframe = true;
@@ -103,7 +111,6 @@ public:
 
 	void OnFixedTimeStep() override
 	{
-
 	}
 
 	void OnUpdate(float deltaTime) override

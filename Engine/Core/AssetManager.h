@@ -624,12 +624,8 @@ namespace Core
 			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
 
 			IcoSphereCreator::Create(mesh, recursionLevel, radius);
-			//IcoSphereCreator::CreateSimple(mesh);
 
 			mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
-			//mesh->BuildAndBindVertexPositionColorBuffer();
-			//mesh->BuildAndBindIndexBuffer();
-
 			mesh->mode = GL_TRIANGLES;
 			mesh->renderType = Mesh::LitTextured;
 
@@ -669,67 +665,11 @@ namespace Core
 					mesh->indices.push_back(curRow + (s + 1));
 				}
 			}
-			//mesh->BuildAndBindVertexPositionColorBuffer();
 			mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
 			mesh->mode = GL_TRIANGLES;
 			mesh->renderType = Mesh::LitTextured;
 			return mesh;
 
-		}
-
-		void pushIndices(std::vector<unsigned int>& indices, int sectors, int r, int s)
-		{
-
-		}
-
-		std::shared_ptr<Mesh> CreateSphere(float radius, unsigned int rings, unsigned int sectors)
-		{
-			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(&GetInstance());
-
-			float const R = 1.0f / (float)(rings - 1);
-			float const S = 1.0f / (float)(sectors - 1);
-			int r, s;
-
-			mesh->vertices.resize(rings * sectors * 3);
-			mesh->normals.resize(rings * sectors * 3);
-			mesh->uvs.resize(rings * sectors * 2);
-			std::vector<vec3>::iterator v = mesh->vertices.begin();
-			std::vector<vec3>::iterator n = mesh->normals.begin();
-			std::vector<vec2>::iterator t = mesh->uvs.begin();
-			for (r = 0; r < rings; r++) for (s = 0; s < sectors; s++) {
-				float const y = sin(-M_PI_2 + M_PI * r * R);
-				float const x = cos(2 * M_PI * s * S) * sin(M_PI * r * R);
-				float const z = sin(2 * M_PI * s * S) * sin(M_PI * r * R);
-
-				t->x = s*S;
-				t->y = r*R;
-				*t++;
-
-				v->x = x * radius;
-				v->y = y * radius;
-				v->z = z * radius;
-				*v++;
-
-				n->x = x;
-				n->y = y;
-				n->z = z;
-				*n++;
-			}
-
-			mesh->indices.resize(rings * sectors * 4);
-			std::vector<unsigned int>::iterator i = mesh->indices.begin();
-			for (r = 0; r < rings - 1; r++) for (s = 0; s < sectors - 1; s++) {
-				*i++ = r * sectors + s;
-				*i++ = r * sectors + (s + 1);
-				*i++ = (r + 1) * sectors + (s + 1);
-				*i++ = (r + 1) * sectors + s;
-			}
-
-			mesh->BuildAndBindVertexPositionColorBuffer();
-			//mesh->mode = GL_TRIANGLE_STRIP;
-			//mesh->renderType = Mesh::Coloured;
-
-			return mesh;
 		}
 
 		std::unique_ptr<MeshComponent> CreateCirclePrimitiveMeshComponent(float radius, int fragments)
@@ -767,6 +707,14 @@ namespace Core
 			quadMesh->rootMeshNode->meshes[0]->materialID = texture;
 			return quadMesh;
 		}
+
+		//std::shared_ptr<MeshComponent> CreateGridPrimitiveMeshComponent(float width, float depth, int widthSegments, int depthSegments, std::string texture = "") const
+		//{
+		//	std::shared_ptr<MeshComponent> quadMesh = std::make_shared<MeshComponent>(std::weak_ptr<GameObject>());
+		//	quadMesh->AddRootMesh(CreateQuadPrimitiveAdv(width, depth));
+		//	quadMesh->rootMeshNode->meshes[0]->materialID = texture;
+		//	return quadMesh;
+		//}
 
 		std::shared_ptr<MeshComponent> CreateSimpleQuadPrimitiveMeshComponent(float width, float depth) const
 		{

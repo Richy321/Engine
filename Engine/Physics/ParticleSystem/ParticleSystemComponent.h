@@ -31,7 +31,7 @@ public:
 
 	void Initialise()
 	{
-		for (auto i = 0; i < particleCount; i++)
+		for (size_t i = 0; i < particleCount; i++)
 		{
 			std::shared_ptr<Particle> particle = std::make_shared<Particle>();
 
@@ -44,20 +44,20 @@ public:
 
 	void Render(std::shared_ptr<Core::Camera> mainCamera) override
 	{
-		for (auto i = 0; i < particleCount; i++)
+		for (size_t i = 0; i < particleCount; i++)
 		{
 			//todo render something
 		}
 	}
 
-	void UpdatePhysics(float deltaTime) override
+	void OnFixedTimeStep(float deltaTime) override
 	{
 		std::vector<vec3> forces
 		{
-			vec3(0.0f, IPhysicsManager::gravity, 0.0f)
+			vec3(0.0f, -9.8f, 0.0f)
 		};
 
-		for (auto i = 0; i < particles.size(); i++)
+		for (size_t i = 0; i < particles.size(); i++)
 		{
 			particles[i]->ApplyForces(forces, deltaTime);
 		}

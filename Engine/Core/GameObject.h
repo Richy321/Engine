@@ -57,7 +57,7 @@ namespace Core
 			}
 		}
 
-		virtual void UpdatePhysics(float deltaTime)
+		virtual void OnFixedTimeStep(float deltaTime)
 		{
 			if (!isEnabled)
 				return;
@@ -65,7 +65,7 @@ namespace Core
 			for (auto& comp : components)
 			{
 				if (comp->GetComponentFlags() & Physics)
-					std::dynamic_pointer_cast<IPhysicsComponent>(comp)->UpdatePhysics(deltaTime);
+					std::dynamic_pointer_cast<IPhysicsComponent>(comp)->OnFixedTimeStep(deltaTime);
 			}
 		}
 

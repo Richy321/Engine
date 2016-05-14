@@ -3,10 +3,10 @@
 #include "../Dependencies/glew/glew.h"
 #include <memory>
 #include "Networking/Address.h"
-#include "../Dependencies/glm/vec2.hpp"
-#include "../Dependencies/glm/mat2x2.hpp"
+#include "../Dependencies/glm/glm.hpp"
 
 #define Check_GLError() Utils::CheckGLError(__FILE__,__LINE__)
+using namespace glm;
 
 namespace Core
 {
@@ -114,6 +114,19 @@ namespace Core
 		static bool EqualWithEpsilon(float a, float b)
 		{
 			return std::abs(a - b) <= EPSILON;
+		}
+
+		static glm::vec3 CalculateNormalMagnitude(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3 )
+		{
+			glm::vec3 v1 = p2 - p1;
+			glm::vec3 v2 = p3 - p1;
+
+			return cross(v1, v2);
+		}
+
+		static glm::vec3 CalculateNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
+		{
+			return normalize(CalculateNormalMagnitude(p1, p2, p3));
 		}
 	};
 }

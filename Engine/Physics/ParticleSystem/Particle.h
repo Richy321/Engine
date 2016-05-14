@@ -16,7 +16,7 @@ public:
 	{
 	}
 
-	glm::vec3 ApplyForces(std::vector<glm::vec3> forces, float deltaTime)
+	void ApplyForces(std::vector<glm::vec3> forces, float deltaTime)
 	{
 		for each (glm::vec3 force in forces)
 		{

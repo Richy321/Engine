@@ -52,6 +52,9 @@
     <Filter Include="Physics\ParticleSystem">
       <UniqueIdentifier>{a8e51832-10f0-4947-8235-50728e6d88aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Physics\Cloth">
+      <UniqueIdentifier>{d711b159-c07f-407f-b730-e3d529f8ccc0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -334,6 +337,15 @@
     </ClInclude>
     <ClInclude Include="Physics\IManifold.h">
       <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Cloth\Cloth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Cloth\ClothParticle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Cloth\ClothComponent.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

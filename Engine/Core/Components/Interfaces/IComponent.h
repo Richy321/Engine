@@ -34,7 +34,8 @@ namespace Core
 			DirectionalMovement,
 			ParticleSystem,
 			Collider,
-			RigidBody
+			RigidBody,
+			Cloth
 		};
 
 		int GetID() const { return id; }
@@ -48,7 +49,7 @@ namespace Core
 		std::weak_ptr<IGameObject> GetParentGameObject() { return parentGameObject; }
 		void SetParentGameObject(std::weak_ptr<IGameObject> parent) { parentGameObject = parent; }
 
-		virtual void Update(float deltaTime) = 0;
+		virtual void Update(float deltaTime) {}
 		virtual void Destroy() {}
 
 		virtual ComponentTypes GetComponentType() const = 0;

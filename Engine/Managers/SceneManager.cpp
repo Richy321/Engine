@@ -32,7 +32,7 @@ void SceneManager::OnFixedTimeStep()
 {
 	//Call specific physics GO functions
 	for (std::shared_ptr<GameObject>& go : gameObjectManager)
-		go->UpdatePhysics(fixedTimeStep);
+		go->OnFixedTimeStep(fixedTimeStep);
 }
 
 void SceneManager::notifyBeginFrame()
@@ -93,7 +93,7 @@ void SceneManager::notifyDisplayFrame()
 
 	Check_GLError();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(clearColour.r, clearColour.g, clearColour.b, clearColour.a);
 
 	for (size_t i = 0; i < gameObjectManager.size(); i++)
 	{

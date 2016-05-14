@@ -10,7 +10,7 @@ class RigidBody2DComponent : public IPhysicsComponent
 {
 public:
 
-	RigidBody2DComponent(std::weak_ptr<Core::IGameObject> gameObj) : IPhysicsComponent(gameObj)
+	RigidBody2DComponent(std::weak_ptr<Core::IGameObject> gameObj) : IComponent(gameObj), IPhysicsComponent(gameObj)
 	{
 		Reset();
 	}
@@ -47,7 +47,7 @@ public:
 
 	std::shared_ptr<PhysicsMaterial> physicsMaterial;
 
-	void UpdatePhysics(float deltaTime) override
+	void OnFixedTimeStep(float deltaTime) override
 	{
 
 	}
@@ -95,7 +95,6 @@ public:
 		u = mat2();
 		position = vec2();
 	}
-
 
 	void SetOrientation2D(float rad)
 	{

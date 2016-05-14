@@ -1,7 +1,7 @@
 #pragma once
 #include "IComponent.h"
 
-class IPhysicsComponent : public Core::IComponent
+class IPhysicsComponent : public virtual Core::IComponent
 {
 public:
 
@@ -14,5 +14,5 @@ public:
 	{
 	}
 
-	virtual void UpdatePhysics(float deltaTime) = 0;
+	virtual void OnFixedTimeStep(float deltaTime) = 0;
 };
