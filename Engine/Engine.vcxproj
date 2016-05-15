@@ -877,6 +877,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClCompile Include="Managers\SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Physics\Cloth\ClothConstraint.h" />
     <ClInclude Include="Physics\Cloth\ClothComponent.h" />
     <ClInclude Include="Physics\Cloth\ClothParticle.h" />
     <ClInclude Include="Physics\Cloth\Cloth.h" />

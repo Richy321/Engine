@@ -47,6 +47,8 @@ namespace Core
 		ComponentFlags GetComponentFlags() const { return componentFlags; }
 		
 		std::weak_ptr<IGameObject> GetParentGameObject() { return parentGameObject; }
+		std::weak_ptr<IGameObject> GetParentGameObject() const { return parentGameObject; }
+
 		void SetParentGameObject(std::weak_ptr<IGameObject> parent) { parentGameObject = parent; }
 
 		virtual void Update(float deltaTime) {}

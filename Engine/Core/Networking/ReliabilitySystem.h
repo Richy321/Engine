@@ -279,8 +279,8 @@ namespace networking
 					acked_bytes_per_second += itor->size;
 				}
 			}
-			sent_bytes_per_second /= rttMaximum;
-			acked_bytes_per_second /= rttMaximum;
+			sent_bytes_per_second /= static_cast<int>(rttMaximum);
+			acked_bytes_per_second /= static_cast<int>(rttMaximum);
 			sentBandwidth = sent_bytes_per_second * (8 / 1000.0f);
 			ackedBandwidth = acked_bytes_per_second * (8 / 1000.0f);
 		}

@@ -39,6 +39,14 @@ public:
 		acceleration += f / mass;
 	}
 
+	void OffsetPosition(const vec3 offset)
+	{
+		if(movable)
+		{
+			pos += offset;
+		}
+	}
+
 	void OnFixedTimeStep(float deltaTime, float damping)
 	{
 		if(movable)
@@ -50,8 +58,5 @@ public:
 			acceleration = vec3(0.0f, 0.0f, 0.0f);
 		}
 	}
-
-
-
 };
 

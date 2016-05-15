@@ -1,5 +1,6 @@
 #pragma once
 #include "ClothParticle.h"
+#include "ClothConstraint.h"
 #include "../../Core/Camera.h"
 namespace Physics
 {
@@ -7,15 +8,21 @@ namespace Physics
 	{
 		class Cloth
 		{
+		private:
+			std::shared_ptr<ClothParticle>& GetParticle(int x, int y)
+			{
+				return particles[y * particleColRowCount.x + x];
+			}
 		public:
 
 			std::vector<std::shared_ptr<ClothParticle>> particles;
+			std::vector<std::shared_ptr<ClothConstraint>> constraints;
 			std::unique_ptr<Mesh> mesh;
 
 			float damping = 0.01f;
 			int constraintRestrictions = 15;
 			vec2 size;
-			vec2 particleColRowCount;
+			ivec2 particleColRowCount;
 
 			Cloth(vec2 size, ivec2 particleColRowCount)
 			{
@@ -42,16 +49,17 @@ namespace Physics
 				GenerateIndicies();
 				GenerateUVs();
 				GenerateNormals();
-
+				
 				mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
 				mesh->mode = GL_TRIANGLES;
 				mesh->renderType = Mesh::LitTextured;
+
+				GenerateConstraints();
 			}
 
 			~Cloth()
 			{
 			}
-
 
 			void GenerateVertices()
 			{
@@ -67,10 +75,10 @@ namespace Physics
 				{
 					for (int y = 0; y < particleColRowCount.y - 1; y++)
 					{
-						int index1= y * static_cast<int>(particleColRowCount.x) + x;
-						int index2 = (y + 1) * static_cast<int>(particleColRowCount.x) + x;
-						int index3 = y * static_cast<int>(particleColRowCount.x) + x + 1;
-						int index4 = (y+1) * static_cast<int>(particleColRowCount.x) + x + 1;
+						int index1= y * particleColRowCount.x + x;
+						int index2 = (y + 1) * particleColRowCount.x + x;
+						int index3 = y * particleColRowCount.x + x + 1;
+						int index4 = (y+1) * particleColRowCount.x + x + 1;
 
 						mesh->indices.push_back(index1);
 						mesh->indices.push_back(index2);
@@ -106,6 +114,36 @@ namespace Physics
 				}
 			}
 
+			void GenerateConstraints()
+			{
+				for (int x = 0; x < particleColRowCount.x; x++)
+				{
+					for (int y = 0; y < particleColRowCount.y; y++)
+					{
+						//immediate 'structural' and 'shear' neighbour constraints
+						if (x < particleColRowCount.x - 1)
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x, y), GetParticle(x + 1, y)));
+						if(y < particleColRowCount.y - 1)
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x, y), GetParticle(x, y + 1)));
+
+						if(x < particleColRowCount.x - 1 && y < particleColRowCount.y - 1) 
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x, y), GetParticle(x + 1, y + 1)));
+						if (x < particleColRowCount.x - 1 && y < particleColRowCount.y - 1)
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x + 1, y), GetParticle(x, y + 1)));
+
+						//secondary 'bending' constraints
+						if (x < particleColRowCount.x - 2)
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x, y), GetParticle(x + 2, y)));
+						if (y < particleColRowCount.y - 2)
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x, y), GetParticle(x, y + 2)));
+						if (x < particleColRowCount.x - 2 && y < particleColRowCount.y - 2)
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x, y), GetParticle(x + 2, y + 2)));
+						if (x < particleColRowCount.x - 2 && y < particleColRowCount.y - 2)
+							constraints.push_back(std::make_shared<ClothConstraint>(GetParticle(x + 2, y), GetParticle(x, y + 2)));
+					}
+				}
+			}
+
 			void Render(std::shared_ptr<Core::Camera> mainCamera, const mat4 &toWorld)
 			{
 				mesh->Render(mainCamera, toWorld);
@@ -120,6 +158,38 @@ namespace Physics
 				GenerateVertices();
 				GenerateNormals();
 				mesh->BuildAndBindVertexPositionNormalTexturedBuffer();
+			}
+
+			void ApplyConstraints()
+			{
+				for(auto s : constraints)
+				{
+					s->ApplyConstraint();
+				}
+			}
+
+			void AddForce(const vec3 force)
+			{
+				for(auto p : particles)
+				{
+					p->AddForce(force);
+				}
+			}
+
+			void HandleCollisions(std::vector<std::shared_ptr<ICollider>> colliders)
+			{
+				for (int i = 0; i < colliders.size(); i++)
+				{
+					if (colliders[i]->GetColliderType() == ICollider::SphereCollider)
+					{
+						std::shared_ptr<SphereColliderComponent> sphereCollider = std::dynamic_pointer_cast<SphereColliderComponent>(colliders[i]);
+
+						for (std::shared_ptr<ClothParticle> p : particles)
+						{
+
+						}
+					}
+				}
 			}
 		};
 	}

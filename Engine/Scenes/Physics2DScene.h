@@ -328,8 +328,8 @@ public:
 
 		in[0] = (2.0f*((float)(x - 0) / (this->windowInfo.width - 0))) - 1.0f,
 		in[1] = 1.0f - (2.0f*((float)(y - 0) / (this->windowInfo.height - 0)));
-		in[2] = 2.0* winZ - 1.0;
-		in[3] = 1.0;
+		in[2] = 2.0f* winZ - 1.0f;
+		in[3] = 1.0f;
 
 		vec4 pos = in * pv;
 		pos.w = 1.0f / pos.w;

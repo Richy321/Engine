@@ -378,8 +378,8 @@ namespace Core
 
 			std::vector<vec2> verts;
 
-			int vertexCount = linearRand(minVertexCount, maxVertexCount);
-			for (int i = 0; i < vertexCount; i++)
+			uint vertexCount = linearRand(minVertexCount, maxVertexCount);
+			for (size_t i = 0; i < vertexCount; i++)
 			{
 				verts.push_back(vec2(linearRand(-sizeRange, sizeRange), linearRand(-sizeRange, sizeRange)));
 			}
@@ -387,7 +387,7 @@ namespace Core
 			// Find the right most point on the hull
 			int32 rightMost = 0;
 			float highestXCoord = verts[0].x;
-			for (uint32 i = 1; i < vertexCount; ++i)
+			for (size_t i = 1; i < vertexCount; ++i)
 			{
 				float x = verts[i].x;
 				if (x > highestXCoord)
@@ -451,7 +451,7 @@ namespace Core
 				}
 			}
 
-			for (int i = 0; i < verts.size(); i++)
+			for (size_t i = 0; i < verts.size(); i++)
 				mesh->vertices.push_back(vec3(verts[hull[i]], 0.0f));
 
 			// Compute face normals
@@ -638,9 +638,9 @@ namespace Core
 			float const R = 1.0f / (float)(rings);
 			float const S = 1.0f / (float)(sectors);
 
-			for (int r = 0; r <= rings; ++r)
+			for (size_t r = 0; r <= rings; ++r)
 			{
-				for (int s = 0; s <= sectors; ++s) 
+				for (size_t s = 0; s <= sectors; ++s)
 				{
 					float const y = sin(-M_PI_2 + M_PI * r * R);
 					float const x = cos(2 * M_PI * s * S) * sin(M_PI * r * R);

@@ -20,6 +20,11 @@ public:
 	const float clothWidth = 30.0f;
 	const float clothDepth = 30.0f;
 
+	std::shared_ptr<ClothComponent> clothComponent;
+
+	std::vector<std::shared_ptr<ICollider>> sphereColliders;
+
+
 	ClothScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
 		camera = std::make_shared<CameraFPS>();
@@ -84,23 +89,30 @@ public:
 		camera->Translate(0.0f, 23.0f, clothDepth * 1.7f);
 	}
 
-	void InitialiseSceneObjects()
+	void CreateSphere(float radius, vec3 pos)
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
-		std::shared_ptr<MeshComponent> meshComponent = AssetManager::GetInstance().CreateSpherePrimitiveMeshComponent(5, 24, 24);
+		std::shared_ptr<MeshComponent> meshComponent = AssetManager::GetInstance().CreateSpherePrimitiveMeshComponent(radius, 24, 24);
 		//meshComponent->rootMeshNode->meshes[0]->renderWireframe = true;
 		go->AddComponent(meshComponent);
-		go->Translate(0.0f, 10.0f, 0.0f);
+		std::shared_ptr<SphereColliderComponent> sphereCollider = std::make_shared<SphereColliderComponent>(go, radius);
+		go->AddComponent(sphereCollider);
+		go->Translate(pos);
 		gameObjectManager.push_back(go);
+		sphereColliders.push_back(sphereCollider);
+	}
 
+	void InitialiseSceneObjects()
+	{
 		cloth = std::make_shared<GameObject>();
-		//cloth->AddComponent(AssetManager::GetInstance().CreateQuadPrimitiveMeshComponent(clothWidth, clothDepth, defaultCheckeredTexture));
-		std::shared_ptr<ClothComponent> clothComponent = std::make_shared<ClothComponent>(std::weak_ptr<GameObject>(),vec2(clothWidth, clothDepth), vec2(10,10));
+		clothComponent = std::make_shared<ClothComponent>(std::weak_ptr<GameObject>(),vec2(clothWidth, clothDepth), vec2(10,10));
 		clothComponent->SetTexture(defaultCheckeredTexture);
 		cloth->AddComponent(clothComponent);
 		cloth->Translate(-clothWidth *0.5f, 20.0f, -clothDepth * 0.5f);
 		gameObjectManager.push_back(cloth);
-		
+
+		CreateSphere(5.0f, vec3(0.0f, 10.0f, 0.0f));
+
 		//std::shared_ptr<GameObject> go2 = std::make_shared<GameObject>();
 		//std::shared_ptr<MeshComponent> meshComponent2 = AssetManager::GetInstance().CreateIcospherePrimitiveMeshComponent(1, 5.0f);
 		////meshComponent2->rootMeshNode->meshes[0]->renderWireframe = true;
@@ -111,6 +123,9 @@ public:
 
 	void OnFixedTimeStep() override
 	{
+		clothComponent->AddForce(vec3(0.0f, -0.1f, 0.0f));
+		SceneManager::OnFixedTimeStep();
+		HandleCollisions();
 	}
 
 	void OnUpdate(float deltaTime) override
@@ -137,5 +152,9 @@ public:
 		SceneManager::notifyDisplayFrame();
 	}
 
+	void HandleCollisions()
+	{
+		clothComponent->HandleCollisions(sphereColliders);
+	}
 };
 

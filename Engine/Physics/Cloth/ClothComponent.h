@@ -26,6 +26,7 @@ public:
 
 	void OnFixedTimeStep(float deltaTime) override
 	{
+		cloth->ApplyConstraints();
 		cloth->OnFixedTimeStep(deltaTime);
 	}
 
@@ -37,6 +38,16 @@ public:
 	void SetTexture(std::string texture)
 	{
 		cloth->mesh->materialID = texture;
+	}
+
+	void AddForce(const vec3 force)
+	{
+		cloth->AddForce(force);
+	}
+
+	void HandleCollisions(std::vector<std::shared_ptr<ICollider>> colliders)
+	{
+		cloth->HandleCollisions(colliders);
 	}
 };
 

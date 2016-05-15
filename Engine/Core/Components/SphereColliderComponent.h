@@ -37,6 +37,11 @@ namespace Core
 		{
 			return SphereCollider;
 		}
+
+		vec3 Position() const
+		{
+			return GetParentGameObject().lock()->GetPosition();
+		}
 	};
 }
 
