@@ -5,6 +5,9 @@
 #include "ClothParticle.h"
 #include "ClothConstraint.h"
 #include "../../Core/Camera.h"
+
+#include "../Dependencies/glm/gtx/norm.hpp"
+
 namespace Physics
 {
 	namespace Cloth
@@ -229,10 +232,12 @@ namespace Physics
 
 							vec3 v = vec3(particlePos) - sphereCenter;
 							
-							float l = length(v);
+							float lSquared = length2(v);
+							float rad = sphereCollider->Radius();
 
-							if(l < sphereCollider->Radius())
+							if(lSquared < rad * rad)
 							{
+								float l = length(v);
 								//vec3 forceV = v / l * sphereCollider->Radius();
 								//particles[j]->OffsetPosition(forceV);
 								particles[j]->OffsetPosition(normalize(v) * (sphereCollider->Radius() - l));
