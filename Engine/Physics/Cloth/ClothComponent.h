@@ -21,13 +21,16 @@ public:
 	{
 	}
 
+	void Reset()
+	{
+	}
 	std::unique_ptr<Physics::Cloth::Cloth> cloth;
 
 
 	void OnFixedTimeStep(float deltaTime) override
 	{
-		cloth->ApplyConstraints();
-		cloth->OnFixedTimeStep(deltaTime);
+		//cloth->ApplyConstraints();
+		//cloth->OnFixedTimeStep(deltaTime);
 	}
 
 	void Render(std::shared_ptr<Core::Camera> mainCamera) override
@@ -45,9 +48,20 @@ public:
 		cloth->AddForce(force);
 	}
 
+	void AddWindForce(const vec3 direction)
+	{
+		cloth->AddWindForce(direction);
+	}
+
 	void HandleCollisions(std::vector<std::shared_ptr<ICollider>> colliders)
 	{
-		cloth->HandleCollisions(colliders);
+		cloth->HandleCollisions(colliders, parentGameObject.lock()->GetWorldTransform());
+	}
+
+	void Update(float deltaTime) override
+	{
+		cloth->ApplyConstraints();
+		cloth->OnFixedTimeStep(deltaTime);
 	}
 };
 

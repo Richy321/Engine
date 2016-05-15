@@ -1,4 +1,7 @@
 #pragma once
+
+#include <ppl.h>
+
 #include "ClothParticle.h"
 #include "ClothConstraint.h"
 #include "../../Core/Camera.h"
@@ -13,6 +16,18 @@ namespace Physics
 			{
 				return particles[y * particleColRowCount.x + x];
 			}
+
+			void AddWindForcesForTriangle(std::shared_ptr<ClothParticle> p1, std::shared_ptr<ClothParticle> p2, std::shared_ptr<ClothParticle> p3, const vec3 direction)
+			{
+				vec3 normalMag = Utils::CalculateNormalMagnitude(p1->pos, p2->pos, p3->pos);
+				vec3 d = normalize(normalMag);
+				vec3 force = normalMag * (dot(d, direction));
+
+				p1->AddForce(force);
+				p2->AddForce(force);
+				p3->AddForce(force);
+			}
+
 		public:
 
 			std::vector<std::shared_ptr<ClothParticle>> particles;
@@ -20,12 +35,13 @@ namespace Physics
 			std::unique_ptr<Mesh> mesh;
 
 			float damping = 0.01f;
-			int constraintRestrictions = 15;
+			uint constraintIterations = 15;
 			vec2 size;
 			ivec2 particleColRowCount;
 
 			Cloth(vec2 size, ivec2 particleColRowCount)
 			{
+				
 				this->size = size;
 				this->particleColRowCount = particleColRowCount;
 
@@ -55,6 +71,7 @@ namespace Physics
 				mesh->renderType = Mesh::LitTextured;
 
 				GenerateConstraints();
+				printf("Cloth Constructor done");
 			}
 
 			~Cloth()
@@ -64,7 +81,7 @@ namespace Physics
 			void GenerateVertices()
 			{
 				mesh->vertices.clear();
-				for(auto i : particles )
+				for(auto& i : particles )
 					mesh->vertices.push_back(i->pos);
 			}
 
@@ -105,6 +122,7 @@ namespace Physics
 				
 			void GenerateNormals()
 			{
+				mesh->normals.clear();
 				for (size_t i = 0; i < mesh->indices.size(); i+=3)
 				{
 					mesh->normals.push_back(Utils::CalculateNormal(
@@ -151,7 +169,7 @@ namespace Physics
 
 			void OnFixedTimeStep(float deltaTime)
 			{
-				for(auto i : particles)
+				for(auto& i : particles)
 					i->OnFixedTimeStep(deltaTime, damping);
 
 				//update mesh positions and normals and rebind
@@ -162,12 +180,16 @@ namespace Physics
 
 			void ApplyConstraints()
 			{
-				for(auto s : constraints)
+				for (size_t i = 0; i < constraintIterations; i++)
 				{
-					s->ApplyConstraint();
+					//for (size_t j = 0; j < constraints.size(); j++)
+					Concurrency::parallel_for(size_t(0), constraints.size(), [&](size_t j)
+					{
+						constraints[j]->ApplyConstraint();
+					});
 				}
 			}
-
+			
 			void AddForce(const vec3 force)
 			{
 				for(auto p : particles)
@@ -176,18 +198,47 @@ namespace Physics
 				}
 			}
 
-			void HandleCollisions(std::vector<std::shared_ptr<ICollider>> colliders)
+			void AddWindForce(const vec3 direction)
 			{
-				for (int i = 0; i < colliders.size(); i++)
+				for (size_t x = 0; x < particleColRowCount.x-1; x++)
+				{
+					for (size_t y = 0; y < particleColRowCount.y-1; y++)
+					{
+						AddWindForcesForTriangle(GetParticle(x + 1, y), GetParticle(x, y), GetParticle(x, y + 1), direction);
+						AddWindForcesForTriangle(GetParticle(x + 1, y + 1), GetParticle(x + 1, y), GetParticle(x, y + 1), direction);
+					}
+				}
+			}
+
+			void HandleCollisions(std::vector<std::shared_ptr<ICollider>> colliders, const mat4 &worldTransform)
+			{
+				for (size_t i = 0; i < colliders.size(); i++)
 				{
 					if (colliders[i]->GetColliderType() == ICollider::SphereCollider)
 					{
 						std::shared_ptr<SphereColliderComponent> sphereCollider = std::dynamic_pointer_cast<SphereColliderComponent>(colliders[i]);
 
-						for (std::shared_ptr<ClothParticle> p : particles)
+						//for (size_t j = 0; j < particles.size(); j++)
+						Concurrency::parallel_for(size_t(0), particles.size(), [&](size_t j)
 						{
+							vec3 sphereCenter = sphereCollider->Position();
+							
+							//transform particles into world space to do collision detection
+							vec4 tmp = vec4(particles[j]->pos, 1.0f);
+							vec4 particlePos = worldTransform * tmp;
 
-						}
+							vec3 v = vec3(particlePos) - sphereCenter;
+							
+							float l = length(v);
+
+							if(l < sphereCollider->Radius())
+							{
+								//vec3 forceV = v / l * sphereCollider->Radius();
+								//particles[j]->OffsetPosition(forceV);
+								particles[j]->OffsetPosition(normalize(v) * (sphereCollider->Radius() - l));
+								//particles[j]->pos = normalize(v) * (sphereCollider->Radius() - l);//particles[j]->oldPos;
+							}
+						});
 					}
 				}
 			}

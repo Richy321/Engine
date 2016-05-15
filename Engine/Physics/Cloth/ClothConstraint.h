@@ -6,14 +6,11 @@ class ClothConstraint
 {
 public:
 	float restDistance;
-	std::shared_ptr<ClothParticle> particle1;
-	std::shared_ptr<ClothParticle> particle2;
+	const std::shared_ptr<ClothParticle>& particle1;
+	const std::shared_ptr<ClothParticle>& particle2;
 
-	ClothConstraint(std::shared_ptr<ClothParticle> p1, std::shared_ptr<ClothParticle>p2)
+	ClothConstraint(const std::shared_ptr<ClothParticle>& p1, const std::shared_ptr<ClothParticle>& p2) : particle1(p1), particle2(p2)
 	{
-		particle1 = p1;
-		particle2 = p2;
-
 		restDistance = length(particle1->pos - particle2->pos);
 	}
 

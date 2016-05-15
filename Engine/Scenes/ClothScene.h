@@ -17,8 +17,8 @@ public:
 
 	std::shared_ptr<GameObject> cloth;
 	float m_scale = 0.0f;
-	const float clothWidth = 30.0f;
-	const float clothDepth = 30.0f;
+	const float clothWidth = 100.0f;
+	const float clothDepth = 100.0f;
 
 	std::shared_ptr<ClothComponent> clothComponent;
 
@@ -43,7 +43,7 @@ public:
 		InitialiseCamera();
 		InitialiseSceneObjects();
 
-		clearColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		//clearColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void InitialiseTextures() const
@@ -56,37 +56,17 @@ public:
 		directionalLight = std::make_shared<DirectionalLight>();
 		directionalLight->Color = vec3(1.0f, 1.0f, 1.0f);
 		directionalLight->AmbientIntensity = 0.01f;
-		directionalLight->DiffuseIntensity = 0.5f;
-		directionalLight->Direction = vec3(0.0f, -1.0, -1.0);
-
-		/*
-		pointLights.push_back(std::make_shared<PointLight>());
-		pointLights[0]->DiffuseIntensity = 0.75f;
-		pointLights[0]->Color = vec3(1.0f, 0.5f, 0.0f);
-		pointLights[0]->Position = vec3(3.0f, 1.0f, 5.0f);
-		pointLights[0]->Attenuation.Linear = 0.1f;
-
-		pointLights.push_back(std::make_shared<PointLight>());
-		pointLights[1]->DiffuseIntensity = 0.75f;
-		pointLights[1]->Color = vec3(0.0f, 0.5f, 1.0f);
-		pointLights[1]->Position = vec3(7.0f, 1.0f, 1.0f);
-		pointLights[1]->Attenuation.Linear = 0.1f;
-
-		spotLights.push_back(std::make_shared<SpotLight>());
-		spotLights[0]->DiffuseIntensity = 0.9f;
-		spotLights[0]->Color = vec3(1.0f, 0.0f, 0.0f);
-		spotLights[0]->Position = vec3(clothWidth * 0.5f, 5.0f, clothDepth * 0.5f);
-		spotLights[0]->Direction = vec3(0.0, -1.0f, 0.0f);
-		spotLights[0]->Attenuation.Linear = 0.1f;
-		spotLights[0]->Cutoff = 20.0f;*/
+		directionalLight->DiffuseIntensity = 0.9f;
+		directionalLight->Direction = vec3(0.0f, -0.7, -1.0);
 	}
 
 	void InitialiseCamera()
 	{
 		camera->useWASD = true;
-		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 100.0f);
+		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 0.01f, 1000.0f);
 		SetMainCamera(camera);
-		camera->Translate(0.0f, 23.0f, clothDepth * 1.7f);
+		//camera->RotateX(-90.0f);
+		camera->Translate(0.0f, 23.0f, 50 * 1.7f);
 	}
 
 	void CreateSphere(float radius, vec3 pos)
@@ -105,41 +85,37 @@ public:
 	void InitialiseSceneObjects()
 	{
 		cloth = std::make_shared<GameObject>();
-		clothComponent = std::make_shared<ClothComponent>(std::weak_ptr<GameObject>(),vec2(clothWidth, clothDepth), vec2(10,10));
+		clothComponent = std::make_shared<ClothComponent>(std::weak_ptr<GameObject>(),vec2(clothWidth, clothDepth), vec2(
+			30, 30));
 		clothComponent->SetTexture(defaultCheckeredTexture);
 		cloth->AddComponent(clothComponent);
-		cloth->Translate(-clothWidth *0.5f, 20.0f, -clothDepth * 0.5f);
+		cloth->Translate(-clothWidth *0.5f, 50.0f, -clothDepth * 0.5f);
 		gameObjectManager.push_back(cloth);
 
-		CreateSphere(5.0f, vec3(0.0f, 10.0f, 0.0f));
-
-		//std::shared_ptr<GameObject> go2 = std::make_shared<GameObject>();
-		//std::shared_ptr<MeshComponent> meshComponent2 = AssetManager::GetInstance().CreateIcospherePrimitiveMeshComponent(1, 5.0f);
-		////meshComponent2->rootMeshNode->meshes[0]->renderWireframe = true;
-		//go2->AddComponent(meshComponent2);
-		//go2->Translate(0.0f, 0.0f, 0.0f);
-		//gameObjectManager.push_back(go2);
+		CreateSphere(15.0f, vec3(0.0f, 0.0f, 0.0f));
 	}
 
 	void OnFixedTimeStep() override
 	{
-		clothComponent->AddForce(vec3(0.0f, -0.1f, 0.0f));
 		SceneManager::OnFixedTimeStep();
-		HandleCollisions();
 	}
 
 	void OnUpdate(float deltaTime) override
 	{
+		clothComponent->AddForce(vec3(0.0f, -9.8f, 0.0f)); //gravity
+		//clothComponent->AddWindForce(vec3(0.5f, 0.0f, 0.2f));
+		HandleCollisions();
 		m_scale += 0.0057f;
 		camera->Update(deltaTime);
-		//pointLights[0]->Position = vec3(clothWidth * 0.25f, 1.0f, clothDepth * (cosf(m_scale) + 1.0f) / 2.0f);
-		//pointLights[1]->Position = vec3(clothWidth * 0.75f, 1.0f, clothDepth * (sinf(m_scale) + 1.0f) / 2.0f);
 	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
 	{
 		SceneManager::notifyProcessNormalKeys(key, x, y);
 		camera->OnKey(key, x, y);
+
+		if (key == 'r')
+			clothComponent->Reset();
 	}
 
 	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override

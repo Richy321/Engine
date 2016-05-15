@@ -42,6 +42,11 @@ namespace Core
 		{
 			return GetParentGameObject().lock()->GetPosition();
 		}
+
+		float Radius() const
+		{
+			return boundingSphere.radius;
+		}
 	};
 }
 
