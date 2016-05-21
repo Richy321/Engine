@@ -131,6 +131,16 @@ void SceneManager::notifyReshape(int width,
 	int previous_height)
 {
 	//todo - handle resizing
+	// Adjust the viewport if the user resizes the window
+	glViewport(0, 0, width, height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	if (height == 0)
+		gluPerspective(80, (float)width, 1.0, 5000.0);
+	else
+		gluPerspective(80, (float)width / (float)height, 1.0, 5000.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 void SceneManager::notifyErrorCallback(GLenum source,
