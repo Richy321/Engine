@@ -14,11 +14,11 @@ public:
 	std::shared_ptr<CameraFPS> camera;
 	std::vector<std::shared_ptr<PointLight>> pointLights;
 	const std::string defaultCheckeredTexture = "Default Checkered";
+	const std::string earthTexture = "Earth";
 
 	std::shared_ptr<GameObject> cloth;
-	float m_scale = 0.0f;
-	const float clothWidth = 100.0f;
-	const float clothDepth = 100.0f;
+	const float clothWidth = 7.0f;
+	const float clothDepth = 7.0f;
 
 	std::shared_ptr<ClothComponent> clothComponent;
 
@@ -40,15 +40,15 @@ public:
 
 		InitialiseLights();
 		InitialiseTextures();
-		InitialiseCamera();
 		InitialiseSceneObjects();
-
+		InitialiseCamera();
 		//clearColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void InitialiseTextures() const
 	{
 		AssetManager::GetInstance().LoadTextureFromFile("Resources/checkered.jpg", defaultCheckeredTexture, GL_BGRA, GL_RGBA, 0, 0);
+		AssetManager::GetInstance().LoadTextureFromFile("Resources/earth.jpg", earthTexture, GL_BGRA, GL_RGBA, 0, 0);
 	}
 
 	void InitialiseLights()
@@ -63,17 +63,17 @@ public:
 	void InitialiseCamera()
 	{
 		camera->useWASD = true;
-		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 0.01f, 1000.0f);
+		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 50000.0f);
 		SetMainCamera(camera);
 		//camera->RotateX(-90.0f);
-		camera->Translate(0.0f, 23.0f, 50 * 1.7f);
+		camera->Translate(0.0f, 0.0f, 10);
 	}
 
 	void CreateSphere(float radius, vec3 pos)
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		std::shared_ptr<MeshComponent> meshComponent = AssetManager::GetInstance().CreateSpherePrimitiveMeshComponent(radius, 24, 24);
-		//meshComponent->rootMeshNode->meshes[0]->renderWireframe = true;
+		meshComponent->rootMeshNode->meshes[0]->materialID = earthTexture;
 		go->AddComponent(meshComponent);
 		std::shared_ptr<SphereColliderComponent> sphereCollider = std::make_shared<SphereColliderComponent>(go, radius);
 		go->AddComponent(sphereCollider);
@@ -86,13 +86,16 @@ public:
 	{
 		cloth = std::make_shared<GameObject>();
 		clothComponent = std::make_shared<ClothComponent>(std::weak_ptr<GameObject>(),vec2(clothWidth, clothDepth), vec2(
-			30, 30));
+			35, 35));
 		clothComponent->SetTexture(defaultCheckeredTexture);
 		cloth->AddComponent(clothComponent);
-		cloth->Translate(-clothWidth *0.5f, 50.0f, -clothDepth * 0.5f);
+		cloth->Translate(-clothWidth *0.5f, 3.0f, -clothDepth * 0.5f);
 		gameObjectManager.push_back(cloth);
 
-		CreateSphere(15.0f, vec3(0.0f, 0.0f, 0.0f));
+		CreateSphere(3.0f, vec3(0.0f, 0.0f, 0.0f));
+
+		std::shared_ptr<SphereColliderComponent> sphereCollider = std::dynamic_pointer_cast<SphereColliderComponent>(sphereColliders[0]);
+		clothComponent->sphere = sphereCollider;
 	}
 
 	void OnFixedTimeStep() override
@@ -102,10 +105,10 @@ public:
 
 	void OnUpdate(float deltaTime) override
 	{
-		clothComponent->AddForce(vec3(0.0f, -9.8f, 0.0f)); //gravity
+		//clothComponent->AddForce(vec3(0.0f, -9.8f, 0.0f)); //gravity
 		//clothComponent->AddWindForce(vec3(0.5f, 0.0f, 0.2f));
+
 		HandleCollisions();
-		m_scale += 0.0057f;
 		camera->Update(deltaTime);
 	}
 
@@ -120,7 +123,7 @@ public:
 
 	virtual void OnMousePassiveMove(int posX, int posY, int deltaX, int deltaY) override
 	{
-		camera->OnMouseMove(deltaX, deltaY);
+		//camera->OnMouseMove(deltaX, deltaY);
 	}
 
 	virtual void notifyDisplayFrame() override

@@ -6,7 +6,7 @@
 #include "ClothConstraint.h"
 #include "../../Core/Camera.h"
 
-#include "../Dependencies/glm/gtx/norm.hpp"
+#include "../../Dependencies/glm/gtx/norm.hpp"
 
 namespace Physics
 {
@@ -185,7 +185,6 @@ namespace Physics
 			{
 				for (size_t i = 0; i < constraintIterations; i++)
 				{
-					//for (size_t j = 0; j < constraints.size(); j++)
 					Concurrency::parallel_for(size_t(0), constraints.size(), [&](size_t j)
 					{
 						constraints[j]->ApplyConstraint();

@@ -151,7 +151,7 @@ namespace Core
 			}
 		}
 
-		void BuildAndBindVertexPositionNormalTexturedBuffer()
+		void BuildAndBindVertexPositionNormalTexturedBuffer(bool isDynamic = false)
 		{
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
@@ -178,8 +178,11 @@ namespace Core
 				
 			BuildAndBindIndexBuffer();
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionNormalTextured) * verts.size(), &verts[0], GL_STATIC_DRAW);
-
+			if(isDynamic)
+				glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionNormalTextured) * verts.size(), &verts[0], GL_DYNAMIC_DRAW);
+			else
+				glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPositionNormalTextured) * verts.size(), &verts[0], GL_STATIC_DRAW);
+			
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPositionNormalTextured), (void*)0);
 

@@ -350,6 +350,12 @@
     <ClInclude Include="Physics\Cloth\ClothConstraint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\Cloth\Cloth2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Cloth\ClothParticle2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basicColor.frag">
