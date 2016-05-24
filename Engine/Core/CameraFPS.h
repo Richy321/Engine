@@ -20,8 +20,6 @@ namespace Core
 		vec3 right;
 		vec3 up;
 
-		
-
 		void RotateSpherical(int deltaX, int deltaY)
 		{
 			// Compute new orientation

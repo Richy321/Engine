@@ -122,7 +122,6 @@ namespace Core
 			//todo - load textures from scene
 			//todo - detect vertex format based on Has* functions
 			//todo - proper asset caching
-			//todo - extend asset manager to textures (devIL ? )
 			recursiveImport(scene, scene->mRootNode, rval->rootMeshNode, materialIds);
 
 			return rval;
