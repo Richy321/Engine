@@ -164,8 +164,7 @@ public:
 		pointLights[0]->Position = vec3(floorWidth * 0.25f, 1.0f, floorDepth * (cosf(m_scale) + 1.0f) / 2.0f);
 		pointLights[1]->Position = vec3(floorWidth * 0.75f, 1.0f, floorDepth * (sinf(m_scale) + 1.0f) / 2.0f);
 
-
-		if(hasLMBClicked)
+		/*if(hasLMBClicked)
 		{
 
 			POINT mouse; 
@@ -180,7 +179,7 @@ public:
 			std::shared_ptr<GameObject> circle = CreateCirclePhysicsObject(1.0f, 0.2f, pos, 0.0f);
 			gameObjectManager.push_back(circle);
 			hasLMBClicked = false;
-		}
+		}*/
 	}
 
 	void GenerateCollisionManifolds()

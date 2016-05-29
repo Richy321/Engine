@@ -194,5 +194,21 @@ void SceneManager::notifyErrorCallback(GLenum source,
 }
 
 
+vec2 SceneManager::UnprojectGLM(int x, int y)
+{
+	GLint viewport[4];
+	GLfloat winY, z;
+	glGetIntegerv(GL_VIEWPORT, viewport);
 
+	winY = viewport[3] - (float)y;
+	glReadPixels(x, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+	glm::vec3 screen = glm::vec3(x, winY, z);
+
+	vec4 viewportGLM(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+	vec3 pos = glm::unProject(screen, mainCamera.lock()->view, mainCamera.lock()->projection, viewportGLM);
+	printf("GLM pos: %f,%f,%f\n", pos.x, pos.y, pos.z);
+
+	return vec2(pos);
+}
 

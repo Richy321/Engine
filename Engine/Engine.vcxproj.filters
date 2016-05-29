@@ -339,22 +339,22 @@
       <Filter>Physics</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Cloth\Cloth.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Cloth\ClothParticle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Cloth\ClothComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Cloth\ClothConstraint.h">
-      <Filter>Header Files</Filter>
+      <Filter>Physics\Cloth</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Cloth\Cloth2.h">
-      <Filter>Header Files</Filter>
+      <Filter>Physics\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Cloth\ClothComponent.h">
+      <Filter>Physics\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Cloth\ClothConstraint.h">
+      <Filter>Physics\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Cloth\ClothParticle.h">
+      <Filter>Physics\Cloth</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Cloth\ClothParticle2.h">
-      <Filter>Header Files</Filter>
+      <Filter>Physics\Cloth</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

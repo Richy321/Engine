@@ -8,8 +8,6 @@
 class Cloth2
 {
 public:
-
-
 	std::vector<ClothParticle2> particles;	
 	std::unique_ptr<Mesh> mesh;
 	vec2 size; // cloth dimensions
@@ -38,7 +36,12 @@ public:
 					|| y == 0 || y == particleColRowCount.y - 1) ? distanceY / 2.0f : 0,
 					size.y * (y / static_cast<float>(particleColRowCount.y)));
 				
+				//create particle and set gravity as a constant acceleration
 				particles[y * particleColRowCount.x + x] = ClothParticle2(position, vec3(0, gravity, 0));
+				
+				//lock first row of particles for flag effect
+				//if(x == 0)
+				//	particles[y * particleColRowCount.x + x].movable = false;
 			}
 		}
 
@@ -152,7 +155,7 @@ public:
 							// Get the direction this spring is pulling
 							vec3 springVector = GetParticleConst(x + a, y + b)->position - p->position;
 
-							// Find how much force is exerted by this string
+							// Find how much force is exerted by this spring
 							float len = length(springVector);
 							float normalLength = sqrt((a * distanceX) * (a * distanceX) + (b * distanceY) * (b * distanceY));
 							float forceScalar = (len - normalLength) / normalLength;
@@ -171,7 +174,8 @@ public:
 				}
 
 				// If a spring is stretched beyond 25% we will begin to minimize the effects of other forces to maintain the cloth shape
-				if (largestStretch >= 0.25) {
+				if (largestStretch >= 0.25) 
+				{
 					p->multiplyForceAccumulated((largestStretch >= 0.75f) ? 0.0f : (0.75f - largestStretch));
 				}
 

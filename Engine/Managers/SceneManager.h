@@ -46,6 +46,7 @@ namespace Managers
 
 		std::mutex mutexGameObjectManager;
 		vec4 clearColour = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		vec2 UnprojectGLM(int x, int y);
 
 	public:
 		static std::map<unsigned char, bool> keyState;

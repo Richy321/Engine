@@ -30,6 +30,13 @@ namespace Core
 		
 		vec3 GetPosition() const { return vec3(world[3].x, world[3].y, world[3].z); }
 
+		void SetPosition(vec3 pos)
+		{
+			world[3].x = pos.x;
+			world[3].y = pos.y;
+			world[3].z = pos.z;
+		}
+
 		unsigned int GetID() override { return ID; }
 		
 		GameObject()

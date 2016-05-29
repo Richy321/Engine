@@ -13,7 +13,7 @@ public:
 	}
 
 	ClothParticle2()
-		: position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), acceleration(0.0f, 0.0f, 0.0f), forceAccumulated(0.0f, 0.0f, 0.0f), normal(0.0f, 0.0f, 0.0f), damping(0.7f), inverseMass(1.0f), movable(true)
+		: position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), acceleration(0.0f, 0.0f, 0.0f), forceAccumulated(0.0f, 0.0f, 0.0f), normal(0.0f, 0.0f, 0.0f), damping(0.4f), inverseMass(1.0f), movable(true)
 	{
 	}
 
@@ -23,7 +23,8 @@ public:
 	{
 	}
 
-	ClothParticle2& ClothParticle2::operator= (const ClothParticle2& particle) {
+	ClothParticle2& ClothParticle2::operator= (const ClothParticle2& particle) 
+	{
 		position = particle.position;
 		velocity = particle.velocity;
 		acceleration = particle.acceleration;
