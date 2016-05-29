@@ -7,7 +7,7 @@
 #include "Components/NetworkViewComponent.h"
 #include "Components/Interfaces/IPhysicsComponent.h"
 
-//class IComponent;
+class Ray;
 
 namespace Core
 {
@@ -231,7 +231,7 @@ namespace Core
 			world[2][2] = 0.0f;
 		}
 
-#pragma endregion 
+#pragma endregion
 	};
 }
 

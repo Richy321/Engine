@@ -19,20 +19,34 @@ public:
 
 	void Render(std::vector<std::shared_ptr<GameObject>> objects, std::vector<std::shared_ptr<BaseLight>> lights, uint width, uint height)
 	{
-		vec3 orig;
+		vec3 origin(0, 0, 0);
 
 		vec3 *framebuffer = new vec3[width * height];
 		vec3 *pix = framebuffer;
 
 		float scale = tan(radians(fov * 0.5f));
-		float imageAspectRatio = width / static_cast<float>(height);
+		float imageAspectRatio = width / static_cast<float>(height); // assume width > height
+
+		float t = Infinity;
+
 
 		for (uint32_t j = 0; j < height; ++j)
 		{
 			for (uint32_t i = 0; i < width; ++i)
 			{
-				vec3 dir;
-				*(pix++) = CastRay(orig, dir, objects, lights, width, height, 0);
+				float px = (2 * (i + 0.5) / (float)width - 1) * imageAspectRatio * scale;
+				float py = (1 - 2 * (j + 0.5) / (float)height) * scale;
+
+				origin = vec3(vec4(origin, 1.0f) * camera->GetWorldTransform());
+				
+				vec3 dir = vec3(px, py, -1);
+				dir = vec3(vec4(dir, 0.0f) * camera->GetWorldTransform());
+				dir = dir - origin;
+				dir = normalize(dir);
+				//vec3 dir;
+				//dir = vec3(vec4(px, py, -1.0f, 0.0f) * camera->GetWorldTransform());
+				//dir = normalize(dir);
+				*(pix++) = CastRay(origin, dir, objects, lights, width, height, 0);
 			}
 		}
 
@@ -47,6 +61,8 @@ public:
 private:
 	std::shared_ptr<Core::Camera> camera;
 	float fov;
+
+	const float Infinity = std::numeric_limits<float>::max();
 
 	static void SaveToFileFreeImage(std::string filename, vec3 *framebuffer, uint width, uint height)
 	{
@@ -95,15 +111,13 @@ private:
 		const std::vector<std::shared_ptr<GameObject>>& objects, const std::vector<std::shared_ptr<BaseLight>>& lights, 
 		const uint& width, const uint& height, uint32 depth)
 	{
-		//vec3 hitColor = (dir + vec3(1)) * 0.5f;
+		vec3 hitColor = (dir + vec3(1)) * 0.5f;
 		
-		vec3 hitColor(1.0f, 1.0f, 0.0f);
-		return hitColor;
-	}
+		//if (object.intersect(ray, t) && t >= ray.tMin && t <= r.tMax) {
 
-	inline float clamp(const float &lo, const float &hi, const float &v)
-	{
-		return std::max(lo, std::min(hi, v));
+
+		//vec3 hitColor(1.0f, 1.0f, 0.0f);
+		return hitColor;
 	}
 };
 

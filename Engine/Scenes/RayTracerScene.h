@@ -18,10 +18,10 @@ public:
 
 	std::shared_ptr<GameObject> sphere;
 
-	float fov = 45.0f;
+	float fov = 90.0f;
 
-	uint imageWidth = 1024;
-	uint imageHeight = 768;
+	uint imageWidth = 640;
+	uint imageHeight = 480;
 
 	RayTracerScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
@@ -40,8 +40,6 @@ public:
 		InitialiseTextures();
 		InitialiseSceneObjects();
 		InitialiseCamera();
-
-		//clearColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void InitialiseTextures() const
@@ -64,7 +62,6 @@ public:
 		camera->useWASD = true;
 		camera->SetPerspectiveProjection(fov, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 50000.0f);
 		SetMainCamera(camera);
-		camera->Translate(0.0f, 0.0f, 10);
 	}
 
 	std::shared_ptr<GameObject> CreateSphere(float radius, vec3 pos)
@@ -80,7 +77,7 @@ public:
 
 	void InitialiseSceneObjects()
 	{
-		sphere = CreateSphere(1.5f, vec3(0.0f, 0.0f, 0.0f));
+		sphere = CreateSphere(1.5f, vec3(-1.0f, 0.0f, -10.0f));
 
 		rayTracer = std::make_unique<RaytracerCPU>(fov, camera);
 	}
