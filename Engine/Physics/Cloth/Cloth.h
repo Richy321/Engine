@@ -232,14 +232,14 @@ namespace Physics
 							vec3 v = vec3(particlePos) - sphereCenter;
 							
 							float lSquared = length2(v);
-							float rad = sphereCollider->Radius();
+							float rad = sphereCollider->GetRadius();
 
 							if(lSquared < rad * rad)
 							{
 								float l = length(v);
 								//vec3 forceV = v / l * sphereCollider->Radius();
 								//particles[j]->OffsetPosition(forceV);
-								particles[j]->OffsetPosition(normalize(v) * (sphereCollider->Radius() - l));
+								particles[j]->OffsetPosition(normalize(v) * (sphereCollider->GetRadius() - l));
 								//particles[j]->pos = normalize(v) * (sphereCollider->Radius() - l);//particles[j]->oldPos;
 							}
 						});

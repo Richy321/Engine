@@ -21,6 +21,7 @@ namespace Core
 		SphereColliderComponent(std::weak_ptr<Core::IGameObject> gameObj, float radius) : IComponent(gameObj)
 		{
 			boundingSphere.radius = radius;
+			boundingSphere.radius2 = radius * radius;
 		}
 
 		void Update(float deltaTime) override
@@ -43,9 +44,14 @@ namespace Core
 			return GetParentGameObject().lock()->GetPosition();
 		}
 
-		float Radius() const
+		float GetRadius() const
 		{
 			return boundingSphere.radius;
+		}
+
+		float GetRadius2() const
+		{
+			return boundingSphere.radius2;
 		}
 	};
 }

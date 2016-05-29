@@ -221,7 +221,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Physics2D Release|x64'" Label="Configuration">
@@ -610,7 +610,7 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RayTracer Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -885,8 +885,8 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClInclude Include="Physics\Cloth\ClothComponent.h" />
     <ClInclude Include="Physics\Cloth\ClothParticle.h" />
     <ClInclude Include="Physics\Cloth\Cloth.h" />
+    <ClInclude Include="Raytracer\RayTracer.h" />
     <ClInclude Include="Raytracer\Ray.h" />
-    <ClInclude Include="Raytracer\RaytracerCPU.h" />
     <ClInclude Include="Scenes\ClothScene.h" />
     <ClInclude Include="Core\Components\BoxColliderComponent.h" />
     <ClInclude Include="Core\Components\Interfaces\ICollider.h" />

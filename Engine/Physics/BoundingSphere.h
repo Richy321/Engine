@@ -12,6 +12,7 @@ public:
 	BoundingSphere(float radius)
 	{
 		this->radius = radius;
+		radius2 = radius * radius; //commonly used so cache it.
 	}
 
 	~BoundingSphere()
@@ -19,5 +20,6 @@ public:
 	}
 
 	float radius;
+	float radius2;
 };
 

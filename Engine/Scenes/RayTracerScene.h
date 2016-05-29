@@ -2,14 +2,14 @@
 #include "../Managers/SceneManager.h"
 #include "../Core/CameraFPS.h"
 #include "../Core/AssetManager.h"
-#include "../Raytracer/RaytracerCPU.h"
+#include "../Raytracer/RayTracer.h"
 
 using namespace Core;
 
 class RayTracerScene : public Managers::SceneManager
 {
 public:
-	std::unique_ptr<RaytracerCPU> rayTracer;
+	std::unique_ptr<RayTracer> rayTracer;
 	std::shared_ptr<CameraFPS> camera;
 	std::vector<std::shared_ptr<PointLight>> pointLights;
 	const std::string defaultCheckeredTexture = "Default Checkered";
@@ -17,8 +17,10 @@ public:
 	const std::string solidTexture = "Solid";
 
 	std::shared_ptr<GameObject> sphere;
+	std::vector<std::shared_ptr<SphereColliderComponent>> sphereColliders;
 
-	float fov = 90.0f;
+
+	float fov = 30.0f;
 
 	uint imageWidth = 640;
 	uint imageHeight = 480;
@@ -71,15 +73,20 @@ public:
 		meshComponent->rootMeshNode->meshes[0]->materialID = solidTexture;
 		go->AddComponent(meshComponent);
 		go->Translate(pos);
+
+		std::shared_ptr<SphereColliderComponent> sphereCollider = std::make_shared<SphereColliderComponent>(go, radius);
+		go->AddComponent(sphereCollider);
+		sphereColliders.push_back(sphereCollider);
+
 		gameObjectManager.push_back(go);
 		return go;
 	}
 
 	void InitialiseSceneObjects()
 	{
-		sphere = CreateSphere(1.5f, vec3(-1.0f, 0.0f, -10.0f));
+		sphere = CreateSphere(1.5f, vec3(0.0f, 0.0f, -10.0f));
 
-		rayTracer = std::make_unique<RaytracerCPU>(fov, camera);
+		rayTracer = std::make_unique<RayTracer>(fov, camera);
 	}
 
 	void OnFixedTimeStep() override
@@ -97,7 +104,7 @@ public:
 		SceneManager::notifyProcessNormalKeys(key, x, y);
 		camera->OnKey(key, x, y);
 
-		if(key == 'r')
+		if(key == 'r' || key == 'R')
 		{
 			rayTracer->Render(gameObjectManager, GetLights(), imageWidth, imageHeight);
 		}

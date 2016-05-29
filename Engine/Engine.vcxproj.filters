@@ -362,13 +362,13 @@
     <ClInclude Include="Raytracer\Ray.h">
       <Filter>Raytracer</Filter>
     </ClInclude>
-    <ClInclude Include="Raytracer\RaytracerCPU.h">
-      <Filter>Raytracer</Filter>
-    </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Raytracer</Filter>
     </ClInclude>
     <ClInclude Include="MaterialComponent.h">
+      <Filter>Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="Raytracer\RayTracer.h">
       <Filter>Raytracer</Filter>
     </ClInclude>
   </ItemGroup>

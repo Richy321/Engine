@@ -73,7 +73,7 @@ public:
 		mat4 trans = inverse(parentGameObject.lock()->GetWorldTransform());
 
 		vec4 spherePosInClothSpace = trans * vec4(sphere->Position(), 1.0f);
-		cloth2->CalculateForces(vec3(0.04f, -0.02f, 0.02f), vec3(spherePosInClothSpace), sphere->Radius() * 1.1f);
+		cloth2->CalculateForces(vec3(0.04f, -0.02f, 0.02f), vec3(spherePosInClothSpace), sphere->GetRadius() * 1.1f);
 
 		unsigned long currentUpdate = glutGet(GLUT_ELAPSED_TIME);
 		cloth2->Update((currentUpdate - lastUpdate)/100.0f);
