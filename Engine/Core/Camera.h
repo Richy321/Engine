@@ -17,6 +17,7 @@ namespace Core
 
 		float fovX;
 		float fovY;
+
 		float aspectRatio;
 		ProjectionType projectionType = Perspective;
 		

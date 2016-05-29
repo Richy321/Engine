@@ -129,6 +129,22 @@ namespace Managers
 			captureCursor = capture;
 			glutSetCursor(!capture ? GLUT_CURSOR_INHERIT : GLUT_CURSOR_NONE);
 		}
+
+
+		std::vector<std::shared_ptr<Core::BaseLight>> GetLights()
+		{
+			std::vector<std::shared_ptr<Core::BaseLight>> lights;
+
+			lights.push_back(directionalLight);
+			
+			for (auto i : spotLights)
+				lights.push_back(i);
+
+			for (auto i : pointLights)
+				lights.push_back(i);
+
+			return lights;
+		}
 	};
 }
 

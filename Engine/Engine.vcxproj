@@ -877,12 +877,16 @@ xcopy /y "$(ProjectDir)Dependencies\freeImage\$(PlatformTarget)\FreeImage.dll" "
     <ClCompile Include="Managers\SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialComponent.h" />
     <ClInclude Include="Physics\Cloth\ClothParticle2.h" />
     <ClInclude Include="Physics\Cloth\Cloth2.h" />
     <ClInclude Include="Physics\Cloth\ClothConstraint.h" />
     <ClInclude Include="Physics\Cloth\ClothComponent.h" />
     <ClInclude Include="Physics\Cloth\ClothParticle.h" />
     <ClInclude Include="Physics\Cloth\Cloth.h" />
+    <ClInclude Include="Raytracer\Ray.h" />
+    <ClInclude Include="Raytracer\RaytracerCPU.h" />
     <ClInclude Include="Scenes\ClothScene.h" />
     <ClInclude Include="Core\Components\BoxColliderComponent.h" />
     <ClInclude Include="Core\Components\Interfaces\ICollider.h" />

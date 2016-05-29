@@ -2,14 +2,14 @@
 #include "../Managers/SceneManager.h"
 #include "../Core/CameraFPS.h"
 #include "../Core/AssetManager.h"
-#include "Physics/ParticleSystem/ParticleSystemComponent.h"
-#include "../Physics/Cloth/ClothComponent.h"
+#include "../Raytracer/RaytracerCPU.h"
+
 using namespace Core;
 
 class RayTracerScene : public Managers::SceneManager
 {
 public:
-
+	std::unique_ptr<RaytracerCPU> rayTracer;
 	std::shared_ptr<CameraFPS> camera;
 	std::vector<std::shared_ptr<PointLight>> pointLights;
 	const std::string defaultCheckeredTexture = "Default Checkered";
@@ -17,6 +17,11 @@ public:
 	const std::string solidTexture = "Solid";
 
 	std::shared_ptr<GameObject> sphere;
+
+	float fov = 45.0f;
+
+	uint imageWidth = 1024;
+	uint imageHeight = 768;
 
 	RayTracerScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
@@ -35,6 +40,7 @@ public:
 		InitialiseTextures();
 		InitialiseSceneObjects();
 		InitialiseCamera();
+
 		//clearColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
@@ -56,7 +62,7 @@ public:
 	void InitialiseCamera()
 	{
 		camera->useWASD = true;
-		camera->SetPerspectiveProjection(45.0f, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 50000.0f);
+		camera->SetPerspectiveProjection(fov, static_cast<float>(windowInfo.width), static_cast<float>(windowInfo.height), 1.0f, 50000.0f);
 		SetMainCamera(camera);
 		camera->Translate(0.0f, 0.0f, 10);
 	}
@@ -75,6 +81,8 @@ public:
 	void InitialiseSceneObjects()
 	{
 		sphere = CreateSphere(1.5f, vec3(0.0f, 0.0f, 0.0f));
+
+		rayTracer = std::make_unique<RaytracerCPU>(fov, camera);
 	}
 
 	void OnFixedTimeStep() override
@@ -91,6 +99,11 @@ public:
 	{
 		SceneManager::notifyProcessNormalKeys(key, x, y);
 		camera->OnKey(key, x, y);
+
+		if(key == 'r')
+		{
+			rayTracer->Render(gameObjectManager, GetLights(), imageWidth, imageHeight);
+		}
 	}
 
 	void notifyProcessMouseState(int button, int state, int x, int y) override

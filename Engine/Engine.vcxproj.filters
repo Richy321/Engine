@@ -55,6 +55,9 @@
     <Filter Include="Physics\Cloth">
       <UniqueIdentifier>{d711b159-c07f-407f-b730-e3d529f8ccc0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Raytracer">
+      <UniqueIdentifier>{a2e02e2a-2064-48d6-8ecd-d00f98de2d77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -355,6 +358,18 @@
     </ClInclude>
     <ClInclude Include="Physics\Cloth\ClothParticle2.h">
       <Filter>Physics\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Raytracer\Ray.h">
+      <Filter>Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="Raytracer\RaytracerCPU.h">
+      <Filter>Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialComponent.h">
+      <Filter>Raytracer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

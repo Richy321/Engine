@@ -202,9 +202,9 @@ namespace Physics
 
 			void AddWindForce(const vec3 direction)
 			{
-				for (size_t x = 0; x < particleColRowCount.x-1; x++)
+				for (size_t x = 0; x < static_cast<uint>(particleColRowCount.x)-1; x++)
 				{
-					for (size_t y = 0; y < particleColRowCount.y-1; y++)
+					for (size_t y = 0; y < static_cast<uint>(particleColRowCount.y)-1; y++)
 					{
 						AddWindForcesForTriangle(GetParticle(x + 1, y), GetParticle(x, y), GetParticle(x, y + 1), direction);
 						AddWindForcesForTriangle(GetParticle(x + 1, y + 1), GetParticle(x + 1, y), GetParticle(x, y + 1), direction);

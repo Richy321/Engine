@@ -5,6 +5,14 @@ namespace Core
 {
 	struct BaseLight
 	{
+		enum LightType
+		{
+			Base,
+			Directional,
+			Spot,
+			Point
+		};
+
 		vec3 Color;
 		float AmbientIntensity;
 		float DiffuseIntensity;
@@ -15,6 +23,11 @@ namespace Core
 			AmbientIntensity = 0.0f;
 			DiffuseIntensity = 0.0f;
 		}
+
+		virtual ~BaseLight()
+		{}
+
+		virtual LightType GetLightType() = 0;
 	};
 
 	struct DirectionalLight : BaseLight
@@ -24,6 +37,11 @@ namespace Core
 		DirectionalLight()
 		{
 			Direction = vec3(0.0f, 0.0f, 0.0f);
+		}
+
+		LightType GetLightType() override
+		{
+			return Directional;
 		}
 	};
 
@@ -45,6 +63,11 @@ namespace Core
 			Attenuation.Linear = 0.0f;
 			Attenuation.Exp = 0.0f;
 		}
+
+		LightType GetLightType() override
+		{
+			return Point;
+		}
 	};
 
 	struct SpotLight : PointLight
@@ -56,6 +79,11 @@ namespace Core
 		{
 			Direction = vec3(0.0f, 0.0f, 0.0f);
 			Cutoff = 0.0f;
+		}
+
+		LightType GetLightType() override
+		{
+			return Spot;
 		}
 	};
 }
