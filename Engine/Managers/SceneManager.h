@@ -22,7 +22,7 @@ namespace Managers
 		bool isWarpingCursor = false;
 
 		void UpdateShaderUniforms() const;
-
+		bool isFirstUpdate = true;
 	protected:
 		SceneManager(Core::Initialisation::WindowInfo winInfo);
 		std::vector<std::shared_ptr<Core::GameObject>> gameObjectManager;
@@ -46,6 +46,7 @@ namespace Managers
 		vec4 clearColour = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		vec2 UnprojectGLM(int x, int y);
 
+		
 	public:
 		static std::map<unsigned char, bool> keyState;
 
@@ -53,7 +54,15 @@ namespace Managers
 
 		virtual void Initialise() override;
 
-		virtual void OnUpdate(float deltaTime) {};
+		virtual void OnUpdate(float deltaTime)
+		{
+			if (isFirstUpdate)
+			{
+				OnFirstUpdate(deltaTime);
+				isFirstUpdate = false;
+			}
+		};
+		virtual void OnFirstUpdate(float deltaTime) {};
 		virtual void OnFixedTimeStep();
 		virtual void OnCommsUpdate(float deltaTime) {};
 
@@ -161,8 +170,6 @@ namespace Managers
 
 		std::vector<std::shared_ptr<Core::SpotLight>>& GetSpotLights() { return spotLights; }
 		std::vector<std::shared_ptr<Core::PointLight>>& GetPointLights() { return pointLights; }
-
-
 	};
 }
 

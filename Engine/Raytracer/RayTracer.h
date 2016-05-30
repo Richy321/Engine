@@ -54,7 +54,7 @@ public:
 				//dir = normalize(dir);
 
 				Ray ray(origin, dir);
-				*(pix++) = Trace(ray, objects, lights, width, height, 0);
+				*(pix++) = CastRay(ray, objects, lights, width, height, 0);
 			}
 		}
 
@@ -75,6 +75,7 @@ private:
 	uint MaxRecursionDepth = 5;
 
 	const float Infinity = std::numeric_limits<float>::max();
+	vec3 defaultColour = vec3(0.0f, 0.0f, 0.0f);
 
 	static void SaveToFileFreeImage(std::string filename, vec3 *framebuffer, uint width, uint height)
 	{
@@ -101,7 +102,6 @@ private:
 		FreeImage_Unload(image);
 	}
 
-
 	static void OpenImage(std::string filename)
 	{
 		ShellExecuteA(nullptr, nullptr, filename.c_str(), nullptr, nullptr, SW_SHOW);
@@ -120,14 +120,9 @@ private:
 		ofs.close();
 	}
 
-	vec3 Trace(const Ray& primaryRay, const std::vector<std::shared_ptr<GameObject>>& objects, const std::vector<std::shared_ptr<BaseLight>>& lights, const uint& width, const uint& height, uint32 depth)
+
+	bool Trace(const Ray& ray, const std::vector<std::shared_ptr<GameObject>>& objects, float& tnear, std::shared_ptr<SphereColliderComponent>& closestSphere)
 	{
-		vec3 defaultColour(0.0f, 0.0f, 0.0f);
-		vec3 surfaceColour(0.0f);
-
-		float tnear = Infinity;
-		std::shared_ptr<SphereColliderComponent> closestSphere = nullptr;
-
 		for (auto o : objects)
 		{
 			std::shared_ptr<IComponent> component = o->GetComponentByType(IComponent::Collider);
@@ -141,121 +136,243 @@ private:
 					{
 						float t0 = Infinity;
 						float t1 = Infinity;
-						if (RaySphereIntersect(sphereColliderComponent, primaryRay, t0, t1))
+						if (RaySphereIntersect(sphereColliderComponent, ray, t0, t1))
 						{
-								if (t0 < 0)
+							if (t0 < 0)
 								t0 = t1;
 							if (t0 < tnear)
 							{
 								tnear = t0;
 								closestSphere = sphereColliderComponent;
 							}
+							return true;
 						}
 					}
-
-					//early out - return black if no intersection
-					if (closestSphere == nullptr)
-						return defaultColour;
-	
-					std::shared_ptr<MaterialComponent> sphereMaterial = nullptr;
-					std::shared_ptr<IComponent> tmpComp = closestSphere->GetParentGameObject().lock()->GetComponentByType(IComponent::RenderMaterial);
-					if(tmpComp != nullptr)
-					{
-						sphereMaterial = std::dynamic_pointer_cast<MaterialComponent>(tmpComp);
-					}
-
-					vec3 intersectionPoint = primaryRay.origin + primaryRay.direction * tnear;
-					vec3 intersectionNormal = intersectionPoint - closestSphere->Position();
-					intersectionNormal = normalize(intersectionNormal);
-
-					float bias = 1e-4; // add small bias to the point from which we will raytrace
-					bool inside = false;
-
-					//check is inside object
-					if (dot(primaryRay.direction, intersectionNormal) > 0)
-					{
-						intersectionNormal = -intersectionNormal;
-						inside = true;
-					}
-
-					if (sphereMaterial != nullptr)
-					{
-						if ((sphereMaterial->GetMaterial()->transparency > 0 || sphereMaterial->GetMaterial()->reflection > 0) && depth < MaxRecursionDepth)
-						{
-							//handle transparency and reflections
-						}
-						else
-						{
-							vec3 lightDirection;
-							//diffuse fully opaque object
-							for each (std::shared_ptr<BaseLight> light in lights)
-							{
-								switch (light->GetLightType())
-								{
-								case BaseLight::Base:
-									//not a valid light
-									break;
-								case BaseLight::Spot:
-									//not implemented
-									break;
-								case BaseLight::Directional:
-
-									break;
-								case BaseLight::Point:
-								{
-									std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(light);
-									if (pointLight != nullptr)
-									{
-										vec3 transmission(1.0f);
-										lightDirection = pointLight->Position - intersectionPoint;
-										lightDirection = normalize(lightDirection);
-
-										for (auto subO : objects)
-										{
-											if (subO != o)
-											{
-												std::shared_ptr<IComponent> SubComponent = subO->GetComponentByType(IComponent::Collider);
-												if (SubComponent != nullptr)
-												{
-													std::shared_ptr<ICollider> SubCollider = std::dynamic_pointer_cast<ICollider>(SubComponent);
-													if (SubCollider != nullptr && SubCollider->GetColliderType() == ICollider::ColliderType::SphereCollider)
-													{
-														std::shared_ptr<SphereColliderComponent> SubSphereColliderComponent = std::dynamic_pointer_cast<SphereColliderComponent>(SubCollider);
-														if (SubSphereColliderComponent != nullptr)
-														{
-															float t0;
-															float t1;
-															Ray r(intersectionPoint + intersectionNormal * bias, lightDirection, Ray::Shadow);
-															if (RaySphereIntersect(SubSphereColliderComponent, r, t0, t1))
-															{
-																//in shadow if we hit another object
-																transmission = vec3(0);
-															}
-														}
-													}
-												}
-											}
-										}
-										float diffuse = std::max(float(0), dot(intersectionNormal, lightDirection));
-										surfaceColour += sphereMaterial->GetMaterial()->colour * transmission * diffuse; //* pointLight->DiffuseIntensity;
-
-									}
-								}
-									break;
-								default:
-									break;
-								}
-							}
-						}
-					}
-					else
-						surfaceColour = vec3(Colours_RGBA::HotPink);
 				}
 			}
 		}
-
-		return surfaceColour;// + closestSphere->emissionColor;
+		return false;
 	}
+
+	vec3 CastRay(const Ray& primaryRay, const std::vector<std::shared_ptr<GameObject>>& objects, const std::vector<std::shared_ptr<BaseLight>>& lights, const uint& width, const uint& height, uint32 depth)
+	{
+		vec3 surfaceColour(0.0f);
+
+		float tnear = Infinity;
+		std::shared_ptr<SphereColliderComponent> closestSphere = nullptr;
+
+		//early out - over our recursion depth limit, return default background colour
+		if(depth > MaxRecursionDepth)
+			return defaultColour;
+
+		if (!Trace(primaryRay, objects, tnear, closestSphere))
+		{
+			//early out - return default background colour if no intersection
+			return defaultColour;
+		}
+
+		std::shared_ptr<MaterialComponent> sphereMaterial = nullptr;
+		std::shared_ptr<IComponent> tmpComp = closestSphere->GetParentGameObject().lock()->GetComponentByType(IComponent::RenderMaterial);
+		if(tmpComp != nullptr)
+		{
+			sphereMaterial = std::dynamic_pointer_cast<MaterialComponent>(tmpComp);
+		}
+
+		vec3 intersectionPoint = primaryRay.origin + primaryRay.direction * tnear;
+		vec3 intersectionNormal = intersectionPoint - closestSphere->Position();
+		intersectionNormal = normalize(intersectionNormal);
+
+		float bias = 1e-4; // add small bias to the point from which we will raytrace
+		bool inside = false;
+
+		//check is inside object
+		if (dot(primaryRay.direction, intersectionNormal) > 0)
+		{
+			intersectionNormal = -intersectionNormal;
+			inside = true;
+		}
+
+		if (sphereMaterial != nullptr)
+		{
+			if (sphereMaterial->GetMaterial()->transparency > 0 && sphereMaterial->GetMaterial()->reflection > 0)
+			{
+				//transparency and reflection
+				
+			}
+			else if(sphereMaterial->GetMaterial()->reflection > 0)
+			{
+				//just reflection
+			}
+			else
+			{
+				//fully opaque object/diffuse
+				vec3 lightDirection;
+				vec3 lightAmount(0.0f);
+				vec3 specularColour(0.0f);
+
+				vec3 shadowPointOrigin = (dot(primaryRay.direction, intersectionNormal) < 0) ?
+					intersectionPoint + intersectionNormal * bias :
+					intersectionPoint - intersectionNormal * bias;
+
+				for each (std::shared_ptr<BaseLight> light in lights)
+				{
+					switch (light->GetLightType())
+					{
+					case BaseLight::Base:
+						//not a valid light
+						break;
+					case BaseLight::Spot:
+						//not implemented
+						break;
+					case BaseLight::Directional:
+
+						break;
+					case BaseLight::Point:
+					{
+						std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(light);
+						if (pointLight != nullptr)
+						{
+							vec3 transmission(1.0f);
+
+
+							lightDirection = pointLight->Position - intersectionPoint;
+							lightDirection = normalize(lightDirection);
+
+							Ray shadowRay(intersectionPoint + intersectionNormal * bias, lightDirection, Ray::Shadow);
+
+							float tNearShadow = Infinity;
+							std::shared_ptr<SphereColliderComponent> closestSphereShadow;
+							if(Trace(shadowRay, objects, tNearShadow, closestSphereShadow))
+							{
+								transmission = vec3(0);
+							}
+
+							/*
+							
+							lightDirection = pointLight->Position - intersectionPoint;
+							float lightDistance2 = dot(lightDirection, lightDirection);
+							lightDirection = normalize(lightDirection);
+							float lightDotNorm = std::max(0.0f, dot(lightDirection, intersectionNormal));
+							
+							
+							float tNearShadow = Infinity;
+							Ray shadowRay(shadowPointOrigin, lightDirection, Ray::Shadow);
+
+							std::shared_ptr<SphereColliderComponent> closestSphereShadow;
+
+							//check if the point is in shadow and if it's the nearest occluding object from the light
+							bool isInShadow = Trace(shadowRay, objects, tNearShadow, closestSphereShadow) &&
+								tNearShadow * tNearShadow < lightDistance2;
+
+								*/
+
+
+							//Phong
+							/*lightAmount += (1 - isInShadow) * pointLight->DiffuseIntensity * lightDotNorm;
+							float specExponent = 25.0f;
+
+							vec3 reflectionDirection = reflect(-lightDirection, intersectionNormal);
+							specularColour += powf(std::max(0.f, -dot(reflectionDirection, primaryRay.direction)), sphereMaterial->GetMaterial()->specularExponent) * pointLight->DiffuseIntensity;
+
+
+							surfaceColour = lightAmount * sphereMaterial->GetMaterial()->colour * sphereMaterial->GetMaterial()->Kd * specularColour * sphereMaterial->GetMaterial()->Ks;
+							*/
+
+							/*
+							for (auto subO : objects)
+							{
+								if (subO != o)
+								{
+									std::shared_ptr<IComponent> SubComponent = subO->GetComponentByType(IComponent::Collider);
+									if (SubComponent != nullptr)
+									{
+										std::shared_ptr<ICollider> SubCollider = std::dynamic_pointer_cast<ICollider>(SubComponent);
+										if (SubCollider != nullptr && SubCollider->GetColliderType() == ICollider::ColliderType::SphereCollider)
+										{
+											std::shared_ptr<SphereColliderComponent> SubSphereColliderComponent = std::dynamic_pointer_cast<SphereColliderComponent>(SubCollider);
+											if (SubSphereColliderComponent != nullptr)
+											{
+												float t0;
+												float t1;
+												Ray r(intersectionPoint + intersectionNormal * bias, lightDirection, Ray::Shadow);
+												if (RaySphereIntersect(SubSphereColliderComponent, r, t0, t1))
+												{
+													//in shadow if we hit another object
+													transmission = vec3(0);
+												}
+											}
+										}
+									}
+								}
+							}*/
+
+							//Phong lighting
+
+
+
+							float diffuse = std::max(0.0f, dot(intersectionNormal, lightDirection));
+							surfaceColour += sphereMaterial->GetMaterial()->colour * transmission * diffuse;
+						}
+					}
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			surfaceColour = vec3(Colours_RGBA::HotPink);
+		}
+		return surfaceColour;
+	}
+
+	vec3 Reflect(const vec3& i, const vec3& n)
+	{
+		return i - 2 * dot(i, n) * n;
+	}
+
+	//Refract using Snell's law
+	vec3 Refract(const vec3& i, const vec3& N, const float& ior)
+	{
+		float cosi = clamp(dot(i, N), -1.0f, 1.0f);
+		float etai = 1, etat = ior;
+		vec3 n = N;
+		if (cosi < 0)
+			cosi = -cosi;
+		else
+			std::swap(etai, etat); n = -N;
+
+		float eta = etai / etat;
+		float k = 1 - eta * eta * (1 - cosi * cosi);
+
+		return k < 0.0f ? vec3(0.0f) : vec3(eta * i + (eta * cosi - sqrtf(k)) * n);
+	}
+
+	void Fresnel(const vec3& I, const vec3& N, const float& ior, float& kr)
+	{
+		float cosi = clamp(dot(I, N), -1.0f, 1.0f);
+		float etai = 1, etat = ior;
+		if (cosi > 0) { std::swap(etai, etat); }
+		// Compute sini using Snell's law
+		float sint = etai / etat * sqrtf(std::max(0.f, 1 - cosi * cosi));
+		// Total internal reflection
+		if (sint >= 1) {
+			kr = 1;
+		}
+		else {
+			float cost = sqrtf(std::max(0.f, 1 - sint * sint));
+			cosi = fabsf(cosi);
+			float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+			float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+			kr = (Rs * Rs + Rp * Rp) / 2;
+		}
+		// As a consequence of the conservation of energy, transmittance is given by:
+		// kt = 1 - kr;
+	}
+
+#pragma region Intersect calculations
 
 	bool RaySphereIntersect(const std::shared_ptr<SphereColliderComponent>& sphere, const Ray& ray, float &t0, float &t1) const
 	{
@@ -285,5 +402,8 @@ private:
 	{
 		return false;
 	}
+
+#pragma endregion
+
 };
 

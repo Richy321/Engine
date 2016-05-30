@@ -16,11 +16,7 @@ public:
 	const std::string earthTexture = "Earth";
 	const std::string solidTexture = "Solid";
 
-	std::shared_ptr<GameObject> sphere;
-	std::vector<std::shared_ptr<SphereColliderComponent>> sphereColliders;
-
 	float fov = 30.0f;
-
 	uint imageWidth = 640;
 	uint imageHeight = 480;
 
@@ -57,7 +53,7 @@ public:
 		pl1 = std::make_shared<PointLight>();
 		pl1->DiffuseIntensity = 2.75f;
 		pl1->Color = vec3(1.0f, 1.0f, 1.0f);
-		pl1->Position = vec3(20.0f, 0.0f, 5.0f);
+		pl1->Position = vec3(30.0f, 0.0f, -30.0f);
 		pl1->Attenuation.Linear = 0.1f;
 		AddLight(pl1);
 
@@ -93,7 +89,6 @@ public:
 
 		std::shared_ptr<SphereColliderComponent> sphereCollider = std::make_shared<SphereColliderComponent>(go, radius);
 		go->AddComponent(sphereCollider);
-		sphereColliders.push_back(sphereCollider);
 
 		std::shared_ptr<MaterialComponent> matComp = std::make_shared<MaterialComponent>(go);
 		go->AddComponent(matComp);
@@ -105,7 +100,8 @@ public:
 
 	void InitialiseSceneObjects()
 	{
-		sphere = CreateSphere(1.5f, vec3(0.0f, 0.0f, -10.0f));
+		CreateSphere(1.5f, vec3(5.0f, 0.0f, -30.0f));
+		CreateSphere(3.5f, vec3(-5.0f, 0.0f, -30.0f));
 
 		rayTracer = std::make_unique<RayTracer>(fov, camera);
 	}
@@ -117,7 +113,13 @@ public:
 
 	void OnUpdate(float deltaTime) override
 	{
+		SceneManager::OnUpdate(deltaTime);
 		camera->Update(deltaTime);
+	}
+
+	void OnFirstUpdate(float deltaTime) override
+	{
+		rayTracer->Render(gameObjectManager, GetLights(), windowInfo.width, windowInfo.height);
 	}
 
 	void notifyProcessNormalKeys(unsigned char key, int x, int y) override
@@ -127,7 +129,7 @@ public:
 
 		if(key == 'r' || key == 'R')
 		{
-			rayTracer->Render(gameObjectManager, GetLights(), imageWidth, imageHeight);
+			rayTracer->Render(gameObjectManager, GetLights(), windowInfo.width, windowInfo.height);
 		}
 	}
 
