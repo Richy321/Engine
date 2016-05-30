@@ -10,6 +10,7 @@ namespace Core
 	public:
 		MaterialComponent(std::weak_ptr<Core::IGameObject> gameObj) : IComponent(gameObj)
 		{
+			material = std::make_shared<Material>();
 		}
 
 		~MaterialComponent()
@@ -19,6 +20,12 @@ namespace Core
 		std::shared_ptr<Material> GetMaterial() const
 		{
 			return material;
+		}
+
+
+		ComponentTypes GetComponentType() const override
+		{
+			return RenderMaterial;
 		}
 
 	protected:

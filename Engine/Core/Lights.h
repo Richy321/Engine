@@ -25,7 +25,8 @@ namespace Core
 		}
 
 		virtual ~BaseLight()
-		{}
+		{
+		}
 
 		virtual LightType GetLightType() = 0;
 	};
@@ -62,6 +63,11 @@ namespace Core
 			Attenuation.Constant = 1.0f;
 			Attenuation.Linear = 0.0f;
 			Attenuation.Exp = 0.0f;
+		}
+
+		~PointLight() override
+		{
+			printf("point light destroyed");
 		}
 
 		LightType GetLightType() override

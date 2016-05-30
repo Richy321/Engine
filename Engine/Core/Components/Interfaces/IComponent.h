@@ -35,7 +35,8 @@ namespace Core
 			ParticleSystem,
 			Collider,
 			RigidBody,
-			Cloth
+			Cloth,
+			RenderMaterial
 		};
 
 		int GetID() const { return id; }

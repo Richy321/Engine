@@ -3,6 +3,7 @@
 #include "../Core/CameraFPS.h"
 #include "../Core/AssetManager.h"
 #include "../Raytracer/RayTracer.h"
+#include "../MaterialComponent.h"
 
 using namespace Core;
 
@@ -11,7 +12,6 @@ class RayTracerScene : public Managers::SceneManager
 public:
 	std::unique_ptr<RayTracer> rayTracer;
 	std::shared_ptr<CameraFPS> camera;
-	std::vector<std::shared_ptr<PointLight>> pointLights;
 	const std::string defaultCheckeredTexture = "Default Checkered";
 	const std::string earthTexture = "Earth";
 	const std::string solidTexture = "Solid";
@@ -19,11 +19,13 @@ public:
 	std::shared_ptr<GameObject> sphere;
 	std::vector<std::shared_ptr<SphereColliderComponent>> sphereColliders;
 
-
 	float fov = 30.0f;
 
 	uint imageWidth = 640;
 	uint imageHeight = 480;
+
+	std::shared_ptr<PointLight> pl1;
+	std::shared_ptr<PointLight> pl2;
 
 	RayTracerScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
@@ -52,11 +54,26 @@ public:
 
 	void InitialiseLights()
 	{
-		directionalLight = std::make_shared<DirectionalLight>();
+		pl1 = std::make_shared<PointLight>();
+		pl1->DiffuseIntensity = 2.75f;
+		pl1->Color = vec3(1.0f, 1.0f, 1.0f);
+		pl1->Position = vec3(20.0f, 0.0f, 5.0f);
+		pl1->Attenuation.Linear = 0.1f;
+		AddLight(pl1);
+
+		/*pl2 = std::make_shared<PointLight>();
+		pl2->DiffuseIntensity = 10.75f;
+		pl2->Color = vec3(1.0f, 0.5f, 0.0f);
+		pl2->Position = vec3(3.0f, 1.0f, 5.0f);
+		pl2->Attenuation.Linear = 0.1f;
+		pl2->Position = vec3(10.0f, 10.0f, 10.0f);
+		AddLight(pl2);*/
+
+		/*directionalLight = std::make_shared<DirectionalLight>();
 		directionalLight->Color = vec3(1.0f, 1.0f, 1.0f);
 		directionalLight->AmbientIntensity = 0.01f;
 		directionalLight->DiffuseIntensity = 0.9f;
-		directionalLight->Direction = vec3(0.0f, -0.7, -1.0);
+		directionalLight->Direction = vec3(0.0f, -0.7, -1.0);*/
 	}
 
 	void InitialiseCamera()
@@ -77,6 +94,10 @@ public:
 		std::shared_ptr<SphereColliderComponent> sphereCollider = std::make_shared<SphereColliderComponent>(go, radius);
 		go->AddComponent(sphereCollider);
 		sphereColliders.push_back(sphereCollider);
+
+		std::shared_ptr<MaterialComponent> matComp = std::make_shared<MaterialComponent>(go);
+		go->AddComponent(matComp);
+		matComp->GetMaterial()->colour = vec3(Colours_RGBA::Red);
 
 		gameObjectManager.push_back(go);
 		return go;
@@ -122,5 +143,22 @@ public:
 	{
 		SceneManager::notifyDisplayFrame();
 	}
+
+	//std::vector<std::shared_ptr<Core::BaseLight>> GetLights()
+	//{
+	//	std::vector<std::shared_ptr<Core::BaseLight>> lights;
+
+	//	if (directionalLight != nullptr)
+	//		lights.push_back(directionalLight);
+
+	//	for (auto i : spotLights)
+	//		lights.push_back(i);
+
+	//	for (auto i : pointLights)
+	//		lights.push_back(i);
+
+	//	return lights;
+	//}
+	
 };
 

@@ -1,16 +1,17 @@
 #pragma once
 #include "Dependencies/glm/detail/type_vec4.hpp"
+#include "Core/Colours.h"
 
 class Material
 {
 public:
 
-	glm::vec4 colour;
-	glm::vec4 emissionColour;
+	vec3 colour;
+	vec3 emissionColour;
 	float transparency;
 	float reflection;
 
-	Material()
+	Material() : colour(vec3(Colours_RGBA::HotPink)), emissionColour(0.0f, 0.0f, 0.0f), transparency(0.0f), reflection(0.0f)
 	{
 	}
 

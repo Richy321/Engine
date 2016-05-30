@@ -150,6 +150,7 @@ namespace Core
 			}
 			return componentsOfType;
 		}
+
 		#pragma endregion
 
 		#pragma region Transforms

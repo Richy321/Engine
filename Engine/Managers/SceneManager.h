@@ -40,9 +40,7 @@ namespace Managers
 		bool paused = false;
 		const float fixedTimeStep = 1.0f / 60.0f;
 
-		std::shared_ptr<Core::DirectionalLight> directionalLight;
-		std::vector<std::shared_ptr<Core::SpotLight>> spotLights;
-		std::vector<std::shared_ptr<Core::PointLight>> pointLights;
+
 
 		std::mutex mutexGameObjectManager;
 		vec4 clearColour = vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -130,12 +128,17 @@ namespace Managers
 			glutSetCursor(!capture ? GLUT_CURSOR_INHERIT : GLUT_CURSOR_NONE);
 		}
 
+		std::shared_ptr<Core::DirectionalLight> directionalLight;
+		std::vector<std::shared_ptr<Core::SpotLight>> spotLights;
+		std::vector<std::shared_ptr<Core::PointLight>> pointLights;
+
 
 		std::vector<std::shared_ptr<Core::BaseLight>> GetLights()
 		{
 			std::vector<std::shared_ptr<Core::BaseLight>> lights;
 
-			lights.push_back(directionalLight);
+			if(directionalLight != nullptr)
+				lights.push_back(directionalLight);
 			
 			for (auto i : spotLights)
 				lights.push_back(i);
@@ -145,6 +148,21 @@ namespace Managers
 
 			return lights;
 		}
+
+		void AddLight(std::shared_ptr<Core::PointLight>& light)
+		{
+			pointLights.push_back(light);
+		}
+
+		void AddLight(std::shared_ptr<Core::SpotLight>& light)
+		{
+			spotLights.push_back(light);
+		}
+
+		std::vector<std::shared_ptr<Core::SpotLight>>& GetSpotLights() { return spotLights; }
+		std::vector<std::shared_ptr<Core::PointLight>>& GetPointLights() { return pointLights; }
+
+
 	};
 }
 

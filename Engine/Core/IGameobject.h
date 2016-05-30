@@ -33,6 +33,7 @@ namespace Core
 		virtual std::shared_ptr<IComponent> GetComponentByID(int id) = 0;
 		virtual std::shared_ptr<IComponent> GetComponentByType(IComponent::ComponentTypes type) = 0;
 
+
 		virtual vec3 GetPosition() const = 0;
 
 		IGameObject()

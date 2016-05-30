@@ -17,5 +17,6 @@ namespace Core
 		vec4 Red = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		vec4 Green = vec4(0.0f, 1.0f, 0.0f, 1.0f);
 		vec4 Blue = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		vec4 Yellow = vec4(1.0f, 1.0f, 0.0f, 1.0f);
 	}
 }
