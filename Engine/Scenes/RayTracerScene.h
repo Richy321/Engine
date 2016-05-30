@@ -20,8 +20,8 @@ public:
 	uint imageWidth = 640;
 	uint imageHeight = 480;
 
-	std::shared_ptr<PointLight> pl1;
-	std::shared_ptr<PointLight> pl2;
+	//std::shared_ptr<PointLight> pl1;
+	//std::shared_ptr<PointLight> pl2;
 
 	RayTracerScene(Initialisation::WindowInfo windowInfo) : SceneManager(windowInfo)
 	{
@@ -38,7 +38,8 @@ public:
 
 		InitialiseLights();
 		InitialiseTextures();
-		InitialiseSceneObjects();
+		//InitialiseSceneObjects();
+		InitialiseDemoObjects();
 		InitialiseCamera();
 	}
 
@@ -50,14 +51,6 @@ public:
 
 	void InitialiseLights()
 	{
-		pl1 = std::make_shared<PointLight>();
-		//pl1->DiffuseIntensity = 2.75f;
-		pl1->DiffuseIntensity = 1.0f;
-		pl1->Color = vec3(1.0f, 1.0f, 1.0f);
-		pl1->Position = vec3(30.0f, 0.0f, -30.0f);
-		pl1->Attenuation.Linear = 0.1f;
-		AddLight(pl1);
-
 		/*pl2 = std::make_shared<PointLight>();
 		pl2->DiffuseIntensity = 10.75f;
 		pl2->Color = vec3(1.0f, 0.5f, 0.0f);
@@ -80,7 +73,7 @@ public:
 		SetMainCamera(camera);
 	}
 
-	std::shared_ptr<GameObject> CreateSphere(float radius, vec3 pos)
+	std::shared_ptr<GameObject> CreateSphere(float radius, vec3 pos, bool reflective, float transparency, vec3 colour)
 	{
 		std::shared_ptr<GameObject> go = std::make_shared<GameObject>();
 		std::shared_ptr<MeshComponent> meshComponent = AssetManager::GetInstance().CreateSpherePrimitiveMeshComponent(radius, 24, 24);
@@ -93,7 +86,12 @@ public:
 
 		std::shared_ptr<MaterialComponent> matComp = std::make_shared<MaterialComponent>(go);
 		go->AddComponent(matComp);
-		matComp->GetMaterial()->colour = vec3(Colours_RGBA::Red);
+		matComp->GetMaterial()->colour = colour;
+
+		if(reflective)
+			matComp->GetMaterial()->reflection = 1.0f;
+
+		matComp->GetMaterial()->transparency = transparency;
 
 		gameObjectManager.push_back(go);
 		return go;
@@ -101,8 +99,35 @@ public:
 
 	void InitialiseSceneObjects()
 	{
-		CreateSphere(1.5f, vec3(5.0f, 0.0f, -30.0f));
-		CreateSphere(3.5f, vec3(-5.0f, 0.0f, -30.0f));
+		std::shared_ptr<PointLight>pl1 = std::make_shared<PointLight>();
+		//pl1->DiffuseIntensity = 2.75f;
+		pl1->DiffuseIntensity = 1.0f;
+		pl1->Color = vec3(1.0f, 1.0f, 1.0f);
+		pl1->Position = vec3(30.0f, 0.0f, -30.0f);
+		pl1->Attenuation.Linear = 0.1f;
+		AddLight(pl1);
+
+		CreateSphere(1.5f, vec3(5.0f, 0.0f, -30.0f), true, 0.0f, Colours_RGB::Red);
+		CreateSphere(3.5f, vec3(-5.0f, 0.0f, -30.0f), false, 0.0f, Colours_RGB::Red);
+
+		rayTracer = std::make_unique<RayTracer>(fov, camera);
+	}
+
+	void InitialiseDemoObjects()
+	{
+		std::shared_ptr<PointLight> pl2 = std::make_shared<PointLight>();
+		//pl1->DiffuseIntensity = 2.75f;
+		pl2->DiffuseIntensity = 1.0f;
+		pl2->Color = vec3(1.0f, 1.0f, 1.0f);
+		pl2->Position = vec3(0.0f, 20.0f, -30.0f);
+		pl2->Attenuation.Linear = 0.1f;
+		AddLight(pl2);
+
+		CreateSphere(10000, vec3(0.0, -10004, -20), false, 0.0f, vec3(0.20, 0.20, 0.20));
+		CreateSphere(4, vec3(0.0, 0, -20), true, 0.5f, vec3(1.00, 0.32, 0.36));
+		CreateSphere(2, vec3(5.0, -1, -15), true, 0.0f, vec3(0.90, 0.76, 0.46));
+		CreateSphere(3, vec3(5.0, 0, -25), true, 0.0f, vec3(0.65, 0.77, 0.97));
+		CreateSphere(3, vec3(-5.5, 0, -15), true, 0.0f, vec3(0.90, 0.90, 0.90));
 
 		rayTracer = std::make_unique<RayTracer>(fov, camera);
 	}
