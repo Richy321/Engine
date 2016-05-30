@@ -234,18 +234,24 @@ private:
 						{
 							vec3 transmission(1.0f);
 
-
 							lightDirection = pointLight->Position - intersectionPoint;
+							float lightDistance2 = dot(lightDirection, lightDirection);
 							lightDirection = normalize(lightDirection);
+							float lightDotNorm = std::max(0.0f, dot(lightDirection, intersectionNormal));
 
 							Ray shadowRay(intersectionPoint + intersectionNormal * bias, lightDirection, Ray::Shadow);
 
+							bool isInShadow = false;
 							float tNearShadow = Infinity;
 							std::shared_ptr<SphereColliderComponent> closestSphereShadow;
-							if(Trace(shadowRay, objects, tNearShadow, closestSphereShadow))
-							{
-								transmission = vec3(0);
-							}
+							isInShadow = Trace(shadowRay, objects, tNearShadow, closestSphereShadow) && tNearShadow * tNearShadow < lightDistance2;
+
+							if (isInShadow)
+								transmission = vec3(0.0f);
+	
+							lightAmount += (1 - isInShadow) * pointLight->DiffuseIntensity * lightDotNorm;
+							vec3 reflectionDir = Reflect(-lightDirection, intersectionNormal);
+							specularColour += powf(std::max(0.0f, -dot(reflectionDir, primaryRay.direction)), sphereMaterial->GetMaterial()->specularExponent) * pointLight->DiffuseIntensity;
 
 							/*
 							
@@ -310,8 +316,8 @@ private:
 
 
 
-							float diffuse = std::max(0.0f, dot(intersectionNormal, lightDirection));
-							surfaceColour += sphereMaterial->GetMaterial()->colour * transmission * diffuse;
+							//float diffuse = std::max(0.0f, dot(intersectionNormal, lightDirection));
+							//surfaceColour += sphereMaterial->GetMaterial()->colour * transmission * diffuse;
 						}
 					}
 						break;
@@ -319,6 +325,7 @@ private:
 						break;
 					}
 				}
+				surfaceColour = lightAmount * sphereMaterial->GetMaterial()->colour * sphereMaterial->GetMaterial()->Kd + specularColour * sphereMaterial->GetMaterial()->Ks;
 			}
 		}
 		else

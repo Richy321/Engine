@@ -51,7 +51,8 @@ public:
 	void InitialiseLights()
 	{
 		pl1 = std::make_shared<PointLight>();
-		pl1->DiffuseIntensity = 2.75f;
+		//pl1->DiffuseIntensity = 2.75f;
+		pl1->DiffuseIntensity = 1.0f;
 		pl1->Color = vec3(1.0f, 1.0f, 1.0f);
 		pl1->Position = vec3(30.0f, 0.0f, -30.0f);
 		pl1->Attenuation.Linear = 0.1f;
