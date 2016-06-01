@@ -16,7 +16,7 @@ public:
 	const std::string earthTexture = "Earth";
 	const std::string solidTexture = "Solid";
 
-	float fov = 30.0f;
+	float fov = 60.0f;
 	uint imageWidth = 640;
 	uint imageHeight = 480;
 
@@ -123,11 +123,17 @@ public:
 		pl2->Attenuation.Linear = 0.1f;
 		AddLight(pl2);
 
-		CreateSphere(10000, vec3(0.0, -10004, -20), false, 0.0f, vec3(0.20, 0.20, 0.20));
+		CreateSphere(10000, vec3(0.0, -10004, -20), false, 0.0f, vec3(0.10, 0.10, 0.20));
 		CreateSphere(4, vec3(0.0, 0, -20), true, 0.5f, vec3(1.00, 0.32, 0.36));
-		CreateSphere(2, vec3(5.0, -1, -15), true, 0.0f, vec3(0.90, 0.76, 0.46));
-		CreateSphere(3, vec3(5.0, 0, -25), true, 0.0f, vec3(0.65, 0.77, 0.97));
-		CreateSphere(3, vec3(-5.5, 0, -15), true, 0.0f, vec3(0.90, 0.90, 0.90));
+		CreateSphere(2, vec3(5.0, -1, -15), true, 0.7f, vec3(0.90, 0.16, 0.46));
+		CreateSphere(4, vec3(5.0, 0, -25), false, 1.0f, vec3(0.65, 0.77, 0.6));
+		CreateSphere(3, vec3(-5.5, 0, -15), true, 1.0f, vec3(0.90, 0.90, 0.90));
+		CreateSphere(1, vec3(-5.5, 0, -15), true, 1.0f, vec3(0.90, 0.90, 0.90));
+		CreateSphere(2, vec3(-7.5, 5, -15), false, 0.0f, vec3(0.90, 0.0, 0.90));
+		CreateSphere(2, vec3(7.5, 5, -15), true, 1.0f, vec3(0.3, 0.8, 0.1));
+		CreateSphere(5, vec3(-7.5, 7, -20), true, 0.0f, vec3(0.8, 0.8, 0.8));
+		CreateSphere(5, vec3(-0, 10, -35), true, 0.0f, vec3(0.8, 0.8, 0.8));
+		CreateSphere(10, vec3(7.5, 0, -35), true, 0.0f, vec3(0.0, 0.0, 0.8));
 
 		rayTracer = std::make_unique<RayTracer>(fov, camera);
 	}

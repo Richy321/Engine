@@ -192,11 +192,10 @@ private:
 			if(sphereMaterial->GetMaterial()->transparency > 0 || sphereMaterial->GetMaterial()->reflection > 0)
 			{
 				float facingratio = -dot(primaryRay.direction, intersectionNormal);
-				// change the mix value to tweak the effect
 				float fresneleffect = Mix(pow(1.0f - facingratio, 3.0f), 1.0f, 0.1f);
-				// compute reflection direction (not need to normalize because all vectors
-				// are already normalized)
-				vec3 refldir = primaryRay.direction - intersectionNormal * 2.0f * dot(primaryRay.direction, intersectionNormal);
+				
+				// compute reflection direction
+				vec3 refldir = Reflect(primaryRay.direction, intersectionNormal);
 				refldir = normalize(refldir);
 				float reflNear = 0;
 				vec3 reflection = CastRay(Ray(intersectionPoint + intersectionNormal * bias, refldir), objects, lights, depth + 1);
@@ -216,37 +215,6 @@ private:
 					reflection * fresneleffect +
 					refraction * (1 - fresneleffect) * sphereMaterial->GetMaterial()->transparency) * sphereMaterial->GetMaterial()->colour;
 			}
-			/*
-			if (sphereMaterial->GetMaterial()->transparency > 0 && sphereMaterial->GetMaterial()->reflection > 0)
-			{
-				//transparency and reflection
-				vec3 reflectionDirection = normalize(reflect(primaryRay.direction, intersectionNormal));
-				vec3 refractionDirection = normalize(refract(primaryRay.direction, intersectionNormal, sphereMaterial->GetMaterial()->indexOfRefraction));
-				vec3 reflectionRayOrig = (dot(reflectionDirection, intersectionNormal) < 0) ?
-					intersectionPoint - intersectionNormal * bias :
-					intersectionPoint + intersectionNormal * bias;
-				vec3 refractionRayOrig = (dot(refractionDirection, intersectionNormal) < 0) ?
-					intersectionPoint - intersectionNormal * bias :
-					intersectionPoint + intersectionNormal * bias;
-				vec3 reflectionColor = CastRay(Ray(reflectionRayOrig, reflectionDirection, Ray::Reflection), objects, lights, depth + 1);
-				vec3 refractionColor = CastRay(Ray(refractionRayOrig, refractionDirection, Ray::Refraction), objects, lights, depth + 1);
-				float kr;
-				Fresnel(primaryRay.direction, intersectionNormal, sphereMaterial->GetMaterial()->indexOfRefraction, kr);
-				surfaceColour = reflectionColor * kr + refractionColor * (1 - kr);
-			}
-			else if(sphereMaterial->GetMaterial()->reflection > 0)
-			{
-				//just reflection
-				float kr;
-				Fresnel(primaryRay.direction, intersectionNormal, sphereMaterial->GetMaterial()->indexOfRefraction, kr);
-				vec3 reflectionDirection = Reflect(primaryRay.direction, intersectionNormal);
-				vec3 reflectionRayOrigin = dot(reflectionDirection, intersectionNormal) < 0 ?
-					intersectionPoint + intersectionNormal * bias :
-					intersectionPoint - intersectionNormal * bias;
-				Ray reflectionRay(reflectionRayOrigin, reflectionDirection, Ray::Reflection);
-				surfaceColour = CastRay(reflectionRay, objects, lights, depth + 1) * kr;
-			}*/
-
 			else
 			{
 				//fully opaque object/diffuse
@@ -315,45 +283,6 @@ private:
 	vec3 Reflect(const vec3& i, const vec3& n)
 	{
 		return i - 2 * dot(i, n) * n;
-	}
-
-	//Refract using Snell's law
-	vec3 Refract(const vec3& i, const vec3& N, const float& ior)
-	{
-		float cosi = clamp(dot(i, N), -1.0f, 1.0f);
-		float etai = 1, etat = ior;
-		vec3 n = N;
-		if (cosi < 0)
-			cosi = -cosi;
-		else
-			std::swap(etai, etat); n = -N;
-
-		float eta = etai / etat;
-		float k = 1 - eta * eta * (1 - cosi * cosi);
-
-		return k < 0.0f ? vec3(0.0f) : vec3(eta * i + (eta * cosi - sqrtf(k)) * n);
-	}
-
-	void Fresnel(const vec3& I, const vec3& N, const float& ior, float& kr)
-	{
-		float cosi = clamp(dot(I, N), -1.0f, 1.0f);
-		float etai = 1, etat = ior;
-		if (cosi > 0) { std::swap(etai, etat); }
-		// Compute sini using Snell's law
-		float sint = etai / etat * sqrtf(std::max(0.f, 1 - cosi * cosi));
-		// Total internal reflection
-		if (sint >= 1) {
-			kr = 1;
-		}
-		else {
-			float cost = sqrtf(std::max(0.f, 1 - sint * sint));
-			cosi = fabsf(cosi);
-			float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-			float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
-			kr = (Rs * Rs + Rp * Rp) / 2;
-		}
-		// As a consequence of the conservation of energy, transmittance is given by:
-		// kt = 1 - kr;
 	}
 
 	float Mix(const float &a, const float &b, const float &mix)
